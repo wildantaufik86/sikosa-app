@@ -1,0 +1,70 @@
+# Node.js
+/node_modules
+/npm-debug.log*
+/yarn-debug.log*
+/yarn-error.log*
+package-lock.json
+yarn.lock
+
+# Build files
+/dist
+/build
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Dependency directories
+/node_modules/
+yarn-error.log
+
+# MongoDB database files
+*.mongodb
+*.sql
+*.sqlite
+*.sqlite3
+*.bak
+*.backup
+
+# Environment files
+.env
+.env.*.local
+
+# OS and Editor files
+.DS_Store
+Thumbs.db
+.idea
+.vscode
+*.sublime-project
+*.sublime-workspace
+
+# Cache files
+.cache/
+*.cache
+
+# Testing
+/coverage
+/nyc_output
+/.nyc_output
+
+# Serverless environments
+/.serverless
+
+# Temporary files
+*.swp
+*.swo
+*.swn
+*.tmp
+*.temp
+
+# Build files and minified code for deployment
+/build
+/public/build
+/public/static

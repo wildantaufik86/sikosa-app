@@ -24,7 +24,11 @@ const PsikologSidebar = () => {
         </button>
 
         <Link to="/psikolog/dashboard" className="flex items-center space-x-2">
-          <img src="/assets/nav-logo.png" alt="Logo" className="w-5 h-5 object-cover" />
+          <img
+            src="/assets/nav-logo.png"
+            alt="Logo"
+            className="w-5 h-5 object-cover"
+          />
           <h2 className="text-xl font-bold text-[#35A7FF]">Sikosa</h2>
         </Link>
       </div>
@@ -37,35 +41,81 @@ const PsikologSidebar = () => {
       >
         <div>
           {/* Close Button for Drawer */}
-          <button className="absolute top-4 right-4 text-gray-800 text-2xl lg:hidden" onClick={toggleDrawer}>
+          <button
+            className="absolute top-4 right-4 text-gray-800 text-2xl lg:hidden"
+            onClick={toggleDrawer}
+          >
             <AiOutlineClose />
           </button>
 
           {/* Sidebar Header with Logo and Title */}
-          <Link to="/psikolog/dashboard" className="flex items-center p-3 space-x-1">
-            <img src="/assets/nav-logo.png" alt="Logo" className="w-5 h-5 object-cover" />
+          <Link
+            to="/psikolog/dashboard"
+            className="flex items-center p-3 space-x-1"
+          >
+            <img
+              src="/assets/nav-logo.png"
+              alt="Logo"
+              className="w-5 h-5 object-cover"
+            />
             <h2 className="text-xl font-bold text-[#35A7FF]">Sikosa</h2>
           </Link>
 
           {/* Sidebar Navigation Links */}
           <ul className="space-y-2">
             <li>
-              <NavLink to="/psikolog/dashboard" className={({ isActive }) => `block text-sm font-semibold py-2 px-4 rounded ${isActive ? "bg-[#EFF6FF] text-[#35A7FF]" : "text-gray-800 hover:bg-[#EFF6FF] hover:text-[#35A7FF]"}`}>
+              <NavLink
+                to="/psikolog/dashboard"
+                className={({ isActive }) =>
+                  `block text-sm font-semibold py-2 px-4 rounded ${
+                    isActive
+                      ? "bg-[#EFF6FF] text-[#35A7FF]"
+                      : "text-gray-800 hover:bg-[#EFF6FF] hover:text-[#35A7FF]"
+                  }`
+                }
+              >
                 Beranda
               </NavLink>
             </li>
             <li>
-              <NavLink to="/psikolog/artikel" className={({ isActive }) => `block text-sm font-semibold py-2 px-4 rounded ${isActive ? "bg-[#EFF6FF] text-[#35A7FF]" : "text-gray-800 hover:bg-[#EFF6FF] hover:text-[#35A7FF]"}`}>
+              <NavLink
+                to="/psikolog/artikel"
+                className={({ isActive }) =>
+                  `block text-sm font-semibold py-2 px-4 rounded ${
+                    isActive
+                      ? "bg-[#EFF6FF] text-[#35A7FF]"
+                      : "text-gray-800 hover:bg-[#EFF6FF] hover:text-[#35A7FF]"
+                  }`
+                }
+              >
                 Artikel
               </NavLink>
             </li>
             <li>
-              <NavLink to="/psikolog/profile" className={({ isActive }) => `block text-sm font-semibold py-2 px-4 rounded ${isActive ? "bg-[#EFF6FF] text-[#35A7FF]" : "text-gray-800 hover:bg-[#EFF6FF] hover:text-[#35A7FF]"}`}>
+              <NavLink
+                to="/psikolog/profile"
+                className={({ isActive }) =>
+                  `block text-sm font-semibold py-2 px-4 rounded ${
+                    isActive
+                      ? "bg-[#EFF6FF] text-[#35A7FF]"
+                      : "text-gray-800 hover:bg-[#EFF6FF] hover:text-[#35A7FF]"
+                  }`
+                }
+              >
                 Profile
               </NavLink>
             </li>
             <li>
-              <NavLink to="/psikolog/layanan" className={({ isActive }) => `block text-sm font-semibold py-2 px-4 rounded ${isActive ? "bg-[#EFF6FF] text-[#35A7FF]" : "text-gray-800 hover:bg-[#EFF6FF] hover:text-[#35A7FF]"}`}>
+              <NavLink
+                to="/psikolog/layanan"
+                className={({ isActive }) =>
+                  `block text-sm font-semibold py-2 px-4 rounded ${
+                    isActive
+                      ? "bg-[#EFF6FF] text-[#35A7FF]"
+                      : "text-gray-800 hover:bg-[#EFF6FF] hover:text-[#35A7FF]"
+                  }`
+                }
+              >
                 Layanan Saya
               </NavLink>
             </li>
@@ -78,29 +128,58 @@ const PsikologSidebar = () => {
             {/* Messages NavLink */}
             <NavLink
               to="/psikolog/messages"
-              className={({ isActive }) => `flex items-center justify-between space-x-2 text-gray-800 py-2 px-4 rounded ${isActive ? "bg-[#EFF6FF] text-[#35A7FF]" : "hover:bg-[#EFF6FF] hover:text-[#35A7FF]"}`}
+              className={({ isActive }) =>
+                `flex items-center justify-between space-x-2 text-gray-800 py-2 px-4 rounded ${
+                  isActive
+                    ? "bg-[#EFF6FF] text-[#35A7FF]"
+                    : "hover:bg-[#EFF6FF] hover:text-[#35A7FF]"
+                }`
+              }
             >
               <div className="flex items-center space-x-2">
                 <BiMessageAlt className="text-lg" />
                 <span className="text-sm font-semibold">Messages</span>
               </div>
-              {messagesCount > 0 && <span className="ml-auto bg-red-500 text-white text-[10px] font-semibold py-1 px-2 rounded-full">{messagesCount}</span>}
+              {messagesCount > 0 && (
+                <span className="ml-auto bg-red-500 text-white text-[10px] font-semibold py-1 px-2 rounded-full">
+                  {messagesCount}
+                </span>
+              )}
             </NavLink>
 
             {/* Notifications NavLink */}
             <NavLink
-              to="/psikolog/notifications"
-              className={({ isActive }) => `flex justify-between items-center space-x-2 text-gray-800 py-2 px-4 rounded ${isActive ? "bg-[#EFF6FF] text-[#35A7FF]" : "hover:bg-[#EFF6FF] hover:text-[#35A7FF]"}`}
+              to="/psikolog/notifikasi"
+              className={({ isActive }) =>
+                `flex justify-between items-center space-x-2 text-gray-800 py-2 px-4 rounded ${
+                  isActive
+                    ? "bg-[#EFF6FF] text-[#35A7FF]"
+                    : "hover:bg-[#EFF6FF] hover:text-[#35A7FF]"
+                }`
+              }
             >
               <div className="flex items-center space-x-2">
                 <IoMdNotificationsOutline className="text-lg" />
                 <span className="text-sm font-semibold">Notifications</span>
               </div>
-              {notificationsCount > 0 && <span className="ml-auto bg-red-500 text-white text-[10px] font-semibold py-1 px-2 rounded-full">{notificationsCount}</span>}
+              {notificationsCount > 0 && (
+                <span className="ml-auto bg-red-500 text-white text-[10px] font-semibold py-1 px-2 rounded-full">
+                  {notificationsCount}
+                </span>
+              )}
             </NavLink>
 
             {/* Logout NavLink */}
-            <NavLink to="/psikolog/logout" className={({ isActive }) => `flex items-center space-x-2 text-gray-800 py-2 px-4 rounded ${isActive ? "bg-[#EFF6FF] text-[#35A7FF]" : "hover:bg-[#EFF6FF] hover:text-[#35A7FF]"}`}>
+            <NavLink
+              to="/psikolog/logout"
+              className={({ isActive }) =>
+                `flex items-center space-x-2 text-gray-800 py-2 px-4 rounded ${
+                  isActive
+                    ? "bg-[#EFF6FF] text-[#35A7FF]"
+                    : "hover:bg-[#EFF6FF] hover:text-[#35A7FF]"
+                }`
+              }
+            >
               <IoMdLogOut className="text-lg" />
               <span className="text-sm font-semibold">Logout</span>
             </NavLink>
@@ -108,7 +187,11 @@ const PsikologSidebar = () => {
 
           {/* Profile Section */}
           <div className="flex items-center px-4 space-x-4">
-            <img src="/assets/home-image.png" alt="Profile" className="w-12 h-12 object-cover rounded-full" />
+            <img
+              src="/assets/home-image.png"
+              alt="Profile"
+              className="w-12 h-12 object-cover rounded-full"
+            />
             <div>
               <p className="font-semibold text-md text-gray-800">John Doe</p>
               <p className="text-gray-500 text-xs">john.doe@example.com</p>
@@ -118,7 +201,12 @@ const PsikologSidebar = () => {
       </aside>
 
       {/* Overlay for Drawer */}
-      {isDrawerOpen && <div className="fixed inset-0 bg-black opacity-50 lg:hidden z-40" onClick={toggleDrawer} />}
+      {isDrawerOpen && (
+        <div
+          className="fixed inset-0 bg-black opacity-50 lg:hidden z-40"
+          onClick={toggleDrawer}
+        />
+      )}
     </div>
   );
 };

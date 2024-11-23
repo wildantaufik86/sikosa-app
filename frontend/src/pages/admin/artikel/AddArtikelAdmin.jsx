@@ -5,7 +5,7 @@ import { CKEditor } from "@ckeditor/ckeditor5-react";
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 import { AiFillStar } from "react-icons/ai"; // Import the star icon
 
-const TambahArtikel = () => {
+const AddArtikelAdmin = () => {
   const [title, setTitle] = useState("");
   const [slug, setSlug] = useState("");
   const [description, setDescription] = useState("");
@@ -19,7 +19,6 @@ const TambahArtikel = () => {
     }
   };
 
-  // Handle title change and automatically generate slug
   const handleTitleChange = (e) => {
     const newTitle = e.target.value;
     setTitle(newTitle);
@@ -38,13 +37,7 @@ const TambahArtikel = () => {
         <h2 className="text-xl font-semibold">New Artikel</h2>
         <div className="space-x-2">
           <Link
-            to="/psikolog/artikel/preview/1"
-            className="px-4 py-1 text-sm text-black border border-black rounded-lg"
-          >
-            Preview
-          </Link>
-          <Link
-            to="/psikolog/artikel"
+            to="/admin/artikel-manajemen"
             className="px-4 py-[5px] bg-[#35A7FF] text-sm text-white rounded-lg"
           >
             Cancel
@@ -56,7 +49,7 @@ const TambahArtikel = () => {
       </div>
 
       {/* Back Arrow Icon with Border Circle */}
-      <Link to="/psikolog/artikel">
+      <Link to="/admin/artikel-manajemen">
         <div className="mb-6 flex items-center space-x-2">
           <div className="border-2 border-black rounded-full p-1">
             <IoIosArrowBack className="text-black text-xl" />
@@ -167,4 +160,4 @@ const TambahArtikel = () => {
   );
 };
 
-export default TambahArtikel;
+export default AddArtikelAdmin;

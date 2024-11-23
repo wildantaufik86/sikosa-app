@@ -2,6 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
+html {
+  font-family: "Plus Jakarta Sans", sans-serif;
+}
+
 .fade-enter {
   opacity: 0;
   transform: translateY(10px);
@@ -18,4 +22,7 @@
   opacity: 0;
   transform: translateY(-10px);
   transition: opacity 300ms, transform 300ms;
+}
+.ckeditor-container .ck-editor__editable_inline {
+  min-height: 150px;
 }

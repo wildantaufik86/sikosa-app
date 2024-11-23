@@ -1,11 +1,9 @@
-// src/App.js
-
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import UserLayout from "./layouts/UserLayout";
 import PsikologLayout from "./layouts/PsikologLayout";
 import AdminLayout from "./layouts/AdminLayout";
-import AdminDashboard from "./pages/admin/DashboardAdmin";
+import UserAdmin from "./pages/admin/users/UserAdmin";
 import Home from "./pages/user/Home";
 import Services from "./pages/user/daftar-layanan/Services";
 import Artikel from "./pages/user/artikel/Artikel";
@@ -25,6 +23,12 @@ import EditProfilePsikolog from "./pages/psikolog/profil/EditProfilePsikolog";
 import MessagePage from "./pages/psikolog/messages/MessagesPage";
 import LayananPage from "./pages/psikolog/layanan/LayananPage";
 import EditArtikel from "./pages/psikolog/artikel/EditArtikel";
+import PreviewArtikel from "./pages/psikolog/artikel/PreviewArtikel";
+import NotificationPage from "./pages/psikolog/notifications/Notifications";
+import ArtikelManajemen from "./pages/admin/artikel/ArtikelManajemen";
+import AddArtikelAdmin from "./pages/admin/artikel/AddArtikelAdmin";
+import EditArtikelAdmin from "./pages/admin/artikel/EditArtikelAdmin";
+import LoginPsikolog from "./pages/psikolog/auth/LoginPsikolog";
 
 function App() {
   return (
@@ -109,6 +113,7 @@ function App() {
 
         {/* End Routes User */}
 
+        <Route path="/psikolog/login" element={<LoginPsikolog />} />
         {/* Start Routes Psikolog */}
         <Route
           path="/psikolog/dashboard"
@@ -123,6 +128,14 @@ function App() {
           element={
             <PsikologLayout>
               <ArtikelPage />
+            </PsikologLayout>
+          }
+        />
+        <Route
+          path="/psikolog/artikel/preview/1"
+          element={
+            <PsikologLayout>
+              <PreviewArtikel />
             </PsikologLayout>
           }
         />
@@ -174,14 +187,46 @@ function App() {
             </PsikologLayout>
           }
         />
+        <Route
+          path="/psikolog/notifikasi"
+          element={
+            <PsikologLayout>
+              <NotificationPage />
+            </PsikologLayout>
+          }
+        />
         {/* End Routes Psikolog */}
 
         {/* Start Routes Admin */}
         <Route
-          path="/admin/dashboard"
+          path="/admin/user"
           element={
             <AdminLayout>
-              <AdminDashboard />
+              <UserAdmin />
+            </AdminLayout>
+          }
+        />
+        <Route
+          path="/admin/artikel-manajemen"
+          element={
+            <AdminLayout>
+              <ArtikelManajemen />
+            </AdminLayout>
+          }
+        />
+        <Route
+          path="/admin/artikel-manajemen/add"
+          element={
+            <AdminLayout>
+              <AddArtikelAdmin />
+            </AdminLayout>
+          }
+        />
+        <Route
+          path="/admin/artikel-manajemen/edit/1"
+          element={
+            <AdminLayout>
+              <EditArtikelAdmin />
             </AdminLayout>
           }
         />

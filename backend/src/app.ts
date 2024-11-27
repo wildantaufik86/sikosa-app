@@ -1,13 +1,21 @@
 import "dotenv/config";
 import express, { NextFunction, Request, Response } from "express";
 import userRoutes from "./routes/users";
+import cors from "cors";
 import createHttpError, { isHttpError } from "http-errors";
 
 const app = express();
 
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(
+  cors({
+    origin: APP_ORIGIN,
+    credentials: true,
+  })
+);
 
-app.use("/api/users", userRoutes);
+app.use("/api/v1/users", userRoutes);
 
 app.use((req, res, next) => {
   next(createHttpError(404, "Endpoint Not Found!"));

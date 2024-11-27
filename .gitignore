@@ -35,8 +35,6 @@ yarn-error.log
 
 # Environment files
 .env
-.env.production
-.env.development
 .env.*.local
 
 # OS and Editor files

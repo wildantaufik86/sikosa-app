@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "dist/server.js",
   "scripts": {
-    "start": "nodemon src/server.ts",
+    "start": "ts-node-dev --files src/index.ts",
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "eslint ."
   },
@@ -22,10 +22,11 @@
     "globals": "^15.12.0",
     "nodemon": "^3.1.7",
     "ts-node": "^10.9.2",
-    "typescript": "^5.6.3",
+    "typescript": "^5.7.2",
     "typescript-eslint": "^8.13.0"
   },
   "dependencies": {
+    "@types/node": "^22.10.1",
     "bcrypt": "^5.1.1",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
@@ -38,7 +39,8 @@
     "mongodb": "^6.11.0",
     "mongoose": "^8.8.2",
     "react": "^18.3.1",
-    "resend": "^4.0.1"
+    "resend": "^4.0.1",
+    "ts-node-dev": "^2.0.0"
   },
   "description": ""
 }

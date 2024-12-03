@@ -7,6 +7,7 @@ import jwt from "jsonwebtoken";
 
 export type CreateAccountParams = {
   email: string;
+  username: string;
   password: string;
   userAgent?: string;
 };
@@ -15,6 +16,7 @@ export const createAccount = async (data: CreateAccountParams) => {
   // Verify existing user
   const existingUser = await UserModel.exists({
     email: data.email,
+    username: data.username,
   });
   if (existingUser) {
     throw new Error("User already Exist");
@@ -22,6 +24,7 @@ export const createAccount = async (data: CreateAccountParams) => {
   // Create use
   const user = await UserModel.create({
     email: data.email,
+    username: data.username,
     password: data.password,
   });
 

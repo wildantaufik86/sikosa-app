@@ -7,6 +7,7 @@ import { setAuthCookies } from "../utils/cookies";
 const registerSchema = z
   .object({
     email: z.string().email().min(1).max(255),
+    username: z.string().min(6).max(10),
     password: z.string().min(6).max(255),
     confirmPassword: z.string().min(6).max(255),
     userAgent: z.string().optional(),

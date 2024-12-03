@@ -18,7 +18,10 @@ const UserLayout = ({ children }) => {
       <Footer />
 
       {/* Chat Icon */}
-      <div onClick={toggleChat} className="fixed bottom-7 right-7 lg:bottom-16 lg:right-20 bg-[#35A7FF] text-white rounded-full p-3 shadow-lg hover:bg-[#5DB9FF] cursor-pointer transition">
+      <div
+        onClick={toggleChat}
+        className="fixed z-20 bottom-7 right-7 lg:bottom-16 lg:right-20 bg-[#35A7FF] text-white rounded-full p-3 shadow-lg hover:bg-[#5DB9FF] cursor-pointer transition"
+      >
         <FaComments className="h-6 w-6" />
       </div>
 

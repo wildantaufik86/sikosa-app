@@ -27,7 +27,7 @@ const Navbar = () => {
         </NavLink>
 
         {/* Menu Icon for Mobile */}
-        <div className="md:hidden">
+        <div className="lg:hidden">
           <button onClick={toggleDrawer}>
             {isOpen ? (
               <FaTimes className="text-[#35A7FF] text-xl" />
@@ -38,7 +38,7 @@ const Navbar = () => {
         </div>
 
         {/* Navigation Links for Desktop */}
-        <div className="hidden md:flex space-x-4">
+        <div className="hidden lg:flex space-x-4">
           <NavLink
             to="/"
             className={({ isActive }) =>
@@ -90,7 +90,7 @@ const Navbar = () => {
         </div>
 
         {/* Buttons and User Profile */}
-        <div className="hidden md:flex items-center space-x-2">
+        <div className="hidden lg:flex items-center space-x-2">
           {/* Log in and Register buttons */}
           <Link to="/login" className="hover:text-blue-300">
             <button className="bg-[#35A7FF] text-white px-4 py-2 font-semibold rounded hover:bg-[#5DB9FF] hover:text-white">
@@ -121,7 +121,7 @@ const Navbar = () => {
       <div
         className={`fixed inset-y-0 right-0 bg-white shadow-lg transition-transform transform ${
           isOpen ? "translate-x-0" : "translate-x-full"
-        } md:hidden z-40 w-1/2`}
+        } lg:hidden z-40 w-1/2`}
       >
         <div className="flex flex-col pt-5">
           <div className="flex justify-between w-full px-7">

@@ -4,7 +4,7 @@ import LeftSection from "../../../components/user/components/beranda/LeftSection
 const Beranda = () => {
   return (
     <>
-      <div className="container lg:h-screen mx-auto py-8 lg:py-0 px-6 lg:px-20 flex flex-col md:flex-row items-center justify-center">
+      <div className="w-full lg:h-screen mx-auto py-8 lg:py-0 px-8 md:px-20 lg:px-28 flex flex-col md:flex-row items-center justify-center">
         {/* Right Section */}
         <RightSection />
 

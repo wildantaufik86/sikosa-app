@@ -29,7 +29,7 @@ userSchema.pre("save", async function (next) {
   }
 
   this.password = await hashValue(this.password);
-  return next();
+  next();
 });
 
 userSchema.methods.comparePassword = async function (val: string) {

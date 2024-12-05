@@ -7,7 +7,7 @@ import errorHandler from "./middleware/errorHandler";
 import { APP_ORIGIN, NODE_ENV, PORT } from "./constants/env";
 import catchErrors from "./utils/catchErrors";
 import { OK } from "./constants/http";
-import authRoutes from "./routes/auth.routes";
+import authRoutes from "./routes/auth.route";
 
 const app = express();
 
@@ -21,7 +21,7 @@ app.use(
 );
 app.use(cookieParser());
 
-app.get("/", ({ req, res, next }: any) => {
+app.get("/", (_, res) => {
   return res.status(OK).json({
     status: "Connected!!!",
   });

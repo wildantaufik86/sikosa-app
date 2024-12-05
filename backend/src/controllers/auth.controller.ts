@@ -1,6 +1,6 @@
 import { z } from "zod";
 import catchErrors from "../utils/catchErrors";
-import { createAccount } from "../services/authService";
+import { createAccount } from "../services/auth.service";
 import { CREATED } from "../constants/http";
 import { setAuthCookies } from "../utils/cookies";
 

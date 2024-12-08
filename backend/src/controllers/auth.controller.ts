@@ -3,19 +3,8 @@ import catchErrors from "../utils/catchErrors";
 import { createAccount } from "../services/auth.service";
 import { CREATED } from "../constants/http";
 import { setAuthCookies } from "../utils/cookies";
+import { loginSchema, registerSchema } from "./auth.schemas";
 
-const registerSchema = z
-  .object({
-    email: z.string().email().min(1).max(255),
-    username: z.string().min(6).max(10),
-    password: z.string().min(6).max(255),
-    confirmPassword: z.string().min(6).max(255),
-    userAgent: z.string().optional(),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: "Password do Not Match",
-    path: ["Confirm Password"],
-  });
 export const registerHandler = catchErrors(async (req, res) => {
   const request = registerSchema.parse({
     ...req.body,
@@ -27,4 +16,13 @@ export const registerHandler = catchErrors(async (req, res) => {
   return setAuthCookies({ res, accessToken, refreshToken })
     .status(CREATED)
     .json(user);
+});
+
+export const loginHandler = catchErrors(async (req, res) => {
+  const request = loginSchema.parse({
+    ...req.body,
+    userAgent: req.headers["user-agent"],
+  });
+
+  // const {} = await loginUser(request);
 });

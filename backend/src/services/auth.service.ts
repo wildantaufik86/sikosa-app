@@ -12,6 +12,7 @@ export type CreateAccountParams = {
   email: string;
   username: string;
   password: string;
+  role?: "mahasiswa" | "dokter" | "admin";
   userAgent?: string;
 };
 
@@ -29,6 +30,7 @@ export const createAccount = async (data: CreateAccountParams) => {
     email: data.email,
     username: data.username,
     password: data.password,
+    role: data.role || "mahasiswa",
   });
   const userId = user._id;
 
@@ -55,7 +57,7 @@ export const createAccount = async (data: CreateAccountParams) => {
   );
 
   const accessToken = jwt.sign(
-    { userId: user._id, sessionId: session._id },
+    { userId: user._id, sessionId: session._id, role: user.role },
     JWT_SECRET,
     {
       audience: ["user"],
@@ -69,3 +71,15 @@ export const createAccount = async (data: CreateAccountParams) => {
     refreshToken,
   };
 };
+
+type LoginParams = {
+  email: string;
+  username: string;
+  password: string;
+  userAgent?: string;
+};
+export const loginUser = async ({
+  email,
+  username,
+  userAgent,
+}: LoginParams) => {};

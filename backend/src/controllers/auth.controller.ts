@@ -1,7 +1,7 @@
 import { z } from "zod";
 import catchErrors from "../utils/catchErrors";
-import { createAccount } from "../services/auth.service";
-import { CREATED } from "../constants/http";
+import { createAccount, loginUser } from "../services/auth.service";
+import { CREATED, OK } from "../constants/http";
 import { setAuthCookies } from "../utils/cookies";
 import { loginSchema, registerSchema } from "./auth.schemas";
 
@@ -24,5 +24,8 @@ export const loginHandler = catchErrors(async (req, res) => {
     userAgent: req.headers["user-agent"],
   });
 
-  // const {} = await loginUser(request);
+  const { accessToken, refreshToken, user } = await loginUser(request);
+  return setAuthCookies({ res, accessToken, refreshToken })
+    .status(OK)
+    .json("Login Succesfull");
 });

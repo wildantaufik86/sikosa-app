@@ -23,7 +23,7 @@ app.use(
 );
 app.use(cookieParser());
 
-app.get("/", (_, res) => {
+app.get("/", ({ req, res }: any) => {
   return res.status(OK).json({
     status: "Connected!!!",
   });

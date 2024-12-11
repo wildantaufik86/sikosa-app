@@ -3,7 +3,11 @@ import { compareValue, hashValue } from "../utils/bcrypt";
 
 export interface UserDocument extends mongoose.Document {
   email: string;
-  username: string;
+  nim: string;
+  profile: {
+    picture: string;
+    fullname: string;
+  };
   role: "mahasiswa" | "dokter" | "admin";
   password: string;
   verified: boolean;
@@ -15,7 +19,8 @@ export interface UserDocument extends mongoose.Document {
     UserDocument,
     | "_id"
     | "email"
-    | "username"
+    | "nim"
+    | "profile"
     | "verified"
     | "role"
     | "createAt"
@@ -27,13 +32,17 @@ export interface UserDocument extends mongoose.Document {
 const userSchema = new mongoose.Schema<UserDocument>(
   {
     email: { type: String, required: true, unique: true },
-    username: { type: String, required: true, unique: true },
+    nim: { type: String, required: true, unique: true },
     password: { type: String, required: true },
     verified: { type: Boolean, required: true, default: false },
     role: {
       type: String,
       enum: ["mahasiswa", "dokter", "admin"],
       default: "mahasiswa",
+    },
+    profile: {
+      picture: { type: String, default: "" },
+      fullname: { type: String, default: "" },
     },
   },
   {

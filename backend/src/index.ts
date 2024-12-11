@@ -8,6 +8,8 @@ import { APP_ORIGIN, NODE_ENV, PORT } from "./constants/env";
 import catchErrors from "./utils/catchErrors";
 import { OK } from "./constants/http";
 import authRoutes from "./routes/auth.route";
+import userRoutes from "./routes/user.route";
+import authenticate from "./middleware/authenticate";
 
 const app = express();
 
@@ -28,6 +30,8 @@ app.get("/", (_, res) => {
 });
 
 app.use("/auth", authRoutes);
+
+app.use("/user", authenticate, userRoutes);
 
 app.use(errorHandler);
 

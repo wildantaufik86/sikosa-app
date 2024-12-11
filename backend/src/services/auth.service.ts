@@ -11,8 +11,12 @@ import { refreshTokenSignOptions, signToken } from "../utils/jwt";
 
 export type CreateAccountParams = {
   email: string;
-  username: string;
+  nim: string;
   password: string;
+  profile?: {
+    picture: string;
+    fullname: string;
+  };
   role?: "mahasiswa" | "dokter" | "admin";
   userAgent?: string;
 };
@@ -20,16 +24,15 @@ export type CreateAccountParams = {
 export const createAccount = async (data: CreateAccountParams) => {
   // Verify existing user
   const existingUser = await UserModel.exists({
-    $or: [{ email: data.email }, { username: data.username }],
+    $or: [{ email: data.email }, { nim: data.nim }],
   });
-  appAssert(!existingUser, CONFLICT, "Email or Username already in use");
-  //   if (existingUser) {
-  //     throw new Error("User already Exist");
-  //   }
+  appAssert(!existingUser, CONFLICT, "Email or nim already in use");
+
   // Create user
   const user = await UserModel.create({
     email: data.email,
-    username: data.username,
+    nim: data.nim,
+    profile: data.profile || { picture: "", fullname: "" },
     password: data.password,
     role: data.role || "mahasiswa",
   });
@@ -66,18 +69,18 @@ export const createAccount = async (data: CreateAccountParams) => {
 };
 
 type LoginParams = {
-  emailOrUsername: string;
+  email: string;
   password: string;
   userAgent?: string;
 };
 export const loginUser = async ({
-  emailOrUsername,
+  email,
   password,
   userAgent,
 }: LoginParams) => {
   // get user by Email
   const user = await UserModel.findOne({
-    $or: [{ email: emailOrUsername }, { username: emailOrUsername }],
+    email: email,
   });
   appAssert(user, UNAUTHORIZED, "Invalid Email or Password");
 

@@ -25,7 +25,8 @@ export const loginHandler = catchErrors(async (req, res) => {
   });
 
   const { accessToken, refreshToken, user } = await loginUser(request);
-  return setAuthCookies({ res, accessToken, refreshToken })
-    .status(OK)
-    .json("Login Succesfull");
+  return setAuthCookies({ res, accessToken, refreshToken }).status(OK).json({
+    message: "Login Success",
+    user,
+  });
 });

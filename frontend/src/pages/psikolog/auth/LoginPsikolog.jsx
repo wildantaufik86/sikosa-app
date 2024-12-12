@@ -1,12 +1,38 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { FaUser, FaLock, FaEye, FaEyeSlash } from "react-icons/fa";
-import { Link } from "react-router-dom";
-import Navbar from "../../../components/user/components/Navbar";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../../../hooks/hooks";
 
 const LoginPsikolog = () => {
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [nim, setNim] = useState("");
   const [password, setPassword] = useState("");
+  const { authUser } = useAuth();
+  const navigate = useNavigate();
+  useEffect(() => {
+    if (!authUser) {
+      navigate("/login");
+    }
+
+    // cek jika bukan dokter
+    if (authUser?.role !== "dokter") {
+      navigate("/");
+    }
+
+    navigate("/psikolog/dashboard");
+  }, [authUser]);
+
+  if (!authUser) {
+    return null;
+  }
+
+  if (authUser?.role !== "dokter") {
+    return null;
+  }
+
+  if (authUser.role === "dokter") {
+    return null;
+  }
 
   const togglePasswordVisibility = () => {
     setPasswordVisible(!passwordVisible);

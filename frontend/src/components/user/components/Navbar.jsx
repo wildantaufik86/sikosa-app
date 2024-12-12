@@ -94,18 +94,20 @@ const Navbar = () => {
           >
             Artikel
           </NavLink>
-          <NavLink
-            to="/riwayat"
-            className={({ isActive }) =>
-              `hover:text-[#5DB9FF] ${
-                isActive
-                  ? "text-[#35A7FF] font-semibold"
-                  : "text-black font-semibold"
-              }`
-            }
-          >
-            Riwayat
-          </NavLink>
+          {authUser && (
+            <NavLink
+              to="/riwayat"
+              className={({ isActive }) =>
+                `hover:text-[#5DB9FF] ${
+                  isActive
+                    ? "text-[#35A7FF] font-semibold"
+                    : "text-black font-semibold"
+                }`
+              }
+            >
+              Riwayat
+            </NavLink>
+          )}
         </div>
 
         {/* Buttons and User Profile */}

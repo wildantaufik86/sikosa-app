@@ -4,9 +4,11 @@ import { FiMenu } from "react-icons/fi";
 import { IoMdNotificationsOutline, IoMdLogOut } from "react-icons/io";
 import { AiOutlineClose } from "react-icons/ai";
 import { BiMessageAlt } from "react-icons/bi";
+import { useAuth } from "../../../hooks/hooks";
 
 const PsikologSidebar = () => {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const { authUser, handleLogout } = useAuth();
 
   const notificationsCount = 5; // Gantilah sesuai dengan jumlah notifikasi yang sebenarnya
   const messagesCount = 3;
@@ -170,19 +172,13 @@ const PsikologSidebar = () => {
             </NavLink>
 
             {/* Logout NavLink */}
-            <NavLink
-              to="/psikolog/logout"
-              className={({ isActive }) =>
-                `flex items-center space-x-2 text-gray-800 py-2 px-4 rounded ${
-                  isActive
-                    ? "bg-[#EFF6FF] text-[#35A7FF]"
-                    : "hover:bg-[#EFF6FF] hover:text-[#35A7FF]"
-                }`
-              }
+            <button
+              onClick={handleLogout}
+              className="flex items-center space-x-2 text-gray-800 py-2 px-4 rounded transition-all hover:text-[#35A7FF]"
             >
               <IoMdLogOut className="text-lg" />
               <span className="text-sm font-semibold">Logout</span>
-            </NavLink>
+            </button>
           </div>
 
           {/* Profile Section */}
@@ -193,8 +189,10 @@ const PsikologSidebar = () => {
               className="w-12 h-12 object-cover rounded-full"
             />
             <div>
-              <p className="font-semibold text-md text-gray-800">John Doe</p>
-              <p className="text-gray-500 text-xs">john.doe@example.com</p>
+              <p className="font-semibold text-md text-gray-800">
+                {authUser.profile.fullname}
+              </p>
+              <p className="text-gray-500 text-xs">{authUser.email}</p>
             </div>
           </div>
         </div>

@@ -3,13 +3,27 @@ import Navbar from "../components/user/components/Navbar";
 import Footer from "../components/Footer";
 import { FaComments } from "react-icons/fa";
 import ChatPopup from "../components/user/components/chatpopup/ChatPopup";
+import { useAuth } from "../hooks/hooks";
+import { useNavigate } from "react-router-dom";
 
 const UserLayout = ({ children }) => {
   const [showChat, setShowChat] = useState(false);
+  const navigate = useNavigate();
 
   const toggleChat = () => {
     setShowChat(!showChat);
   };
+
+  const { authUser } = useAuth();
+  useEffect(() => {
+    if (authUser && authUser?.role === "dokter") {
+      navigate("/psikolog/dashboard");
+    }
+  }, [authUser]);
+
+  if (authUser && authUser?.role === "dokter") {
+    return null;
+  }
 
   return (
     <div className="bg-gray-100 min-h-screen flex flex-col relative">

@@ -94,7 +94,7 @@ const Navbar = () => {
           >
             Artikel
           </NavLink>
-          {authUser && (
+          {authUser?.role === "mahasiswa" && (
             <NavLink
               to="/riwayat"
               className={({ isActive }) =>
@@ -126,6 +126,15 @@ const Navbar = () => {
                 </button>
               </Link>
             </>
+          )}
+
+          {/* dashboard for admin */}
+          {authUser?.role === "admin" && (
+            <Link to="/admin/user" className="hover:text-blue-300">
+              <button className="bg-[#35A7FF] text-white px-4 py-2 font-semibold rounded hover:bg-[#5DB9FF] hover:text-white">
+                Dashboard
+              </button>
+            </Link>
           )}
 
           {/* User Profile Section */}

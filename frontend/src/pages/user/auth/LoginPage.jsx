@@ -14,7 +14,18 @@ const LoginPage = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (authUser) {
+    // route admin
+    if (authUser && authUser.role === "admin") {
+      navigate("/admin/user");
+    }
+
+    // route psikolog/dokter
+    if (authUser && authUser.role === "dokter") {
+      navigate("/psikolog/dashboard");
+    }
+
+    // route user/mahasiswa
+    if (authUser && authUser.role === "mahasiswa") {
       navigate("/");
     }
   }, [authUser]);

@@ -1,17 +1,22 @@
 // ChatDokter.js
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { FaChevronLeft } from "react-icons/fa";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import ChatInput from "../../../components/user/components/chat-dokter/ChatInput";
 import DokterDetail from "../../../components/user/components/chat-dokter/DokterDetail";
 import PesanChat from "../../../components/user/components/chat-dokter/PesanChat";
+import { useAuth } from "../../../hooks/hooks";
 
 const doctorData = {
   id: 1,
   name: "Dr. John Doe",
   image: "https://via.placeholder.com/150",
-  profile: "Dr. John Doe is a specialist in mental health, focusing on anxiety and depression treatment. ",
-  education: ["S1 Psikologi - Universitas X", "S2 Psikologi Klinis - Universitas Y"],
+  profile:
+    "Dr. John Doe is a specialist in mental health, focusing on anxiety and depression treatment. ",
+  education: [
+    "S1 Psikologi - Universitas X",
+    "S2 Psikologi Klinis - Universitas Y",
+  ],
 };
 
 const ChatDokter = () => {
@@ -19,8 +24,22 @@ const ChatDokter = () => {
   const [messages, setMessages] = useState([
     { sender: "doctor", content: "Hello, how can I help you today?" },
     { sender: "user", content: "I have been feeling very anxious lately." },
-    { sender: "doctor", content: "I'm here to help. Could you tell me more about your symptoms?" },
+    {
+      sender: "doctor",
+      content: "I'm here to help. Could you tell me more about your symptoms?",
+    },
   ]);
+  const { authUser } = useAuth();
+  const navigate = useNavigate();
+  useEffect(() => {
+    if (!authUser) {
+      navigate("/login");
+    }
+  }, [authUser]);
+
+  if (!authUser) {
+    return null;
+  }
 
   const sendMessage = () => {
     if (message.trim()) {
@@ -46,7 +65,10 @@ const ChatDokter = () => {
         <span className="font-semibold ml-1">Chat Dokter</span>
       </div>
 
-      <Link to="/daftar-layanan" className="border-2 mb-3 border-black p-2 rounded-full flex items-center justify-center w-10 h-10">
+      <Link
+        to="/daftar-layanan"
+        className="border-2 mb-3 border-black p-2 rounded-full flex items-center justify-center w-10 h-10"
+      >
         <FaChevronLeft className="text-black" />
       </Link>
 
@@ -55,7 +77,11 @@ const ChatDokter = () => {
 
         <div className="w-full lg:w-2/3 border bg-[#EBF6FF] px-4 py-8 rounded-lg shadow-lg flex flex-col">
           <PesanChat messages={messages} doctorImage={doctorData.image} />
-          <ChatInput message={message} setMessage={setMessage} sendMessage={sendMessage} />
+          <ChatInput
+            message={message}
+            setMessage={setMessage}
+            sendMessage={sendMessage}
+          />
         </div>
       </div>
     </div>

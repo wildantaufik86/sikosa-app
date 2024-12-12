@@ -1,11 +1,24 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { FaChevronLeft, FaSearch } from "react-icons/fa";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import RiwayatTabel from "../../../components/user/components/riwayat/RiwayatTabel";
 import SearchRiwayat from "../../../components/user/components/riwayat/SearchRiwayat";
 import { motion } from "framer-motion"; // Import Framer Motion
+import { useAuth } from "../../../hooks/hooks";
 
 const RiwayatPages = () => {
+  const { authUser } = useAuth();
+  const navigate = useNavigate();
+  useEffect(() => {
+    if (!authUser) {
+      navigate("/login");
+    }
+  }, [authUser]);
+
+  if (!authUser) {
+    return null;
+  }
+
   return (
     <>
       <motion.div

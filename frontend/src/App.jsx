@@ -95,7 +95,7 @@ function App() {
           }
         />
         <Route
-          path="/profil"
+          path="/profile"
           element={
             <UserLayout>
               <Profile />

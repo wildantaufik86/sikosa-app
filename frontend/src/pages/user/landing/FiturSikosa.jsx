@@ -38,7 +38,10 @@ const FiturSikosa = () => {
         {/* list fitur */}
         <div className="flex flex-col items-center gap-4 mt-8 pb-4">
           {[...Array(3)].map((_, i) => (
-            <div className="flex items-center gap-4 bg-[#EBF6FF] w-[250px] rounded-lg p-4 shadow-md md:w-[300px]">
+            <div
+              key={i}
+              className="flex items-center gap-4 bg-[#EBF6FF] w-[250px] rounded-lg p-4 shadow-md md:w-[300px]"
+            >
               <div className="w-[30%] flex justify-center items-center">
                 {i === 0 && (
                   <img

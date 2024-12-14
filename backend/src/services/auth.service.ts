@@ -22,7 +22,7 @@ export type CreateAccountParams = {
     picture: string;
     fullname: string;
   };
-  role?: "mahasiswa" | "dokter" | "admin";
+  role?: "mahasiswa" | "psikolog" | "admin";
   userAgent?: string;
 };
 

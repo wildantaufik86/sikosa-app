@@ -8,7 +8,7 @@ export interface UserDocument extends mongoose.Document {
     picture: string;
     fullname: string;
   };
-  role: "mahasiswa" | "dokter" | "admin";
+  role: "mahasiswa" | "psikolog" | "admin";
   password: string;
   verified: boolean;
   createAt: Date;
@@ -37,7 +37,7 @@ const userSchema = new mongoose.Schema<UserDocument>(
     verified: { type: Boolean, required: true, default: false },
     role: {
       type: String,
-      enum: ["mahasiswa", "dokter", "admin"],
+      enum: ["mahasiswa", "psikolog", "admin"],
       default: "mahasiswa",
     },
     profile: {

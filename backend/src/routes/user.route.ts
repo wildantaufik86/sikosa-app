@@ -1,9 +1,17 @@
 import { Router } from "express";
-import { getUserHandler } from "../controllers/user.controller";
+import { updateUserProfileHandler } from "../controllers/user.controller";
+import authenticate from "../middleware/authenticate";
+
+const multer = require("multer"); // Require untuk menghindari masalah default export
+const upload = multer({ dest: "uploads/" });
 
 const userRoutes = Router();
 
-// prefix: /user
-userRoutes.get("/", getUserHandler);
+userRoutes.put(
+  "/profile",
+  authenticate,
+  upload.single("picture"),
+  updateUserProfileHandler
+);
 
 export default userRoutes;

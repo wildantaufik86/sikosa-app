@@ -10,7 +10,7 @@ const profileSchema = z
   })
   .default({ picture: "", fullname: "" });
 const roleSchema = z
-  .enum(["mahasiswa", "dokter", "admin"])
+  .enum(["mahasiswa", "psikolog", "admin"])
   .default("mahasiswa");
 
 export const loginSchema = z.object({

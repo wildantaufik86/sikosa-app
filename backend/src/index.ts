@@ -10,6 +10,7 @@ import { OK } from "./constants/http";
 import authRoutes from "./routes/auth.route";
 import userRoutes from "./routes/user.route";
 import authenticate from "./middleware/authenticate";
+import consultationRoutes from "./routes/consultation.routes";
 
 const app = express();
 
@@ -28,6 +29,10 @@ app.get("/", ({ req, res }: any) => {
     status: "Connected!!!",
   });
 });
+
+app.use("/api", consultationRoutes);
+
+app.use("/consultation", consultationRoutes);
 
 app.use("/auth", authRoutes);
 

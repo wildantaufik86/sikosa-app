@@ -17,7 +17,7 @@ import validatePsychologistId from "../middleware/validatePsychologistId";
 import { applyConsultationHandler } from "../controllers/consultation.controller";
 
 const multer = require("multer");
-const upload = multer({ dest: "uploads/" });
+const upload = multer({ dest: "uploads" });
 
 const userRoutes = Router();
 
@@ -80,6 +80,7 @@ userRoutes.post(
   applyConsultationHandler
 );
 
+// Update profile
 userRoutes.put(
   "/profile",
   authenticate,

@@ -5,9 +5,12 @@ import { BAD_REQUEST, INTERNAL_SERVER_ERROR, OK } from "../constants/http";
 import AppErrorCode from "../constants/appErrorCode";
 
 export const updateUserProfileHandler: RequestHandler = async (req, res) => {
-  const userId = req.userId; // Diambil dari middleware authenticate
-  const { fullname } = req.body; // Mengupdate fullname
-  const picture = req.file?.path; // Mengupdate picture jika ada file upload
+  const userId = req.userId;
+  const { fullname } = req.body;
+
+  const picture = req.file
+    ? `/uploads/${req.file.filename}` // Relative path untuk akses gambar
+    : undefined;
 
   appAssert(userId, BAD_REQUEST, "Invalid user", AppErrorCode.InvalidUser);
 

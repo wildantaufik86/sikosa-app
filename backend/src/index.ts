@@ -11,6 +11,7 @@ import authRoutes from "./routes/auth.route";
 import userRoutes from "./routes/user.routes";
 import authenticate from "./middleware/authenticate";
 import consultationRoutes from "./routes/psikolog.routes";
+import path from "path";
 
 const app = express();
 
@@ -36,6 +37,7 @@ app.use("/consultation", consultationRoutes);
 app.use("/auth", authRoutes);
 
 app.use("/user", authenticate, userRoutes);
+app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 
 app.use(errorHandler);
 

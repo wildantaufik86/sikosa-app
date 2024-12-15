@@ -7,20 +7,29 @@ import AppErrorCode from "../constants/appErrorCode";
 const validateRole = (requiredRole: string): RequestHandler => {
   return async (req, res, next) => {
     try {
+      console.log("Validating role for userId:", req.userId);
+
       // Ambil user berdasarkan req.userId
       const user = await UserModel.findById(req.userId);
+      console.log("User found:", user);
 
-      // Pastikan user ditemukan dan memiliki role yang benar
       appAssert(
-        user && user.role === requiredRole,
+        user, // Pastikan user ditemukan
         UNAUTHORIZED,
-        "Access denied: Invalid role",
+        "Access denied: User not found",
+        AppErrorCode.InvalidRole
+      );
+
+      appAssert(
+        user.role === requiredRole, // Validasi role
+        UNAUTHORIZED,
+        `Access denied: User role is '${user.role}', required role is '${requiredRole}'`,
         AppErrorCode.InvalidRole
       );
 
       next();
     } catch (error) {
-      // Handle error jika terjadi masalah
+      console.error("Error validating role:", error);
       return res.status(UNAUTHORIZED).json({
         message: "Access denied: Unable to validate role",
         code: AppErrorCode.InvalidRole,

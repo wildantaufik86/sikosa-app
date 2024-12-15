@@ -20,7 +20,7 @@ router.post(
 router.put(
   "/:id/status",
   authenticate,
-  validateRole("psychologist"),
+  validateRole("psikolog"),
   updateConsultationStatus
 );
 

@@ -8,9 +8,9 @@ import { APP_ORIGIN, NODE_ENV, PORT } from "./constants/env";
 import catchErrors from "./utils/catchErrors";
 import { OK } from "./constants/http";
 import authRoutes from "./routes/auth.route";
-import userRoutes from "./routes/user.route";
+import userRoutes from "./routes/user.routes";
 import authenticate from "./middleware/authenticate";
-import consultationRoutes from "./routes/consultation.routes";
+import consultationRoutes from "./routes/psikolog.routes";
 
 const app = express();
 
@@ -30,8 +30,7 @@ app.get("/", ({ req, res }: any) => {
   });
 });
 
-app.use("/api", consultationRoutes);
-
+// api konsul
 app.use("/consultation", consultationRoutes);
 
 app.use("/auth", authRoutes);

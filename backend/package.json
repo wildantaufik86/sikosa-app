@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "ts-node-dev --poll --files src/index.ts index.d.ts",
     "start": "node index.js",
-    "lint": "lint .",
+    "lint": "eslint ./src",
     "build": "rimraf dist && tsc"
   },
   "keywords": [],

@@ -36,6 +36,7 @@ yarn-error.log
 # Environment files
 .env
 .env.*.local
+uploads
 
 # OS and Editor files
 .DS_Store

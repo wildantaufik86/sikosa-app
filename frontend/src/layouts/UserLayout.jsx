@@ -9,19 +9,18 @@ import { useNavigate } from "react-router-dom";
 const UserLayout = ({ children }) => {
   const [showChat, setShowChat] = useState(false);
   const navigate = useNavigate();
-
   const toggleChat = () => {
     setShowChat(!showChat);
   };
 
   const { authUser } = useAuth();
   useEffect(() => {
-    if (authUser && authUser?.role === "dokter") {
+    if (authUser && authUser?.role === "psikolog") {
       navigate("/psikolog/dashboard");
     }
   }, [authUser]);
 
-  if (authUser && authUser?.role === "dokter") {
+  if (authUser && authUser?.role === "psikolog") {
     return null;
   }
 

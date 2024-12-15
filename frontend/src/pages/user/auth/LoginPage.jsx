@@ -3,6 +3,7 @@ import { FaEnvelope, FaLock, FaEye, FaEyeSlash } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
 import Navbar from "../../../components/user/components/Navbar";
 import { useAuth } from "../../../hooks/hooks";
+import { putAccessTokenSession } from "../../../utils/utils";
 
 const LoginPage = () => {
   const [passwordVisible, setPasswordVisible] = useState(false);
@@ -10,7 +11,7 @@ const LoginPage = () => {
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState(null);
   const [errorMessagePassword, setErrorMessagePassword] = useState(null);
-  const { authUser, handleAuthUserChange } = useAuth();
+  const { authUser, handleAuthUserChange, handleAccessToken } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -56,7 +57,9 @@ const LoginPage = () => {
           throw new Error("Invalid email or password");
         }
         const result = await response.json();
+        console.log(result);
         handleAuthUserChange(result.user);
+        handleAccessToken(result.accessToken);
         setErrorMessage(null);
         return result;
       } catch (error) {

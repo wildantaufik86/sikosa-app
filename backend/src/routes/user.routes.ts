@@ -85,6 +85,7 @@ userRoutes.put(
   "/profile",
   authenticate,
   upload.single("picture"),
+  validateRole("mahasiswa"),
   updateUserProfileHandler
 );
 

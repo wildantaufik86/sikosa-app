@@ -3,6 +3,8 @@ import UserModel from "../models/userModel";
 import appAssert from "../utils/appAssert";
 import { BAD_REQUEST, INTERNAL_SERVER_ERROR, OK } from "../constants/http";
 import AppErrorCode from "../constants/appErrorCode";
+import fs from "fs/promises"; // Gunakan fs promise untuk operasi file asynchronous
+import path from "path";
 
 export const updateUserProfileHandler: RequestHandler = async (req, res) => {
   const userId = req.userId;
@@ -25,9 +27,28 @@ export const updateUserProfileHandler: RequestHandler = async (req, res) => {
   const user = await UserModel.findById(userId);
   appAssert(user, BAD_REQUEST, "User not found", AppErrorCode.UserNotFound);
 
+  // Simpan path foto profil lama sebelum update
+  const oldProfilePicture = user.profile.picture;
+
   // Update fullname dan picture jika tersedia
   if (fullname) user.profile.fullname = fullname;
-  if (picture) user.profile.picture = picture;
+  if (picture) {
+    user.profile.picture = picture;
+
+    // Hapus file lama jika ada
+    if (oldProfilePicture && oldProfilePicture !== picture) {
+      try {
+        const oldFilePath = path.join(
+          __dirname,
+          `../public${oldProfilePicture}`
+        );
+        // await fs.unlink(oldFilePath);
+      } catch (error) {
+        console.error("Gagal menghapus file lama:", error);
+        // Lanjutkan proses meskipun gagal menghapus file
+      }
+    }
+  }
 
   await user.save();
 
@@ -39,7 +60,10 @@ export const updateUserProfileHandler: RequestHandler = async (req, res) => {
       nim: user.nim,
       role: user.role,
       verified: user.verified,
-      profile: user.profile, // Mengirim kembali fullname dan picture yang terbaru
+      profile: {
+        fullname: user.profile.fullname,
+        picture: user.profile.picture,
+      },
     },
   });
 };

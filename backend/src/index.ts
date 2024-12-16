@@ -32,7 +32,7 @@ app.get("/", ({ req, res }: any) => {
 });
 
 // api konsul
-app.use("/consultation", consultationRoutes);
+app.use("/consultation", consultationRoutes, userRoutes);
 
 app.use("/auth", authRoutes);
 

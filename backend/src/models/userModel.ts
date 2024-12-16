@@ -7,6 +7,9 @@ export interface UserDocument extends mongoose.Document {
   profile: {
     picture: string;
     fullname: string;
+    description?: string;
+    specialization?: string;
+    educationBackground?: string[];
   };
   role: "mahasiswa" | "psikolog" | "admin";
   password: string;
@@ -43,6 +46,9 @@ const userSchema = new mongoose.Schema<UserDocument>(
     profile: {
       picture: { type: String, default: "" },
       fullname: { type: String, default: "" },
+      description: { type: String, default: "" },
+      specialization: { type: String, default: "" },
+      educationBackground: { type: [String], default: [] },
     },
   },
   {

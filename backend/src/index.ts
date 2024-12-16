@@ -12,6 +12,7 @@ import userRoutes from "./routes/user.routes";
 import authenticate from "./middleware/authenticate";
 import consultationRoutes from "./routes/psikolog.routes";
 import path from "path";
+import psikologRoutes from "./routes/psikolog.routes";
 
 const app = express();
 
@@ -37,6 +38,7 @@ app.use("/consultation", consultationRoutes, userRoutes);
 app.use("/auth", authRoutes);
 
 app.use("/user", authenticate, userRoutes);
+app.use("/psikolog", authenticate, psikologRoutes);
 app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 
 app.use(errorHandler);

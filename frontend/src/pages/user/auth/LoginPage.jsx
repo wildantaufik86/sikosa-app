@@ -21,7 +21,7 @@ const LoginPage = () => {
     }
 
     // route psikolog/dokter
-    if (authUser && authUser.role === "dokter") {
+    if (authUser && authUser.role === "psikolog") {
       navigate("/psikolog/dashboard");
     }
 

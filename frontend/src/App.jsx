@@ -71,7 +71,7 @@ function App() {
           }
         />
         <Route
-          path="/daftar-layanan/1"
+          path="/daftar-layanan/:id_psikolog"
           element={
             <UserLayout>
               <DetailPsikolog />
@@ -79,7 +79,7 @@ function App() {
           }
         />
         <Route
-          path="/chat-dokter/1"
+          path="/chat-dokter/:id_psikolog"
           element={
             <UserLayout>
               <ChatDokter />

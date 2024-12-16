@@ -5,6 +5,7 @@ const BASE_URL = "http://localhost:5000";
 const updateProfile = async (updatedDataUser) => {
   try {
     const accessToken = getAccessToken();
+
     if (!accessToken) {
       throw new Error("Invalid accessToken");
     }
@@ -27,4 +28,26 @@ const updateProfile = async (updatedDataUser) => {
   }
 };
 
-export { updateProfile };
+const getPsikologById = async (psikologId) => {
+  try {
+    const accessToken = getAccessToken();
+
+    if (!accessToken) {
+      throw new Error("Invalid access token");
+    }
+    const response = await fetch(`${BASE_URL}/user/psikolog/${psikologId}`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+    if (!response.ok) {
+      throw new Error("Failed to get detail psikolog");
+    }
+
+    const result = await response.json();
+    return { error: false, message: result.message, data: result.data };
+  } catch (error) {
+    return { error: true, message: error.message, data: null };
+  }
+};
+export { updateProfile, getPsikologById };

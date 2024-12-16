@@ -17,7 +17,7 @@ import validatePsychologistId from "../middleware/validatePsychologistId";
 import { applyConsultationHandler } from "../controllers/consultation.controller";
 
 const multer = require("multer");
-const upload = multer({ dest: "uploads" });
+import upload from "../middleware/upload";
 
 const userRoutes = Router();
 

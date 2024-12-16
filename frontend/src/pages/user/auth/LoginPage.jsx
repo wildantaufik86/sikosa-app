@@ -3,6 +3,7 @@ import { FaEnvelope, FaLock, FaEye, FaEyeSlash } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
 import Navbar from "../../../components/user/components/Navbar";
 import { useAuth } from "../../../hooks/hooks";
+import { putAccessTokenSession } from "../../../utils/utils";
 
 const LoginPage = () => {
   const [passwordVisible, setPasswordVisible] = useState(false);
@@ -10,7 +11,7 @@ const LoginPage = () => {
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState(null);
   const [errorMessagePassword, setErrorMessagePassword] = useState(null);
-  const { authUser, handleAuthUserChange } = useAuth();
+  const { authUser, handleAuthUserChange, handleAccessToken } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -20,7 +21,7 @@ const LoginPage = () => {
     }
 
     // route psikolog/dokter
-    if (authUser && authUser.role === "dokter") {
+    if (authUser && authUser.role === "psikolog") {
       navigate("/psikolog/dashboard");
     }
 
@@ -38,8 +39,8 @@ const LoginPage = () => {
     event.preventDefault();
 
     const dataLogin = {
-      email,
-      password,
+      email: email.trim(),
+      password: password.trim(),
     };
 
     const fetchDataLogin = async () => {
@@ -57,6 +58,7 @@ const LoginPage = () => {
         }
         const result = await response.json();
         handleAuthUserChange(result.user);
+        handleAccessToken(result.accessToken);
         setErrorMessage(null);
         return result;
       } catch (error) {

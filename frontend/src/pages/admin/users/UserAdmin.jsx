@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { FiSearch } from "react-icons/fi"; // Importing React Icons
 import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io"; // Importing arrow icons
+import { Link } from "react-router-dom";
 
 const UserAdmin = () => {
   const [searchQuery, setSearchQuery] = useState(""); // State for search query
@@ -65,6 +66,15 @@ const UserAdmin = () => {
         User
       </h1>
 
+      <div className="mb-5">
+        <Link
+          to="/admin/user/add"
+          className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600"
+        >
+          Tambah User
+        </Link>
+      </div>
+
       {/* Table */}
       <div className="overflow-x-auto border-2 shadow-xl border-gray-300 rounded-lg">
         <table className="w-full">
@@ -105,9 +115,12 @@ const UserAdmin = () => {
                   </span>
                 </td>
                 <td className="py-2 px-4 border-b text-center border-gray-200">
-                  <button className="px-3 py-1 text-sm font-semibold bg-yellow-400 text-white rounded-lg hover:bg-blue-600">
+                  <Link
+                    to="/admin/user/edit-user/1"
+                    className="px-3 py-1 text-sm font-semibold bg-yellow-400 text-white rounded-lg hover:bg-blue-600"
+                  >
                     Edit
-                  </button>
+                  </Link>
                   <button className="px-3 py-1 text-sm font-semibold bg-red-500 text-white rounded-lg hover:bg-red-600 ml-2">
                     Delete
                   </button>

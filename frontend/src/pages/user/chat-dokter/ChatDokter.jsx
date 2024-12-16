@@ -1,11 +1,12 @@
 // ChatDokter.js
 import React, { useEffect, useState } from "react";
 import { FaChevronLeft } from "react-icons/fa";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import ChatInput from "../../../components/user/components/chat-dokter/ChatInput";
 import DokterDetail from "../../../components/user/components/chat-dokter/DokterDetail";
 import PesanChat from "../../../components/user/components/chat-dokter/PesanChat";
 import { useAuth } from "../../../hooks/hooks";
+import { getPsikologById } from "../../../utils/api";
 
 const doctorData = {
   id: 1,
@@ -29,6 +30,8 @@ const ChatDokter = () => {
       content: "I'm here to help. Could you tell me more about your symptoms?",
     },
   ]);
+  const { id_psikolog } = useParams();
+  const [psikolog, setPsikolog] = useState(null);
   const { authUser } = useAuth();
   const navigate = useNavigate();
   useEffect(() => {
@@ -37,7 +40,24 @@ const ChatDokter = () => {
     }
   }, [authUser]);
 
-  if (!authUser) {
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const result = await getPsikologById(id_psikolog);
+        if (result.error) {
+          throw new Error(result.message);
+        }
+        setPsikolog(result.data);
+      } catch (error) {
+        alert(error.message);
+      }
+    };
+    if (authUser) {
+      fetchData();
+    }
+  }, [authUser, id_psikolog]);
+
+  if (!authUser || !psikolog) {
     return null;
   }
 
@@ -73,7 +93,7 @@ const ChatDokter = () => {
       </Link>
 
       <div className="flex flex-col lg:flex-row space-y-4 lg:space-y-0 lg:space-x-6">
-        <DokterDetail doctor={doctorData} />
+        <DokterDetail doctor={doctorData} psikolog={psikolog} />
 
         <div className="w-full lg:w-2/3 border bg-[#EBF6FF] px-4 py-8 rounded-lg shadow-lg flex flex-col">
           <PesanChat messages={messages} doctorImage={doctorData.image} />

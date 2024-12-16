@@ -29,6 +29,8 @@ import ArtikelManajemen from "./pages/admin/artikel/ArtikelManajemen";
 import AddArtikelAdmin from "./pages/admin/artikel/AddArtikelAdmin";
 import EditArtikelAdmin from "./pages/admin/artikel/EditArtikelAdmin";
 import LoginPsikolog from "./pages/psikolog/auth/LoginPsikolog";
+import AddUser from "./pages/admin/users/AddUser";
+import EditUser from "./pages/admin/users/EditUser";
 
 function App() {
   return (
@@ -71,7 +73,7 @@ function App() {
           }
         />
         <Route
-          path="/daftar-layanan/1"
+          path="/daftar-layanan/:id_psikolog"
           element={
             <UserLayout>
               <DetailPsikolog />
@@ -79,7 +81,7 @@ function App() {
           }
         />
         <Route
-          path="/chat-dokter/1"
+          path="/chat-dokter/:id_psikolog"
           element={
             <UserLayout>
               <ChatDokter />
@@ -103,7 +105,7 @@ function App() {
           }
         />
         <Route
-          path="/edit-profile/1"
+          path="/edit-profile/:id"
           element={
             <UserLayout>
               <EditProfile />
@@ -203,6 +205,22 @@ function App() {
           element={
             <AdminLayout>
               <UserAdmin />
+            </AdminLayout>
+          }
+        />
+        <Route
+          path="/admin/user/add"
+          element={
+            <AdminLayout>
+              <AddUser />
+            </AdminLayout>
+          }
+        />
+        <Route
+          path="/admin/user/edit-user/1"
+          element={
+            <AdminLayout>
+              <EditUser />
             </AdminLayout>
           }
         />

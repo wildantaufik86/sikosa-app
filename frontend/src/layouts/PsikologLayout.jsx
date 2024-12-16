@@ -13,7 +13,7 @@ const PsikologLayout = ({ children }) => {
     }
 
     // cek jika bukan dokter
-    if (authUser?.role !== "dokter") {
+    if (authUser?.role !== "psikolog") {
       navigate("/");
     }
   }, [authUser]);
@@ -22,7 +22,7 @@ const PsikologLayout = ({ children }) => {
     return null;
   }
 
-  if (authUser?.role !== "dokter") {
+  if (authUser?.role !== "psikolog") {
     return null;
   }
 

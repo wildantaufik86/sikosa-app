@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link, NavLink } from "react-router-dom";
 import { FaBars, FaTimes, FaUser } from "react-icons/fa";
 import { FiLogOut } from "react-icons/fi";
@@ -8,6 +8,20 @@ const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const { authUser, handleLogout } = useAuth();
   const [isUserSettingOpen, setIsUserSettingOpen] = useState(false);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (!e.target.closest("header")) {
+        setIsOpen(false);
+        setIsUserSettingOpen(false);
+      }
+    };
+
+    document.addEventListener("click", handleClickOutside);
+
+    return () => document.removeEventListener("click", handleClickOutside);
+  }, []);
+
   const toggleDrawer = () => {
     setIsOpen(!isOpen);
   };
@@ -255,17 +269,32 @@ const Navbar = () => {
             >
               Artikel
             </NavLink>
-            <NavLink
-              to="/riwayat"
-              className={({ isActive }) =>
-                `py-2 text-lg font-semibold ${
-                  isActive ? "text-[#35A7FF]" : "text-black"
-                }`
-              }
-              onClick={toggleDrawer}
-            >
-              Riwayat
-            </NavLink>
+            {authUser?.role === "mahasiswa" && (
+              <>
+                <NavLink
+                  to="/riwayat"
+                  className={({ isActive }) =>
+                    `py-2 text-lg font-semibold ${
+                      isActive ? "text-[#35A7FF]" : "text-black"
+                    }`
+                  }
+                  onClick={toggleDrawer}
+                >
+                  Riwayat
+                </NavLink>
+                <NavLink
+                  to="/profile"
+                  className={({ isActive }) =>
+                    `py-2 text-lg font-semibold ${
+                      isActive ? "text-[#35A7FF]" : "text-black"
+                    }`
+                  }
+                  onClick={toggleDrawer}
+                >
+                  Profile
+                </NavLink>
+              </>
+            )}
           </div>
 
           {/* Buttons inside the Drawer */}

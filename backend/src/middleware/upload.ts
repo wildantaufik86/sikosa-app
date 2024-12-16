@@ -1,13 +1,6 @@
 import multer from "multer";
 import path from "path";
-import { Request } from "express";
 import crypto, { randomBytes } from "crypto";
-import fs from "fs/promises";
-import { fstat } from "fs";
-
-// if (!fstat.existsSync(uploadDir)) {
-//   fs.mkdirSync(uploadDir, { recursive: true });
-// }
 
 // Konfigurasi multer untuk menyimpan file di folder uploads
 const storage = multer.diskStorage({

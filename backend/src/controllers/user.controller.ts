@@ -3,7 +3,6 @@ import UserModel from "../models/userModel";
 import appAssert from "../utils/appAssert";
 import { BAD_REQUEST, INTERNAL_SERVER_ERROR, OK } from "../constants/http";
 import AppErrorCode from "../constants/appErrorCode";
-import fs from "fs/promises"; // Gunakan fs promise untuk operasi file asynchronous
 import path from "path";
 
 export const updateUserProfileHandler: RequestHandler = async (req, res) => {
@@ -11,7 +10,7 @@ export const updateUserProfileHandler: RequestHandler = async (req, res) => {
   const { fullname } = req.body;
 
   const picture = req.file
-    ? `/uploads/${req.file.filename}` // Relative path untuk akses gambar
+    ? `/uploads/${req.file.filename}` // relative path untuk akses gambar
     : undefined;
 
   appAssert(userId, BAD_REQUEST, "Invalid user", AppErrorCode.InvalidUser);
@@ -56,10 +55,6 @@ export const updateUserProfileHandler: RequestHandler = async (req, res) => {
   res.status(OK).json({
     message: "Profile updated successfully",
     data: {
-      email: user.email,
-      nim: user.nim,
-      role: user.role,
-      verified: user.verified,
       profile: {
         fullname: user.profile.fullname,
         picture: user.profile.picture,

@@ -8,8 +8,6 @@ import {
   getUserChat,
   getUserConsultationHistory,
   getUserConsultationDetail,
-  getUserArticles,
-  getUserArticleDetail,
 } from "../controllers/user.controller";
 import authenticate from "../middleware/authenticate";
 import validateRole from "../middleware/validateRole";
@@ -74,9 +72,9 @@ userRoutes.get(
 // Apply Consultation
 userRoutes.post(
   "/apply",
-  authenticate, // Middleware auth
-  validateRole("mahasiswa"), // Memastikan role adalah mahasiswa
-  validatePsychologistId, // Controller untuk handle apply konsultasi
+  authenticate,
+  validateRole("mahasiswa"),
+  validatePsychologistId,
   applyConsultationHandler
 );
 
@@ -87,20 +85,6 @@ userRoutes.put(
   upload.single("picture"),
   validateRole("mahasiswa"),
   updateUserProfileHandler
-);
-
-// Artikel
-userRoutes.get(
-  "/articles",
-  authenticate,
-  validateRole("mahasiswa"),
-  getUserArticles
-);
-userRoutes.get(
-  "/articles/:id",
-  authenticate,
-  validateRole("mahasiswa"),
-  getUserArticleDetail
 );
 
 export default userRoutes;

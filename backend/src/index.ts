@@ -13,6 +13,7 @@ import authenticate from "./middleware/authenticate";
 import consultationRoutes from "./routes/psikolog.routes";
 import path from "path";
 import psikologRoutes from "./routes/psikolog.routes";
+import articleRoutes from "./routes/article.routes";
 
 const app = express();
 
@@ -31,6 +32,8 @@ app.get("/", ({ req, res }: any) => {
     status: "Connected!!!",
   });
 });
+// general API
+app.use("/api/v1", articleRoutes);
 
 // api konsul
 app.use("/consultation", consultationRoutes, userRoutes);

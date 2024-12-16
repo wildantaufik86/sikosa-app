@@ -74,10 +74,6 @@ export const updatePsychologistProfileHandler: RequestHandler = async (
   res.status(OK).json({
     message: "Psychologist profile updated successfully",
     data: {
-      email: user.email,
-      nim: user.nim,
-      role: user.role,
-      verified: user.verified,
       profile: {
         fullname: user.profile.fullname,
         picture: user.profile.picture,

@@ -39,8 +39,8 @@ const LoginPage = () => {
     event.preventDefault();
 
     const dataLogin = {
-      email,
-      password,
+      email: email.trim(),
+      password: password.trim(),
     };
 
     const fetchDataLogin = async () => {
@@ -57,7 +57,6 @@ const LoginPage = () => {
           throw new Error("Invalid email or password");
         }
         const result = await response.json();
-        console.log(result);
         handleAuthUserChange(result.user);
         handleAccessToken(result.accessToken);
         setErrorMessage(null);

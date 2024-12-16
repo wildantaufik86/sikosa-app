@@ -2,6 +2,7 @@ import { createContext, useState } from "react";
 import {
   getAccessToken,
   getAuthUserSession,
+  putAccessTokenSession,
   putAuthUserSession,
 } from "../utils/utils";
 
@@ -16,9 +17,9 @@ export const AuthProvider = ({ children }) => {
     putAuthUserSession(newAuthUser);
   };
 
-  const handleAccessToken = (accessToken) => {
-    setAccessToken(accessToken);
-    putAccessTokenSession(accessToken);
+  const handleAccessToken = (dataAccessToken) => {
+    setAccessToken(dataAccessToken);
+    putAccessTokenSession(dataAccessToken);
   };
 
   const handleLogout = async () => {

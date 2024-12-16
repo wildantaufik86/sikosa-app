@@ -103,7 +103,7 @@ function App() {
           }
         />
         <Route
-          path="/edit-profile/1"
+          path="/edit-profile/:id"
           element={
             <UserLayout>
               <EditProfile />

@@ -2,9 +2,10 @@ import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useAuth } from "../../../hooks/hooks";
+import { updateProfile } from "../../../utils/api";
 
 const EditProfile = () => {
-  const { authUser } = useAuth();
+  const { authUser, handleAuthUserChange } = useAuth();
   const [nim, setNim] = useState(authUser?.nim || "");
   const [fullname, setFullname] = useState(
     authUser?.profile?.fullname || "User"
@@ -22,9 +23,24 @@ const EditProfile = () => {
     return null;
   }
 
-  const handleUpdateProfile = (event) => {
+  const handleUpdateProfile = async (event) => {
     event.preventDefault();
-    console.log("berhasil submit");
+    try {
+      const updatedDataUser = {
+        fullname: fullname.trim(),
+      };
+      const result = await updateProfile(updatedDataUser);
+      if (result.error) {
+        throw new Error(result.message);
+      }
+      if (result.data) {
+        handleAuthUserChange(result.data);
+        alert(result.message);
+        navigate("/profile");
+      }
+    } catch (error) {
+      alert(error.message);
+    }
   };
 
   return (
@@ -79,7 +95,7 @@ const EditProfile = () => {
                 >
                   <label
                     htmlFor="nim"
-                    className="text-black text-md font-semibold mb-1"
+                    className="text-black text-md font-semibold mb-1 opacity-50"
                   >
                     NIM
                   </label>
@@ -88,7 +104,8 @@ const EditProfile = () => {
                     type="text"
                     defaultValue={nim}
                     onChange={(e) => setNim(e.target.value)}
-                    className="text-gray-700 text-md bg-gray-100 p-1 rounded-sm w-full"
+                    className="outline-none text-gray-700 text-md opacity-50 bg-gray-100 p-1 rounded-sm w-full"
+                    readOnly
                   />
                 </motion.div>
 
@@ -119,7 +136,7 @@ const EditProfile = () => {
                 >
                   <label
                     htmlFor="dob"
-                    className="text-black text-md font-semibold mb-1"
+                    className="text-black text-md opacity-50 font-semibold mb-1"
                   >
                     Email
                   </label>
@@ -128,7 +145,8 @@ const EditProfile = () => {
                     type="text"
                     defaultValue={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="text-gray-700 text-md bg-gray-100 p-1 rounded-sm w-full"
+                    className="outline-none opacity-50 text-gray-700 text-md bg-gray-100 p-1 rounded-sm w-full"
+                    readOnly
                   />
                 </motion.div>
               </div>

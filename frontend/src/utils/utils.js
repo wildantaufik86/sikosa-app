@@ -8,7 +8,8 @@ const putAuthUserSession = (authUser) => {
 };
 
 const getAuthUserSession = () => {
-  return sessionStorage.getItem("authUser") || null;
+  const authUser = sessionStorage.getItem("authUser");
+  return authUser ? JSON.parse(authUser) : null;
 };
 
 const putAccessTokenSession = (accessToken) => {

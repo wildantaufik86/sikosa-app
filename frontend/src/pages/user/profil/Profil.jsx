@@ -1,7 +1,8 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useAuth } from "../../../hooks/hooks";
+import CONFIG from "../../../config/config";
 
 const Profile = () => {
   const { authUser } = useAuth();
@@ -42,11 +43,19 @@ const Profile = () => {
             animate={{ scale: 1 }}
             transition={{ duration: 0.8 }}
           >
-            <img
-              src="/assets/caroulsel1.png" // Ganti dengan URL gambar profil Anda
-              alt="Profile"
-              className="w-full h-80 object-cover rounded-lg"
-            />
+            {authUser?.profile?.picture ? (
+              <img
+                src={`${CONFIG.BASE_URL}${authUser?.profile?.picture}`}
+                alt="Profile"
+                className="w-[400px] h-80 object-cover rounded-lg"
+              />
+            ) : (
+              <img
+                src="https://via.placeholder.com/150"
+                alt="Profile"
+                className="w-[400px] h-80 object-cover rounded-lg"
+              />
+            )}
           </motion.div>
 
           {/* Profile Details */}

@@ -2,7 +2,7 @@ import { getAccessToken } from "./utils";
 
 const BASE_URL = "http://localhost:5000";
 
-const updateProfile = async (updatedDataUser) => {
+const updateProfile = async (formData) => {
   try {
     const accessToken = getAccessToken();
 
@@ -12,10 +12,9 @@ const updateProfile = async (updatedDataUser) => {
     const response = await fetch(`${BASE_URL}/user/profile`, {
       method: "PUT",
       headers: {
-        "Content-Type": "application/json",
         Authorization: `Bearer ${accessToken}`,
       },
-      body: JSON.stringify(updatedDataUser),
+      body: formData,
     });
     if (!response.ok) {
       throw new Error("Failed to update user");

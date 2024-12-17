@@ -150,7 +150,7 @@ function App() {
           }
         />
         <Route
-          path="/psikolog/artikel/edit/1"
+          path="/psikolog/artikel/edit/:slug_article"
           element={
             <PsikologLayout>
               <EditArtikel />

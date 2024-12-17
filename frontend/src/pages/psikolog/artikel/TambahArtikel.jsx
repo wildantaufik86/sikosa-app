@@ -1,20 +1,25 @@
 import { useState } from "react";
 import { IoIosArrowBack } from "react-icons/io";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { CKEditor } from "@ckeditor/ckeditor5-react";
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 import { AiFillStar } from "react-icons/ai"; // Import the star icon
+import { createArticle } from "../../../utils/api";
 
 const TambahArtikel = () => {
   const [title, setTitle] = useState("");
   const [slug, setSlug] = useState("");
-  const [description, setDescription] = useState("");
+  const [content, setContent] = useState("");
   const [image, setImage] = useState(null);
+  const [thumbnail, setThumbnail] = useState(null);
+
+  const navigate = useNavigate();
 
   // Handle image selection
   const handleImageChange = (event) => {
     const file = event.target.files[0];
     if (file) {
+      setThumbnail(file);
       setImage(URL.createObjectURL(file));
     }
   };
@@ -31,8 +36,35 @@ const TambahArtikel = () => {
     );
   };
 
+  const handlePostArticle = async (e) => {
+    e.preventDefault();
+    if (!title || !thumbnail || !content) {
+      alert("Please fill the required input");
+      return false;
+    }
+
+    try {
+      const formData = new FormData();
+      formData.append("title", title);
+      formData.append("thumbnail", thumbnail);
+      formData.append("content", content);
+
+      const response = await createArticle(formData);
+      if (response.error) {
+        throw new Error(response.message);
+      }
+      alert(response.message);
+      navigate("/psikolog/artikel");
+    } catch (error) {
+      alert(error.message);
+    }
+  };
+
   return (
-    <div className="pt-16 pb-10 lg:pt-10 lg:px-4 font-jakarta">
+    <form
+      onSubmit={handlePostArticle}
+      className="pt-16 pb-10 lg:pt-10 lg:px-4 font-jakarta"
+    >
       {/* Title Section */}
       <div className="flex justify-between items-center border-b border-black pb-2 mb-4">
         <h2 className="text-xl font-semibold">New Artikel</h2>
@@ -49,7 +81,10 @@ const TambahArtikel = () => {
           >
             Cancel
           </Link>
-          <button className="px-4 py-1 bg-[#35A7FF] text-sm text-white rounded-lg">
+          <button
+            type="submit"
+            className="px-4 py-1 bg-[#35A7FF] text-sm text-white rounded-lg"
+          >
             Post
           </button>
         </div>
@@ -119,6 +154,7 @@ const TambahArtikel = () => {
           onChange={handleTitleChange}
           className="mt-2 w-full p-3 border border-gray-400 rounded-lg"
           placeholder="Enter article title"
+          required
         />
       </div>
 
@@ -137,8 +173,9 @@ const TambahArtikel = () => {
           id="slug"
           value={slug}
           onChange={(e) => setSlug(e.target.value)}
-          className="mt-2 w-full p-3 border border-gray-400 rounded-lg"
+          className="outline-none opacity-50 mt-2 w-full p-3 border border-gray-400 rounded-lg"
           placeholder="Enter article slug"
+          readOnly
         />
       </div>
 
@@ -150,20 +187,20 @@ const TambahArtikel = () => {
         >
           <AiFillStar className="text-[10px] text-red-500 mr-2" />{" "}
           {/* Red star icon */}
-          Description
+          Content
         </label>
         <div className="ckeditor-container pt-3">
           <CKEditor
             editor={ClassicEditor}
-            data={description}
-            onChange={(event, editor) => setDescription(editor.getData())}
+            data={content}
+            onChange={(event, editor) => setContent(editor.getData())}
             config={{
               placeholder: "Enter article description",
             }}
           />
         </div>
       </div>
-    </div>
+    </form>
   );
 };
 

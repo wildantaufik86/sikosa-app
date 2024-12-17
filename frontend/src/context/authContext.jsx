@@ -11,7 +11,6 @@ export const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
   const [authUser, setAuthUser] = useState(() => getAuthUserSession());
   const [accessToken, setAccessToken] = useState(() => getAccessToken());
-
   const handleAuthUserChange = (newAuthUser) => {
     setAuthUser(newAuthUser);
     putAuthUserSession(newAuthUser);
@@ -35,6 +34,7 @@ export const AuthProvider = ({ children }) => {
       setAccessToken(null);
       sessionStorage.removeItem("authUser");
       sessionStorage.removeItem("accessToken");
+      window.location.href = "/login";
     } catch (error) {
       alert(error.message);
     }

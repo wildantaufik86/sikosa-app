@@ -1,15 +1,37 @@
+import CONFIG from "../config/config";
 import { getAccessToken } from "./utils";
 
-const BASE_URL = "http://localhost:5000";
+const accessToken = getAccessToken();
 
 const updateProfile = async (formData) => {
   try {
-    const accessToken = getAccessToken();
-
     if (!accessToken) {
       throw new Error("Invalid accessToken");
     }
-    const response = await fetch(`${BASE_URL}/user/profile`, {
+    const response = await fetch(`${CONFIG.BASE_URL}/user/profile`, {
+      method: "PUT",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+      body: formData,
+    });
+    if (!response.ok) {
+      throw new Error("Failed to update user");
+    }
+
+    const result = await response.json();
+    return { error: false, message: result.message, data: result.data };
+  } catch (error) {
+    return { error: true, message: error.message, data: null };
+  }
+};
+
+const updateProfilePsikolog = async (formData) => {
+  try {
+    if (!accessToken) {
+      throw new Error("Invalid accessToken");
+    }
+    const response = await fetch(`${CONFIG.BASE_URL}/psikolog/profile`, {
       method: "PUT",
       headers: {
         Authorization: `Bearer ${accessToken}`,
@@ -29,16 +51,17 @@ const updateProfile = async (formData) => {
 
 const getPsikologById = async (psikologId) => {
   try {
-    const accessToken = getAccessToken();
-
     if (!accessToken) {
       throw new Error("Invalid access token");
     }
-    const response = await fetch(`${BASE_URL}/user/psikolog/${psikologId}`, {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    });
+    const response = await fetch(
+      `${CONFIG.BASE_URL}/user/psikolog/${psikologId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      }
+    );
     if (!response.ok) {
       throw new Error("Failed to get detail psikolog");
     }
@@ -49,4 +72,4 @@ const getPsikologById = async (psikologId) => {
     return { error: true, message: error.message, data: null };
   }
 };
-export { updateProfile, getPsikologById };
+export { updateProfile, getPsikologById, updateProfilePsikolog };

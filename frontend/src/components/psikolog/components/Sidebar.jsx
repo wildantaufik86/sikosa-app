@@ -5,6 +5,8 @@ import { IoMdNotificationsOutline, IoMdLogOut } from "react-icons/io";
 import { AiOutlineClose } from "react-icons/ai";
 import { BiMessageAlt } from "react-icons/bi";
 import { useAuth } from "../../../hooks/hooks";
+import CONFIG from "../../../config/config";
+import { FaUser } from "react-icons/fa";
 
 const PsikologSidebar = () => {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -183,11 +185,17 @@ const PsikologSidebar = () => {
 
           {/* Profile Section */}
           <div className="flex items-center px-4 space-x-4">
-            <img
-              src="/assets/home-image.png"
-              alt="Profile"
-              className="w-12 h-12 object-cover rounded-full"
-            />
+            {authUser?.profile.picture ? (
+              <img
+                src={CONFIG.BASE_URL + authUser.profile.picture}
+                alt="Profile"
+                className="w-12 h-12 object-cover rounded-full"
+              />
+            ) : (
+              <div className="flex justify-center items-center w-10 h-10 rounded-full border border-[#35A7FF] mr-2">
+                <FaUser className="text-black" />
+              </div>
+            )}
             <div>
               <p className="font-semibold text-md text-gray-800">
                 {authUser.profile.fullname}

@@ -16,7 +16,7 @@ import {
 
 export type CreateAccountParams = {
   email: string;
-  nim: string;
+  nim?: string;
   password: string;
   profile?: {
     picture: string;

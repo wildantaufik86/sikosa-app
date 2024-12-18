@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 
 export interface ArticleDocument extends Document {
-  writer_id: mongoose.Schema.Types.ObjectId;
+  writer: mongoose.Schema.Types.ObjectId;
   thumbnail: string;
   title: string;
   content: string;
@@ -10,7 +10,7 @@ export interface ArticleDocument extends Document {
 
 const articleSchema = new mongoose.Schema<ArticleDocument>(
   {
-    writer_id: {
+    writer: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,

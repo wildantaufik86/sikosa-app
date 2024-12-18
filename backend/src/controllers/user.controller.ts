@@ -8,6 +8,7 @@ import path from "path";
 export const updateUserProfileHandler: RequestHandler = async (req, res) => {
   const userId = req.userId;
   const { fullname } = req.body;
+  const { nim } = req.body;
 
   const picture = req.file
     ? `/uploads/${req.file.filename}` // relative path untuk akses gambar
@@ -30,6 +31,7 @@ export const updateUserProfileHandler: RequestHandler = async (req, res) => {
   const oldProfilePicture = user.profile.picture;
 
   // Update fullname dan picture jika tersedia
+  if (nim) user.nim = nim;
   if (fullname) user.profile.fullname = fullname;
   if (picture) {
     user.profile.picture = picture;
@@ -55,6 +57,7 @@ export const updateUserProfileHandler: RequestHandler = async (req, res) => {
   res.status(OK).json({
     message: "Profile updated successfully",
     data: {
+      nim: user.nim,
       profile: {
         fullname: user.profile.fullname,
         picture: user.profile.picture,

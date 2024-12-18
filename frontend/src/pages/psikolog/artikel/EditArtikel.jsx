@@ -49,7 +49,7 @@ const EditArtikel = () => {
 
   const handleTitleChange = (e) => {
     const newTitle = e.target.value;
-    setTitle(newTitle);
+    setTitle(newTitle.replace(/[^\w\s-]/g, ""));
     setSlug(
       newTitle
         .toLowerCase()
@@ -91,12 +91,6 @@ const EditArtikel = () => {
       <div className="flex justify-between items-center border-b border-black pb-2 mb-4">
         <h2 className="text-xl font-semibold">Edit Artikel</h2>
         <div className="space-x-2">
-          <Link
-            to="/psikolog/artikel/preview/1"
-            className="px-4 py-1 text-sm text-black border border-black rounded-lg"
-          >
-            Preview
-          </Link>
           <Link
             to="/psikolog/artikel"
             className="px-4 py-[5px] bg-[#35A7FF] text-sm text-white rounded-lg"

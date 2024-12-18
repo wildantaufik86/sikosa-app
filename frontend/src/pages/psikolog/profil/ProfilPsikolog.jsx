@@ -94,7 +94,7 @@ const ProfilePsikolog = () => {
             {/* Edit Profile Button */}
             <div className="mt-4">
               <Link
-                to="/psikolog/edit-profile/1"
+                to={`/psikolog/edit-profile/${authUser._id}`}
                 className="mt-4 bg-[#35A7FF] text-white text-sm font-semibold py-2 px-6 rounded-lg hover:bg-blue-600 self-start"
               >
                 Edit Profil

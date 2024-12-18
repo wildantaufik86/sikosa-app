@@ -31,6 +31,7 @@ import EditArtikelAdmin from "./pages/admin/artikel/EditArtikelAdmin";
 import LoginPsikolog from "./pages/psikolog/auth/LoginPsikolog";
 import AddUser from "./pages/admin/users/AddUser";
 import EditUser from "./pages/admin/users/EditUser";
+import ArtikelView from "./pages/psikolog/artikel/ArticleView";
 
 function App() {
   return (
@@ -134,6 +135,14 @@ function App() {
           }
         />
         <Route
+          path="/psikolog/artikel/:slug"
+          element={
+            <PsikologLayout>
+              <ArtikelView />
+            </PsikologLayout>
+          }
+        />
+        <Route
           path="/psikolog/artikel/preview/:slug"
           element={
             <PsikologLayout>
@@ -166,7 +175,7 @@ function App() {
           }
         />
         <Route
-          path="/psikolog/edit-profile/1"
+          path="/psikolog/edit-profile/:id"
           element={
             <PsikologLayout>
               <EditProfilePsikolog />

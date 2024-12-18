@@ -162,7 +162,10 @@ const ArticleCard = ({
         <div className="flex justify-between">
           {/* Add Eye and Edit icons */}
           <div className="space-x-2 mr-2">
-            <Link to="" className="text-gray-500 hover:text-[#35A7FF]">
+            <Link
+              to={`/psikolog/artikel/${articleData.slug}`}
+              className="text-gray-500 hover:text-[#35A7FF]"
+            >
               <FiEye className="inline-block mr-2" />
             </Link>
             <Link

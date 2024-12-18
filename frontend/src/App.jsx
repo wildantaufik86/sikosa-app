@@ -134,7 +134,7 @@ function App() {
           }
         />
         <Route
-          path="/psikolog/artikel/preview/1"
+          path="/psikolog/artikel/preview/:slug"
           element={
             <PsikologLayout>
               <PreviewArtikel />

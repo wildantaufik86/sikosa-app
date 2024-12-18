@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { IoIosArrowBack } from "react-icons/io";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { CKEditor } from "@ckeditor/ckeditor5-react";
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 import { AiFillStar } from "react-icons/ai"; // Import the star icon
@@ -14,6 +14,43 @@ const TambahArtikel = () => {
   const [thumbnail, setThumbnail] = useState(null);
 
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Load data from sessionStorage if available
+  useEffect(() => {
+    const savedData = JSON.parse(sessionStorage.getItem("artikelData"));
+    if (location.state) {
+      // restore file thumbnail when change page
+      const { thumbnailFile } = location.state;
+      setThumbnail(thumbnailFile);
+    }
+    if (savedData) {
+      setTitle(savedData.title);
+      setSlug(savedData.slug);
+      setContent(savedData.content);
+      setImage(savedData.image);
+    }
+  }, []);
+
+  // Save data to sessionStorage whenever it changes
+  useEffect(() => {
+    // Pastikan data yang akan disimpan tidak kosong atau null
+    if (title && content && image !== null) {
+      const artikelData = { title, slug, content, image };
+      sessionStorage.setItem("artikelData", JSON.stringify(artikelData));
+    }
+  }, [title, slug, content, image, thumbnail]);
+
+  const handlePreview = () => {
+    if (!title || !content || !image) {
+      alert("please fill the required input");
+      return false;
+    }
+
+    navigate(`/psikolog/artikel/preview/${slug}`, {
+      state: { title, content, image, thumbnail },
+    });
+  };
 
   // Handle image selection
   const handleImageChange = (event) => {
@@ -54,10 +91,16 @@ const TambahArtikel = () => {
         throw new Error(response.message);
       }
       alert(response.message);
+      sessionStorage.removeItem("artikelData");
       navigate("/psikolog/artikel");
     } catch (error) {
       alert(error.message);
     }
+  };
+
+  const handleCancelPost = () => {
+    sessionStorage.removeItem("artikelData");
+    navigate("/psikolog/artikel");
   };
 
   return (
@@ -69,18 +112,20 @@ const TambahArtikel = () => {
       <div className="flex justify-between items-center border-b border-black pb-2 mb-4">
         <h2 className="text-xl font-semibold">New Artikel</h2>
         <div className="space-x-2">
-          <Link
-            to="/psikolog/artikel/preview/1"
+          <button
+            type="button"
+            onClick={handlePreview}
             className="px-4 py-1 text-sm text-black border border-black rounded-lg"
           >
             Preview
-          </Link>
-          <Link
-            to="/psikolog/artikel"
+          </button>
+          <button
+            type="button"
+            onClick={handleCancelPost}
             className="px-4 py-[5px] bg-[#35A7FF] text-sm text-white rounded-lg"
           >
             Cancel
-          </Link>
+          </button>
           <button
             type="submit"
             className="px-4 py-1 bg-[#35A7FF] text-sm text-white rounded-lg"
@@ -91,13 +136,13 @@ const TambahArtikel = () => {
       </div>
 
       {/* Back Arrow Icon with Border Circle */}
-      <Link to="/psikolog/artikel">
+      <button type="button" onClick={handleCancelPost}>
         <div className="mb-6 flex items-center space-x-2">
           <div className="border-2 border-black rounded-full p-1">
             <IoIosArrowBack className="text-black text-xl" />
           </div>
         </div>
-      </Link>
+      </button>
 
       {/* Image Upload Section with Thumbnail Label */}
       <div className="mb-6">

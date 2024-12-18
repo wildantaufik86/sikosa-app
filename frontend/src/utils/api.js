@@ -1,10 +1,10 @@
 import CONFIG from "../config/config";
 import { getAccessToken } from "./utils";
 
-const accessToken = getAccessToken();
-
 const updateProfile = async (formData) => {
   try {
+    const accessToken = getAccessToken();
+
     if (!accessToken) {
       throw new Error("Invalid accessToken");
     }
@@ -28,6 +28,7 @@ const updateProfile = async (formData) => {
 
 const updateProfilePsikolog = async (formData) => {
   try {
+    const accessToken = getAccessToken();
     if (!accessToken) {
       throw new Error("Invalid accessToken");
     }
@@ -51,6 +52,7 @@ const updateProfilePsikolog = async (formData) => {
 
 const getPsikologById = async (psikologId) => {
   try {
+    const accessToken = getAccessToken();
     if (!accessToken) {
       throw new Error("Invalid access token");
     }
@@ -117,6 +119,7 @@ const getArticleBySlug = async (slug) => {
 
 const createArticle = async (formData) => {
   try {
+    const accessToken = getAccessToken();
     if (!accessToken) {
       throw new Error("Invalid access token");
     }
@@ -140,6 +143,7 @@ const createArticle = async (formData) => {
 
 const editArticle = async (formData, articleId) => {
   try {
+    const accessToken = getAccessToken();
     if (!accessToken) {
       throw new Error("Invalid access token");
     }
@@ -166,6 +170,7 @@ const editArticle = async (formData, articleId) => {
 
 const deleteArticle = async (articleId) => {
   try {
+    const accessToken = getAccessToken();
     if (!accessToken) {
       throw new Error("Invalid access token");
     }

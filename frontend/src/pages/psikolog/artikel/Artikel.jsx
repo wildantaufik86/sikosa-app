@@ -46,14 +46,22 @@ const ArtikelPage = () => {
 
   const handleDeleteArticle = async () => {
     try {
-      const response = await deleteArticle(selectedArticles[0]);
-      if (response.error) {
-        throw new Error(response.message);
-      }
-      alert(response.message);
+      const deletePromise = selectedArticles.map(async (article) => {
+        const response = await deleteArticle(article);
+        if (response.error) {
+          throw new Error(response.message);
+        }
+
+        return article;
+      });
+
+      const deletedArticlesId = await Promise.all(deletePromise);
+
       setArticles(
-        articles.filter((article) => article._id !== selectedArticles[0])
+        articles.filter((article) => !deletedArticlesId.includes(article._id))
       );
+      setSelectedArticles([]);
+      alert("Article successfully deleted ");
     } catch (error) {
       alert(error.message);
     }

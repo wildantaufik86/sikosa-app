@@ -78,7 +78,7 @@ psikologRoutes.put(
 
       const article = await ArticleModel.findOne({
         _id: id,
-        writer: req.userId,
+        writer_id: req.userId,
       });
       if (!article) {
         return res
@@ -122,7 +122,7 @@ psikologRoutes.delete(
 
       const article = await ArticleModel.findOneAndDelete({
         _id: id,
-        writer: req.userId,
+        writer_id: req.userId,
       });
 
       if (!article) {

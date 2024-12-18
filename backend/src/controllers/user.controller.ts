@@ -115,7 +115,10 @@ export const getDoctorProfile = async (req: Request, res: Response) => {
     const { id } = req.params;
 
     // Ambil data user dengan id tertentu dan hanya return id & fullname
-    const doctorProfile = await UserModel.findById(id, "id profile.fullname");
+    const doctorProfile = await UserModel.findById(
+      id,
+      "id profile.fullname profile.description profile.educationBackground profile.specialization profile.picture"
+    );
 
     if (!doctorProfile) {
       return res
@@ -131,6 +134,40 @@ export const getDoctorProfile = async (req: Request, res: Response) => {
     return res
       .status(INTERNAL_SERVER_ERROR)
       .json({ message: "Error fetching doctor profile" });
+  }
+};
+
+export const getAllPsychologist = async (req: Request, res: Response) => {
+  try {
+    // Query untuk mendapatkan semua user dengan role "psikolog"
+    const doctors = await UserModel.find(
+      { role: "psikolog" }, // Filter hanya untuk role "psikolog"
+      "_id profile.fullname profile.description profile.educationBackground profile.specialization profile.picture" // Field yang dipilih
+    );
+
+    // Format data untuk respons
+    const formattedDoctors = doctors.map((doctor) => ({
+      id: doctor._id,
+      profile: {
+        fullname: doctor.profile.fullname,
+        description: doctor.profile.description,
+        educationBackground: doctor.profile.educationBackground,
+        specialization: doctor.profile.specialization,
+        picture: doctor.profile.picture,
+      },
+    }));
+
+    // Kirim respons ke klien
+    return res.status(OK).json({
+      message: "Doctors retrieved successfully",
+      data: formattedDoctors,
+    });
+  } catch (error) {
+    // Jika terjadi error, tangkap dan kirim respons error
+    console.error("Error fetching doctors:", error);
+    return res.status(INTERNAL_SERVER_ERROR).json({
+      message: "Failed to retrieve doctors",
+    });
   }
 };
 

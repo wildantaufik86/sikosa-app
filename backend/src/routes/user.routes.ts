@@ -8,6 +8,7 @@ import {
   getUserChat,
   getUserConsultationHistory,
   getUserConsultationDetail,
+  getAllPsychologist,
 } from "../controllers/user.controller";
 import authenticate from "../middleware/authenticate";
 import validateRole from "../middleware/validateRole";
@@ -40,6 +41,13 @@ userRoutes.get(
 //   validateRole("mahasiswa"),
 //   getUserServiceDetail
 // );
+
+userRoutes.get(
+  "/psikolog/all",
+  authenticate,
+  validateRole("mahasiswa"),
+  getAllPsychologist
+);
 userRoutes.get(
   "/psikolog/:id",
   authenticate,

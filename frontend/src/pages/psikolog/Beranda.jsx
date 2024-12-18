@@ -1,9 +1,32 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { IoIosArrowForward } from "react-icons/io";
 import { useAuth } from "../../hooks/hooks";
+import { getArticles } from "../../utils/api";
+import CONFIG from "../../config/config";
+import { formattedDate, formattedTitle } from "../../utils/utils";
 
 const Beranda = () => {
   const { authUser } = useAuth();
+  const [articles, setArticles] = useState([]);
+  const [viewAll, setViewAll] = useState(3);
+
+  useEffect(() => {
+    const fetchArticles = async () => {
+      try {
+        const response = await getArticles();
+        if (response.error) {
+          throw new Error(response.message);
+        }
+        const filteredArticleByWriter = response.articles.filter(
+          (article) => article.writer_id === authUser._id
+        );
+        setArticles(filteredArticleByWriter);
+      } catch (error) {
+        console.log(error.message);
+      }
+    };
+    fetchArticles();
+  }, []);
 
   return (
     <div className="pt-16 lg:mt-10 lg:py-0 font-jakarta">
@@ -72,53 +95,43 @@ const Beranda = () => {
       <div className="mt-8">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-lg font-semibold">Artikel Saya</h2>
-          <button className="flex items-center text-sm text-[#35A7FF] font-semibold">
-            View All
+          <button
+            onClick={() =>
+              setViewAll((prevViewAll) =>
+                prevViewAll === articles.length ? 3 : articles.length
+              )
+            }
+            className="flex items-center text-sm text-[#35A7FF] font-semibold"
+          >
+            {viewAll === articles.length ? "View less" : "View All"}
             <IoIosArrowForward className="ml-1" />
           </button>
         </div>
 
         <div>
           {/* Placeholder for Artikel Cards */}
-          <div className=" p-2 mb-4 bg-white border border-gray-400 rounded-lg flex items-center">
-            <img
-              src="/assets/caroulsel1.png"
-              alt="Article 1"
-              className="w-16 h-16 object-cover mr-4"
-            />
-            <div className="space-y-2">
-              <h3 className="text-md font-normal">Article Title 1</h3>
-              <p className="text-gray-600 text-sm">
-                Brief description of the article content goes here...
-              </p>
-            </div>
-          </div>
-          <div className=" p-2 mb-4 bg-white border border-gray-400 rounded-lg flex items-center">
-            <img
-              src="/assets/caroulsel1.png"
-              alt="Article 1"
-              className="w-16 h-16 object-cover mr-4"
-            />
-            <div>
-              <h3 className="text-md font-normal">Article Title 1</h3>
-              <p className="text-gray-600 text-sm">
-                Brief description of the article content goes here...
-              </p>
-            </div>
-          </div>
-          <div className=" p-2 mb-4 bg-white border border-gray-400 rounded-lg flex items-center">
-            <img
-              src="/assets/caroulsel1.png"
-              alt="Article 1"
-              className="w-16 h-16 object-cover mr-4"
-            />
-            <div>
-              <h3 className="text-md font-normal">Article Title 1</h3>
-              <p className="text-gray-600 text-sm">
-                Brief description of the article content goes here...
-              </p>
-            </div>
-          </div>
+          {articles.slice(0, viewAll).map((article, index) => {
+            return (
+              <div
+                key={index}
+                className=" p-2 mb-4 bg-white border border-gray-400 rounded-lg flex items-center"
+              >
+                <img
+                  src={CONFIG.BASE_URL + article.thumbnail}
+                  alt={article.title}
+                  className="w-16 h-16 object-cover mr-4"
+                />
+                <div className="space-y-2">
+                  <h3 className="text-md font-normal">
+                    {formattedTitle(article.title)}
+                  </h3>
+                  <p className="text-gray-600 text-xs">
+                    {formattedDate(article.createdAt)}
+                  </p>
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>

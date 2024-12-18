@@ -59,7 +59,6 @@ psikologRoutes.post(
         message: "Article published",
         data: formatArticle(articleWithWriter),
       });
-      res.status(201).json({ message: "Article published", data: newArticle });
     } catch (error) {
       res.status(500).json({ message: "Failed to publish article", error });
     }

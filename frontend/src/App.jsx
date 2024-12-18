@@ -57,7 +57,7 @@ function App() {
           }
         />
         <Route
-          path="/artikel/1"
+          path="/artikel/:slug"
           element={
             <UserLayout>
               <ArtikelDetail />

@@ -47,8 +47,10 @@ const TambahArtikel = () => {
       return false;
     }
 
+    const createdAt = new Date().toISOString();
+
     navigate(`/psikolog/artikel/preview/${slug}`, {
-      state: { title, content, image, thumbnail },
+      state: { title, content, image, thumbnail, createdAt },
     });
   };
 

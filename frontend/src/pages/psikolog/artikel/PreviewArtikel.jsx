@@ -1,17 +1,12 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { IoIosArrowBack } from "react-icons/io";
 import parse from "html-react-parser";
+import { formattedDate } from "../../../utils/utils";
 
 const PreviewArtikel = () => {
-  const articleTitle =
-    "John Lewis to make final journey across Edmund Pettus Bridge in procession"; // Example title, replace with dynamic data if needed
-  const publishDate = "November 13, 2024"; // Example date, replace with dynamic data if needed
-  const thumbnailUrl = "path-to-thumbnail.jpg"; // Replace with dynamic thumbnail data
-  const descriptionText = `Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque interdum erat vitae metus euismod, non cursus ex auctor.`;
-
   const location = useLocation();
   const navigate = useNavigate();
-  const { title, content, image, thumbnail } = location.state || {};
+  const { title, content, image, thumbnail, createdAt } = location.state || {};
 
   const handleToAddPage = () => {
     navigate("/psikolog/artikel/add", {
@@ -47,7 +42,7 @@ const PreviewArtikel = () => {
           {/* Left: Article Title and Publish Date */}
           <div className="flex-1 mb-4 lg:mb-0">
             <h2 className="text-2xl font-semibold mb-5">{title}</h2>
-            <p className="text-gray-600">{publishDate}</p>
+            <p className="text-gray-600">{formattedDate(createdAt)}</p>
           </div>
 
           {/* Right: Article Thumbnail */}

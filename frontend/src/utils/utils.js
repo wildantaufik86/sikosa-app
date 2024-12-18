@@ -24,9 +24,28 @@ const getAccessToken = () => {
   return sessionStorage.getItem("accessToken") || null;
 };
 
+const formattedDate = (date) => {
+  return new Date(date).toLocaleDateString("id-ID", {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+};
+
+const formattedTitle = (title) => {
+  if (title.length > 50) {
+    return title.slice(0, 50) + "...";
+  }
+
+  return title;
+};
+
 export {
   putAccessTokenSession,
   getAccessToken,
   getAuthUserSession,
   putAuthUserSession,
+  formattedDate,
+  formattedTitle,
 };

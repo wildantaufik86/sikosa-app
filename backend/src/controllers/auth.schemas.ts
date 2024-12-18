@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 const emailSchema = z.string().email().min(1).max(255);
-const nimSchema = z.string().min(6).max(10);
+const nimSchema = z.string().optional().default("");
 const passwordSchema = z.string().min(6).max(255);
 const profileSchema = z
   .object({

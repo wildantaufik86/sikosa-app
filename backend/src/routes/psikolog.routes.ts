@@ -39,7 +39,7 @@ psikologRoutes.post(
       const slug = title.toLowerCase().replace(/ /g, "-");
 
       const newArticle = new ArticleModel({
-        writer_id: req.userId,
+        writer: req.userId,
         thumbnail,
         title,
         content,
@@ -47,6 +47,18 @@ psikologRoutes.post(
       });
 
       await newArticle.save();
+      // Populate writer field
+      const articleWithWriter = await ArticleModel.findById(
+        newArticle._id
+      ).populate({
+        path: "writer",
+        select: "_id profile.fullname",
+      });
+
+      res.status(201).json({
+        message: "Article published",
+        data: formatArticle(articleWithWriter),
+      });
       res.status(201).json({ message: "Article published", data: newArticle });
     } catch (error) {
       res.status(500).json({ message: "Failed to publish article", error });
@@ -83,7 +95,17 @@ psikologRoutes.put(
       if (req.file) article.thumbnail = `/uploads/${req.file.filename}`;
 
       await article.save();
-      res.status(200).json({ message: "Article updated", data: article });
+
+      // Populate writer field
+      const updatedArticle = await ArticleModel.findById(article._id).populate({
+        path: "writer",
+        select: "_id profile.fullname",
+      });
+
+      res.status(200).json({
+        message: "Article updated",
+        data: formatArticle(updatedArticle),
+      });
     } catch (error) {
       res.status(500).json({ message: "Failed to update article", error });
     }
@@ -116,5 +138,22 @@ psikologRoutes.delete(
     }
   }
 );
-
+function formatArticle(article: any) {
+  if (!article) return null;
+  const { _id, title, content, thumbnail, slug, writer, createdAt, updatedAt } =
+    article;
+  return {
+    id: _id,
+    title,
+    content,
+    thumbnail,
+    slug,
+    writer: {
+      id: writer._id,
+      fullname: writer.profile?.fullname || "Unknown",
+    },
+    createdAt,
+    updatedAt,
+  };
+}
 export default psikologRoutes;

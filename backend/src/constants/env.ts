@@ -12,6 +12,7 @@ export const NODE_ENV = getEnv("NODE_ENV", "development");
 export const PORT = getEnv("PORT", "5000");
 export const MONGO_URI = getEnv("MONGO_URI");
 export const APP_ORIGIN = getEnv("APP_ORIGIN");
+export const FE_ORIGIN = getEnv("FE_ORIGIN");
 export const JWT_SECRET = getEnv("JWT_SECRET");
 export const JWT_REFRESH_SECRET = getEnv("JWT_REFRESH_SECRET");
 export const EMAIL_SENDER = getEnv("EMAIL_SENDER");

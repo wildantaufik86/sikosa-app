@@ -35,7 +35,7 @@ export interface UserDocument extends mongoose.Document {
 const userSchema = new mongoose.Schema<UserDocument>(
   {
     email: { type: String, required: true, unique: true },
-    nim: { type: String, default: "", unique: true },
+    nim: { type: String, default: "",},
     password: { type: String, required: true },
     verified: { type: Boolean, required: true, default: false },
     role: {

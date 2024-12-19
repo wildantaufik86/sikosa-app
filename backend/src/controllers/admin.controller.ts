@@ -38,11 +38,12 @@ export const getUserProfile = async (req: Request, res: Response) => {
 };
 
 export const createUser = async (req: Request, res: Response) => {
-  const { email, password, role } = req.body;
+  const { email, password, role, nim = "" } = req.body;
   const newUser = new UserModel({
     email,
     password,
     role,
+    nim: nim.trim() || "",
     profile: {
       picture: req.file ? `/uploads/${req.file.filename}` : "",
       fullname: req.body.fullname,

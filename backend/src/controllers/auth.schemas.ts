@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 const emailSchema = z.string().email().min(1).max(255);
-const nimSchema = z.string().optional().default("");
+const nimSchema = z.string().optional().default("").transform((val) => val || "");;
 const passwordSchema = z.string().min(6).max(255);
 const profileSchema = z
   .object({
@@ -29,4 +29,7 @@ export const registerSchema = loginSchema
   .refine((data) => data.password === data.confirmPassword, {
     message: "Password do Not Match",
     path: ["Confirm Password"],
-  });
+  })
+  .transform((data) => ({
+    ...data,
+    nim: data.nim || ""}));

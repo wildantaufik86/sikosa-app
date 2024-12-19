@@ -4,8 +4,7 @@ import cors from "cors";
 import connectToDatabase from "./config/db";
 import cookieParser from "cookie-parser";
 import errorHandler from "./middleware/errorHandler";
-import { APP_ORIGIN, NODE_ENV, PORT } from "./constants/env";
-import catchErrors from "./utils/catchErrors";
+import { APP_ORIGIN, FE_ORIGIN, NODE_ENV, PORT } from "./constants/env";
 import { OK } from "./constants/http";
 import authRoutes from "./routes/auth.route";
 import userRoutes from "./routes/user.routes";
@@ -22,7 +21,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(
   cors({
-    origin: APP_ORIGIN,
+    origin: [APP_ORIGIN, FE_ORIGIN],
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
     credentials: true,
   })
 );

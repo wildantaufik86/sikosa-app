@@ -20,6 +20,7 @@ import appAssert from "../utils/appAssert";
 export const registerHandler = catchErrors(async (req, res) => {
   const request = registerSchema.parse({
     ...req.body,
+    nim: req.body.nim?.trim() || "",
     userAgent: req.headers["user-agent"],
   });
 

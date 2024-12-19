@@ -66,49 +66,6 @@ export const updateUserProfileHandler: RequestHandler = async (req, res) => {
   });
 };
 
-// GET /user/dashboard
-export const getUserDashboard = async ({ req, res }: any) => {
-  try {
-    return res.status(OK).json({
-      message: "User Dashboard",
-      data: {
-        /* Tambahkan data dashboard */
-      },
-    });
-  } catch (error) {
-    return res
-      .status(INTERNAL_SERVER_ERROR)
-      .json({ message: "Error fetching dashboard data" });
-  }
-};
-
-// GET /user/services
-// export const getUserServices = async ({ req, res }: any) => {
-//   try {
-//     const services = await getUserServicesFromDB(); // Contoh pemanggilan service
-//     return res.status(OK).json({ message: "Daftar layanan", data: services });
-//   } catch (error) {
-//     return res
-//       .status(INTERNAL_SERVER_ERROR)
-//       .json({ message: "Error fetching services" });
-//   }
-// };
-
-// GET /user/services/:id
-// export const getUserServiceDetail = async ({ req, res }: any) => {
-//   try {
-//     const { id } = req.params;
-//     const serviceDetail = await getServiceDetailFromDB(id);
-//     return res
-//       .status(OK)
-//       .json({ message: "Detail layanan", data: serviceDetail });
-//   } catch (error) {
-//     return res
-//       .status(INTERNAL_SERVER_ERROR)
-//       .json({ message: "Error fetching service detail" });
-//   }
-// };
-
 // GET /user/doctor/:id
 export const getDoctorProfile = async (req: Request, res: Response) => {
   try {
@@ -219,38 +176,5 @@ export const getUserConsultationDetail = async ({ req, res }: any) => {
     return res
       .status(INTERNAL_SERVER_ERROR)
       .json({ message: "Error fetching consultation detail" });
-  }
-};
-
-// GET /user/articles
-export const getUserArticles = async ({ req, res }: any) => {
-  try {
-    return res.status(OK).json({
-      message: "Daftar artikel",
-      data: {
-        /* Tambahkan data artikel */
-      },
-    });
-  } catch (error) {
-    return res
-      .status(INTERNAL_SERVER_ERROR)
-      .json({ message: "Error fetching articles" });
-  }
-};
-
-// GET /user/articles/:id
-export const getUserArticleDetail = async ({ req, res }: any) => {
-  try {
-    const { id } = req.params;
-    return res.status(OK).json({
-      message: "Detail artikel",
-      data: {
-        /* Tambahkan data */
-      },
-    });
-  } catch (error) {
-    return res
-      .status(INTERNAL_SERVER_ERROR)
-      .json({ message: "Error fetching article detail" });
   }
 };

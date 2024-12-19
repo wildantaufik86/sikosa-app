@@ -12,12 +12,15 @@ import { deleteArticle, getArticlesByWriter } from "../../../utils/api";
 import CONFIG from "../../../config/config";
 import { useAuth } from "../../../hooks/hooks";
 import { toast } from "react-toastify";
+import ModalConfirm from "../../../components/ModalConfirm";
 
 const ArtikelPage = () => {
   const { authUser } = useAuth();
   const [isManageMode, setIsManageMode] = useState(false); // To toggle manage mode
   const [selectedArticles, setSelectedArticles] = useState([]); // To keep track of selected articles
   const [articles, setArticles] = useState([]);
+  const [filteredArticles, setFilteredArticles] = useState([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchArticles = async () => {
@@ -27,6 +30,7 @@ const ArtikelPage = () => {
           throw new Error(response.message);
         }
         setArticles(response.articles);
+        setFilteredArticles(response.articles);
       } catch (error) {
         alert(error.message);
       }
@@ -58,13 +62,25 @@ const ArtikelPage = () => {
 
       const deletedArticlesId = await Promise.all(deletePromise);
 
-      setArticles(
+      setFilteredArticles(
         articles.filter((article) => !deletedArticlesId.includes(article._id))
       );
       setSelectedArticles([]);
+      setIsModalOpen(false);
       toast.success("Article successfully deleted ");
     } catch (error) {
       toast.error(error.message);
+    }
+  };
+
+  const handleSearchArtikel = (e) => {
+    const query = e.target.value.toLowerCase();
+    if (query) {
+      setFilteredArticles(
+        articles.filter((str) => str.title.toLowerCase().includes(query))
+      );
+    } else {
+      setFilteredArticles(articles);
     }
   };
 
@@ -75,6 +91,7 @@ const ArtikelPage = () => {
         <input
           type="text"
           placeholder="Search articles..."
+          onChange={handleSearchArtikel}
           className="w-1/2 p-2 pl-10 border border-gray-500 rounded-lg focus:outline-none focus:border-[#35A7FF] text-gray-700"
         />
         <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-600" />
@@ -95,7 +112,7 @@ const ArtikelPage = () => {
         <div className="flex items-center space-x-4">
           {isManageMode && selectedArticles.length > 0 && (
             <button
-              onClick={handleDeleteArticle}
+              onClick={() => setIsModalOpen(true)}
               className="ml-4 text-black text-2xl"
             >
               <FiTrash2 className="inline-block" />
@@ -115,8 +132,8 @@ const ArtikelPage = () => {
       {/* Artikel Cards */}
       <div>
         {/* Article Card 1 */}
-        {articles.length !== 0 ? (
-          articles.map((data, index) => (
+        {filteredArticles.length !== 0 ? (
+          filteredArticles.map((data, index) => (
             <ArticleCard
               key={index}
               isManageMode={isManageMode}
@@ -131,7 +148,13 @@ const ArtikelPage = () => {
           </div>
         )}
 
-        {/* Add more article cards similarly */}
+        {/* modal confirm */}
+        <ModalConfirm
+          message={"Apa kamu ingin menghapus artikel ini"}
+          isOpen={isModalOpen}
+          confirmHandle={handleDeleteArticle}
+          cancelHandle={() => setIsModalOpen(false)}
+        />
       </div>
     </div>
   );

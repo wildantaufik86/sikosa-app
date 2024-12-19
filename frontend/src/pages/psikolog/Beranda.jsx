@@ -108,31 +108,35 @@ const Beranda = () => {
           </button>
         </div>
 
-        <div>
-          {/* Placeholder for Artikel Cards */}
-          {articles.slice(0, viewAll).map((article, index) => {
-            return (
-              <div
-                key={index}
-                className=" p-2 mb-4 bg-white border border-gray-400 rounded-lg flex items-center"
-              >
-                <img
-                  src={CONFIG.BASE_URL + article.thumbnail}
-                  alt={article.title}
-                  className="w-16 h-16 object-cover mr-4"
-                />
-                <div className="space-y-2">
-                  <h3 className="text-md font-normal">
-                    {formattedTitle(article.title)}
-                  </h3>
-                  <p className="text-gray-600 text-xs">
-                    {formattedDate(article.createdAt)}
-                  </p>
+        {articles.length !== 0 ? (
+          <div>
+            {/* Placeholder for Artikel Cards */}
+            {articles.slice(0, viewAll).map((article, index) => {
+              return (
+                <div
+                  key={index}
+                  className=" p-2 mb-4 bg-white border border-gray-400 rounded-lg flex items-center"
+                >
+                  <img
+                    src={CONFIG.BASE_URL + article.thumbnail}
+                    alt={article.title}
+                    className="w-16 h-16 object-cover mr-4"
+                  />
+                  <div className="space-y-2">
+                    <h3 className="text-md font-normal">
+                      {formattedTitle(article.title)}
+                    </h3>
+                    <p className="text-gray-600 text-xs">
+                      {formattedDate(article.createdAt)}
+                    </p>
+                  </div>
                 </div>
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
+        ) : (
+          <p className="text-sm">Tidak ada artikel</p>
+        )}
       </div>
     </div>
   );

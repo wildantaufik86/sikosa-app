@@ -41,6 +41,15 @@ const formattedTitle = (title) => {
   return title;
 };
 
+const formattedString = (string) => {
+  return string
+    .split(" ")
+    .map((str) => {
+      return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+    })
+    .join(" ");
+};
+
 export {
   putAccessTokenSession,
   getAccessToken,
@@ -48,4 +57,5 @@ export {
   putAuthUserSession,
   formattedDate,
   formattedTitle,
+  formattedString,
 };

@@ -50,6 +50,31 @@ const updateProfilePsikolog = async (formData) => {
   }
 };
 
+const getAllPsikolog = async () => {
+  try {
+    const accessToken = getAccessToken();
+    if (!accessToken) {
+      throw new Error("Invalid access token");
+    }
+    const response = await fetch(`${CONFIG.BASE_URL}/user/psikolog/all`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to get psikologs");
+    }
+
+    const result = await response.json();
+    if (result.data) {
+      return { error: false, psikologs: result.data };
+    }
+  } catch (error) {
+    return { error: true, psikologs: null };
+  }
+};
+
 const getPsikologById = async (psikologId) => {
   try {
     const accessToken = getAccessToken();
@@ -196,6 +221,7 @@ const deleteArticle = async (articleId) => {
 
 export {
   updateProfile,
+  getAllPsikolog,
   getPsikologById,
   updateProfilePsikolog,
   getArticles,

@@ -31,10 +31,15 @@ import EditArtikelAdmin from "./pages/admin/artikel/EditArtikelAdmin";
 import LoginPsikolog from "./pages/psikolog/auth/LoginPsikolog";
 import AddUser from "./pages/admin/users/AddUser";
 import EditUser from "./pages/admin/users/EditUser";
+import ArtikelView from "./pages/psikolog/artikel/ArticleView";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 function App() {
   return (
     <Router>
+      {/* toast */}
+      <ToastContainer />
       <Routes>
         {/* Star Routes User */}
         <Route path="/login" element={<LoginPage />} />
@@ -57,7 +62,7 @@ function App() {
           }
         />
         <Route
-          path="/artikel/1"
+          path="/artikel/:slug"
           element={
             <UserLayout>
               <ArtikelDetail />
@@ -134,7 +139,15 @@ function App() {
           }
         />
         <Route
-          path="/psikolog/artikel/preview/1"
+          path="/psikolog/artikel/:slug"
+          element={
+            <PsikologLayout>
+              <ArtikelView />
+            </PsikologLayout>
+          }
+        />
+        <Route
+          path="/psikolog/artikel/preview/:slug"
           element={
             <PsikologLayout>
               <PreviewArtikel />
@@ -150,7 +163,7 @@ function App() {
           }
         />
         <Route
-          path="/psikolog/artikel/edit/1"
+          path="/psikolog/artikel/edit/:slug_article"
           element={
             <PsikologLayout>
               <EditArtikel />
@@ -166,7 +179,7 @@ function App() {
           }
         />
         <Route
-          path="/psikolog/edit-profile/1"
+          path="/psikolog/edit-profile/:id"
           element={
             <PsikologLayout>
               <EditProfilePsikolog />

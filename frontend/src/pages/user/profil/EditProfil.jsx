@@ -3,14 +3,16 @@ import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useAuth } from "../../../hooks/hooks";
 import { updateProfile } from "../../../utils/api";
+import CONFIG from "../../../config/config";
+import { toast } from "react-toastify";
 
 const EditProfile = () => {
   const { authUser, handleAuthUserChange } = useAuth();
-  const [nim, setNim] = useState(authUser?.nim || "");
   const [fullname, setFullname] = useState(
     authUser?.profile?.fullname || "User"
   );
-  const [email, setEmail] = useState(authUser?.email || "");
+  const [previewImage, setPreviewImage] = useState(null);
+  const [selectedImage, setSelectedImage] = useState(null);
 
   const navigate = useNavigate();
   useEffect(() => {
@@ -26,20 +28,32 @@ const EditProfile = () => {
   const handleUpdateProfile = async (event) => {
     event.preventDefault();
     try {
-      const updatedDataUser = {
-        fullname: fullname.trim(),
-      };
-      const result = await updateProfile(updatedDataUser);
+      const formData = new FormData();
+      formData.append("fullname", fullname.trim());
+      if (selectedImage) {
+        formData.append("picture", selectedImage);
+      }
+
+      const result = await updateProfile(formData);
       if (result.error) {
         throw new Error(result.message);
       }
       if (result.data) {
-        handleAuthUserChange(result.data);
-        alert(result.message);
-        navigate("/profile");
+        const { profile } = result.data;
+        const updatedUser = { ...authUser, profile };
+        handleAuthUserChange(updatedUser);
+        toast.success(result.message);
       }
     } catch (error) {
-      alert(error.message);
+      toast.error(error.message);
+    }
+  };
+
+  const handleImage = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setPreviewImage(URL.createObjectURL(file));
+      setSelectedImage(file);
     }
   };
 
@@ -72,11 +86,23 @@ const EditProfile = () => {
             animate={{ scale: 1 }}
             transition={{ duration: 0.8, ease: "easeOut" }}
           >
-            <img
-              src="/assets/caroulsel1.png" // Ganti dengan URL gambar profil Anda
-              alt="Profile"
-              className="w-full h-80 object-cover rounded-lg"
-            />
+            {previewImage ? (
+              <img
+                src={previewImage}
+                alt="Profile"
+                className="w-[400px] h-80 object-cover rounded-lg"
+              />
+            ) : (
+              <img
+                src={
+                  authUser.profile.picture
+                    ? CONFIG.BASE_URL + authUser.profile.picture
+                    : "https://via.placeholder.com/150"
+                }
+                alt="Profile"
+                className="w-[400px] h-80 object-cover rounded-lg"
+              />
+            )}
           </motion.aside>
 
           {/* Profile Details */}
@@ -88,27 +114,6 @@ const EditProfile = () => {
           >
             <form onSubmit={handleUpdateProfile}>
               <div className="space-y-4">
-                <motion.div
-                  initial={{ y: 20, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  transition={{ duration: 0.5 }}
-                >
-                  <label
-                    htmlFor="nim"
-                    className="text-black text-md font-semibold mb-1 opacity-50"
-                  >
-                    NIM
-                  </label>
-                  <input
-                    id="nim"
-                    type="text"
-                    defaultValue={nim}
-                    onChange={(e) => setNim(e.target.value)}
-                    className="outline-none text-gray-700 text-md opacity-50 bg-gray-100 p-1 rounded-sm w-full"
-                    readOnly
-                  />
-                </motion.div>
-
                 <motion.div
                   initial={{ y: 20, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
@@ -135,18 +140,17 @@ const EditProfile = () => {
                   transition={{ duration: 0.5, delay: 0.2 }}
                 >
                   <label
-                    htmlFor="dob"
-                    className="text-black text-md opacity-50 font-semibold mb-1"
+                    htmlFor="image"
+                    className="text-black text-md font-semibold mb-1"
                   >
-                    Email
+                    Add Image
                   </label>
                   <input
-                    id="dob"
-                    type="text"
-                    defaultValue={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="outline-none opacity-50 text-gray-700 text-md bg-gray-100 p-1 rounded-sm w-full"
-                    readOnly
+                    id="image"
+                    type="file"
+                    className="outline-none text-gray-700 text-md bg-gray-100 p-1 rounded-sm w-full"
+                    accept="image/*"
+                    onChange={handleImage}
                   />
                 </motion.div>
               </div>

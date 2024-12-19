@@ -1,21 +1,19 @@
+import CONFIG from "../config/config";
 import { getAccessToken } from "./utils";
 
-const BASE_URL = "http://localhost:5000";
-
-const updateProfile = async (updatedDataUser) => {
+const updateProfile = async (formData) => {
   try {
     const accessToken = getAccessToken();
 
     if (!accessToken) {
       throw new Error("Invalid accessToken");
     }
-    const response = await fetch(`${BASE_URL}/user/profile`, {
+    const response = await fetch(`${CONFIG.BASE_URL}/user/profile`, {
       method: "PUT",
       headers: {
-        "Content-Type": "application/json",
         Authorization: `Bearer ${accessToken}`,
       },
-      body: JSON.stringify(updatedDataUser),
+      body: formData,
     });
     if (!response.ok) {
       throw new Error("Failed to update user");
@@ -28,18 +26,69 @@ const updateProfile = async (updatedDataUser) => {
   }
 };
 
-const getPsikologById = async (psikologId) => {
+const updateProfilePsikolog = async (formData) => {
   try {
     const accessToken = getAccessToken();
+    if (!accessToken) {
+      throw new Error("Invalid accessToken");
+    }
+    const response = await fetch(`${CONFIG.BASE_URL}/psikolog/profile`, {
+      method: "PUT",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+      body: formData,
+    });
+    if (!response.ok) {
+      throw new Error("Failed to update user");
+    }
 
+    const result = await response.json();
+    return { error: false, message: result.message, data: result.data };
+  } catch (error) {
+    return { error: true, message: error.message, data: null };
+  }
+};
+
+const getAllPsikolog = async () => {
+  try {
+    const accessToken = getAccessToken();
     if (!accessToken) {
       throw new Error("Invalid access token");
     }
-    const response = await fetch(`${BASE_URL}/user/psikolog/${psikologId}`, {
+    const response = await fetch(`${CONFIG.BASE_URL}/user/psikolog/all`, {
       headers: {
         Authorization: `Bearer ${accessToken}`,
       },
     });
+
+    if (!response.ok) {
+      throw new Error("Failed to get psikologs");
+    }
+
+    const result = await response.json();
+    if (result.data) {
+      return { error: false, psikologs: result.data };
+    }
+  } catch (error) {
+    return { error: true, psikologs: null };
+  }
+};
+
+const getPsikologById = async (psikologId) => {
+  try {
+    const accessToken = getAccessToken();
+    if (!accessToken) {
+      throw new Error("Invalid access token");
+    }
+    const response = await fetch(
+      `${CONFIG.BASE_URL}/user/psikolog/${psikologId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      }
+    );
     if (!response.ok) {
       throw new Error("Failed to get detail psikolog");
     }
@@ -50,4 +99,135 @@ const getPsikologById = async (psikologId) => {
     return { error: true, message: error.message, data: null };
   }
 };
-export { updateProfile, getPsikologById };
+
+const getArticles = async () => {
+  try {
+    const response = await fetch(`${CONFIG.BASE_URL}/api/v1/articles`);
+    if (!response.ok) {
+      throw new Error("Failed to get articles");
+    }
+    const result = await response.json();
+    return { error: false, message: result.message, articles: result.data };
+  } catch (error) {
+    return { error: true, message: error.message, articles: null };
+  }
+};
+
+const getArticlesByWriter = async (writerId) => {
+  try {
+    const response = await fetch(`${CONFIG.BASE_URL}/api/v1/articles`);
+    if (!response.ok) {
+      throw new Error("Failed to get articles");
+    }
+    const result = await response.json();
+    const articlesFilter = result.data.filter(
+      (article) => article.writer === writerId
+    );
+    return { error: false, message: result.message, articles: articlesFilter };
+  } catch (error) {
+    return { error: true, message: error.message, articles: null };
+  }
+};
+
+const getArticleBySlug = async (slug) => {
+  try {
+    const response = await fetch(`${CONFIG.BASE_URL}/api/v1/articles/${slug}`);
+    if (!response.ok) {
+      throw new Error("Failed to get articles");
+    }
+    const result = await response.json();
+    return { error: false, message: result.message, article: result.data };
+  } catch (error) {
+    return { error: true, message: error.message, article: null };
+  }
+};
+
+const createArticle = async (formData) => {
+  try {
+    const accessToken = getAccessToken();
+    if (!accessToken) {
+      throw new Error("Invalid access token");
+    }
+    const response = await fetch(`${CONFIG.BASE_URL}/psikolog/articles`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+      body: formData,
+    });
+    if (!response.ok) {
+      throw new Error("Failed to create article");
+    }
+
+    const result = await response.json();
+    return { error: false, message: result.message, data: result.data };
+  } catch (error) {
+    return { error: true, message: error.message, data: null };
+  }
+};
+
+const editArticle = async (formData, articleId) => {
+  try {
+    const accessToken = getAccessToken();
+    if (!accessToken) {
+      throw new Error("Invalid access token");
+    }
+    const response = await fetch(
+      `${CONFIG.BASE_URL}/psikolog/articles/${articleId}`,
+      {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: formData,
+      }
+    );
+    if (!response.ok) {
+      throw new Error("Failed to update article");
+    }
+
+    const result = await response.json();
+    return { error: false, message: result.message, data: result.data };
+  } catch (error) {
+    return { error: true, message: error.message, data: null };
+  }
+};
+
+const deleteArticle = async (articleId) => {
+  try {
+    const accessToken = getAccessToken();
+    if (!accessToken) {
+      throw new Error("Invalid access token");
+    }
+    const response = await fetch(
+      `${CONFIG.BASE_URL}/psikolog/articles/${articleId}`,
+      {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      }
+    );
+    if (!response.ok) {
+      throw new Error("Failed to delete article");
+    }
+
+    const result = await response.json();
+    return { error: false, message: result.message };
+  } catch (error) {
+    return { error: true, message: error.message };
+  }
+};
+
+export {
+  updateProfile,
+  getAllPsikolog,
+  getPsikologById,
+  updateProfilePsikolog,
+  getArticles,
+  getArticlesByWriter,
+  createArticle,
+  deleteArticle,
+  getArticleBySlug,
+  editArticle,
+};

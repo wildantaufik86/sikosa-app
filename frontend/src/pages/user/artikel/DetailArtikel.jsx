@@ -1,8 +1,31 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { FaChevronLeft } from "react-icons/fa";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
+import { getArticleBySlug } from "../../../utils/api";
+import ArticleContent from "../../../components/user/components/artikel/ArticleContent";
 
 const ArtikelDetail = () => {
+  const { slug } = useParams();
+  const [article, setArticle] = useState(null);
+
+  useEffect(() => {
+    const fetchArticle = async () => {
+      try {
+        const response = await getArticleBySlug(slug);
+        if (response.error) {
+          throw new Error(response.message);
+        }
+
+        setArticle(response.article);
+      } catch (error) {}
+    };
+    fetchArticle();
+  }, []);
+
+  if (!article) {
+    return null;
+  }
+
   return (
     <div className="py-8 lg:py-10 px-6 lg:px-20 font-jakarta">
       {/* Breadcrumb */}
@@ -15,32 +38,18 @@ const ArtikelDetail = () => {
           Artikel
         </Link>{" "}
         <span>&gt;</span>
-        <span className="font-semibold">hehe</span>
+        <span className="font-semibold">{slug}</span>
       </div>
 
-      <Link to="/artikel" className="border-2 mb-3 border-black p-2 rounded-full flex items-center justify-center w-10 h-10">
+      <Link
+        to="/artikel"
+        className="border-2 mb-3 border-black p-2 rounded-full flex items-center justify-center w-10 h-10"
+      >
         <FaChevronLeft className="text-black" />
       </Link>
 
-      <div className="max-w-3xl mx-auto my-10 p-6 border border-gray-300 rounded-lg shadow-lg">
-        {/* Article Title */}
-        <h2 className="text-2xl font-semibold mb-4 text-center">Artikel Title</h2>
-
-        {/* Article Image */}
-        <div className="w-full h-64 overflow-hidden rounded-lg mb-4">
-          <img
-            src="/assets/article-image.jpg" // Replace with your image path
-            alt="Artikel"
-            className="w-full h-full object-cover"
-          />
-        </div>
-
-        {/* Article Description */}
-        <p className="text-lg text-gray-700">
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus lacinia odio vitae vestibulum vestibulum. Cras venenatis euismod malesuada. Fusce ut massa vitae justo bibendum convallis. Maecenas non eros id erat volutpat varius.
-          Duis ac feugiat risus. Etiam at dolor eget urna aliquam auctor in non leo.
-        </p>
-      </div>
+      {/* article section */}
+      <ArticleContent article={article} />
     </div>
   );
 };

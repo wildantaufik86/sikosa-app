@@ -3,34 +3,10 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { FaChevronLeft } from "react-icons/fa";
 import { getPsikologById } from "../../../utils/api";
 import { useAuth } from "../../../hooks/hooks";
-
-const psikologData = [
-  {
-    id: 1,
-    name: "Psikolog A",
-    image: "https://via.placeholder.com/150",
-    profile:
-      "Psikolog A has extensive experience in therapy for anxiety, depression, and relationship issues. ",
-    education: [
-      "S1 Psikologi - Universitas X",
-      "S2 Psikologi Klinis - Universitas Y",
-    ],
-  },
-  {
-    id: 2,
-    name: "Psikolog B",
-    image: "https://via.placeholder.com/150",
-    profile:
-      "Psikolog B specializes in cognitive behavioral therapy and family counseling.",
-    education: [
-      "S1 Psikologi - Universitas Z",
-      "S2 Psikologi Klinis - Universitas W",
-    ],
-  },
-];
+import CONFIG from "../../../config/config";
+import { formattedString } from "../../../utils/utils";
 
 const DetailPsikolog = () => {
-  const psikolog = psikologData[0];
   const { id_psikolog } = useParams();
   const [psikologDetail, setPsikologDetail] = useState(null);
 
@@ -75,7 +51,7 @@ const DetailPsikolog = () => {
           Daftar Layanan
         </Link>{" "}
         <span>&gt;</span>
-        <span className="font-semibold">{psikolog.name}</span>
+        <span className="font-semibold">{psikologDetail.profile.fullname}</span>
       </div>
 
       <Link
@@ -89,15 +65,29 @@ const DetailPsikolog = () => {
       <div className="max-w-xl mx-auto border p-4 rounded-lg shadow-lg">
         {/* Psikolog Image */}
         <img
-          src={psikolog.image}
-          alt={psikolog.name}
+          src={
+            psikologDetail.profile.picture
+              ? CONFIG.BASE_URL + psikologDetail.profile.picture
+              : "https://via.placeholder.com/150"
+          }
+          alt={psikologDetail.profile.fullname}
           className="w-full h-80 object-cover mb-4 rounded-md mx-auto"
         />
 
         {/* Psikolog Name */}
-        <h3 className="text-2xl text-[#35A7FF] font-semibold text-left my-5">
-          {psikologDetail?.profile.fullname}
+        <h3 className="text-2xl text-center font-semibold my-5">
+          {formattedString(psikologDetail.profile.fullname)}
         </h3>
+
+        {/* psikolog spesialization */}
+        <div className="mb-6">
+          <h4 className="text-lg font-semibold mb-2 text-left">
+            Specialization
+          </h4>
+          <p className="text-gray-700 mb-4 pb-2 text-sm font-medium text-justify border-b border-black">
+            {psikologDetail.profile.specialization}
+          </p>
+        </div>
 
         {/* Psikolog Profile */}
         <div className="mb-6">
@@ -105,7 +95,7 @@ const DetailPsikolog = () => {
             Profil Dokter
           </h4>
           <p className="text-gray-700 mb-4 p-2 text-md font-medium text-justify rounded-md border border-[#35A7FF]">
-            {psikolog.profile}
+            {psikologDetail.profile.description}
           </p>
         </div>
 
@@ -115,7 +105,7 @@ const DetailPsikolog = () => {
             Riwayat Pendidikan:
           </h4>
           <ul className="list-disc pl-6 text-gray-700 p-2 text-md font-medium text-justify rounded-md border border-[#35A7FF]">
-            {psikolog.education.map((edu, index) => (
+            {psikologDetail.profile?.educationBackground.map((edu, index) => (
               <li key={index} className="mb-2">
                 {edu}
               </li>

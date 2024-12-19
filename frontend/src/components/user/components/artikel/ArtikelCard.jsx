@@ -1,16 +1,23 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import CONFIG from "../../../../config/config";
+import { formattedTitle } from "../../../../utils/utils";
 
 const ArtikelCard = ({ article }) => {
   return (
-    <Link to={`/artikel/1`} className="block">
+    <Link to={`/artikel/${article.slug}`} className="w-full h-[300px]">
       {" "}
       {/* Link wrapping the entire card */}
-      <div className="border rounded-lg shadow-md bg-white hover:bg-[#35A7FF] transition duration-300">
-        <img src={article.image} alt={article.title} className="w-full h-48 object-cover rounded-t-md" />
-        <div className="px-4 py-2">
-          <h3 className="text-lg font-bold text-black">{article.title}</h3>
-          <p className="text-gray-600 text-sm mt-1 text-justify">{article.description}</p>
+      <div className="border flex-1 flex flex-col rounded-lg shadow-md text-black bg-white p-2 h-full hover:bg-[#35A7FF] hover:text-white transition duration-300">
+        <div className="flex-1 bg-white p-2 rounded-md">
+          <img
+            src={CONFIG.BASE_URL + article.thumbnail}
+            className="w-full h-48 object-cover rounded-md"
+          />
+        </div>
+
+        <div className="px-4 py-2 flex-1 mt-4">
+          <h3 className="text-lg font-bold">{formattedTitle(article.title)}</h3>
         </div>
       </div>
     </Link>

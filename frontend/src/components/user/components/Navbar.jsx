@@ -3,6 +3,7 @@ import { Link, NavLink } from "react-router-dom";
 import { FaBars, FaTimes, FaUser } from "react-icons/fa";
 import { FiLogOut } from "react-icons/fi";
 import { useAuth } from "../../../hooks/hooks";
+import CONFIG from "../../../config/config";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -160,7 +161,7 @@ const Navbar = () => {
               >
                 {user.image ? (
                   <img
-                    src={user.image}
+                    src={`${CONFIG.BASE_URL}${user.image}`}
                     alt="Profile"
                     className="w-10 h-10 rounded-full border border-[#35A7FF] object-cover mr-2"
                   />

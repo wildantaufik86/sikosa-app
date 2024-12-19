@@ -1,20 +1,65 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { IoIosArrowBack } from "react-icons/io";
-import { Link } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { CKEditor } from "@ckeditor/ckeditor5-react";
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 import { AiFillStar } from "react-icons/ai"; // Import the star icon
+import { createArticle } from "../../../utils/api";
+import { toast } from "react-toastify";
 
 const TambahArtikel = () => {
   const [title, setTitle] = useState("");
   const [slug, setSlug] = useState("");
-  const [description, setDescription] = useState("");
+  const [content, setContent] = useState("");
   const [image, setImage] = useState(null);
+  const [thumbnail, setThumbnail] = useState(null);
+
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  // Load data from sessionStorage if available
+  useEffect(() => {
+    const savedData = JSON.parse(sessionStorage.getItem("artikelData"));
+    if (location.state) {
+      // restore file thumbnail when change page
+      const { thumbnailFile } = location.state;
+      setThumbnail(thumbnailFile);
+    }
+    if (savedData) {
+      setTitle(savedData.title);
+      setSlug(savedData.slug);
+      setContent(savedData.content);
+      setImage(savedData.image);
+    }
+  }, []);
+
+  // Save data to sessionStorage whenever it changes
+  useEffect(() => {
+    // Pastikan data yang akan disimpan tidak kosong atau null
+    if (title && content && image !== null) {
+      const artikelData = { title, slug, content, image };
+      sessionStorage.setItem("artikelData", JSON.stringify(artikelData));
+    }
+  }, [title, slug, content, image, thumbnail]);
+
+  const handlePreview = () => {
+    if (!title || !content || !image) {
+      toast.warning("please fill the required input");
+      return false;
+    }
+
+    const createdAt = new Date().toISOString();
+
+    navigate(`/psikolog/artikel/preview/${slug}`, {
+      state: { title, content, image, thumbnail, createdAt },
+    });
+  };
 
   // Handle image selection
   const handleImageChange = (event) => {
     const file = event.target.files[0];
     if (file) {
+      setThumbnail(file);
       setImage(URL.createObjectURL(file));
     }
   };
@@ -31,38 +76,84 @@ const TambahArtikel = () => {
     );
   };
 
+  const handlePostArticle = async (e) => {
+    e.preventDefault();
+    if (!title || !thumbnail || !content) {
+      alert("Please fill the required input");
+      return false;
+    }
+
+    try {
+      const formData = new FormData();
+      formData.append("title", title);
+      formData.append("thumbnail", thumbnail);
+      formData.append("content", content);
+
+      const response = await createArticle(formData);
+      if (response.error) {
+        throw new Error(response.message);
+      }
+      toast.success(response.message);
+      sessionStorage.removeItem("artikelData");
+      handleResetAll();
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
+
+  const handleCancelPost = () => {
+    sessionStorage.removeItem("artikelData");
+    navigate("/psikolog/artikel");
+  };
+
+  const handleResetAll = () => {
+    setTitle("");
+    setContent("");
+    setSlug("");
+    setImage(null);
+    setThumbnail(null);
+  };
+
   return (
-    <div className="pt-16 pb-10 lg:pt-10 lg:px-4 font-jakarta">
+    <form
+      onSubmit={handlePostArticle}
+      className="pt-16 pb-10 lg:pt-10 lg:px-4 font-jakarta"
+    >
       {/* Title Section */}
       <div className="flex justify-between items-center border-b border-black pb-2 mb-4">
         <h2 className="text-xl font-semibold">New Artikel</h2>
         <div className="space-x-2">
-          <Link
-            to="/psikolog/artikel/preview/1"
+          <button
+            type="button"
+            onClick={handlePreview}
             className="px-4 py-1 text-sm text-black border border-black rounded-lg"
           >
             Preview
-          </Link>
-          <Link
-            to="/psikolog/artikel"
+          </button>
+          <button
+            type="button"
+            onClick={handleCancelPost}
             className="px-4 py-[5px] bg-[#35A7FF] text-sm text-white rounded-lg"
           >
             Cancel
-          </Link>
-          <button className="px-4 py-1 bg-[#35A7FF] text-sm text-white rounded-lg">
+          </button>
+          <button
+            type="submit"
+            className="px-4 py-1 bg-[#35A7FF] text-sm text-white rounded-lg"
+          >
             Post
           </button>
         </div>
       </div>
 
       {/* Back Arrow Icon with Border Circle */}
-      <Link to="/psikolog/artikel">
+      <button type="button" onClick={handleCancelPost}>
         <div className="mb-6 flex items-center space-x-2">
           <div className="border-2 border-black rounded-full p-1">
             <IoIosArrowBack className="text-black text-xl" />
           </div>
         </div>
-      </Link>
+      </button>
 
       {/* Image Upload Section with Thumbnail Label */}
       <div className="mb-6">
@@ -119,6 +210,7 @@ const TambahArtikel = () => {
           onChange={handleTitleChange}
           className="mt-2 w-full p-3 border border-gray-400 rounded-lg"
           placeholder="Enter article title"
+          required
         />
       </div>
 
@@ -137,8 +229,9 @@ const TambahArtikel = () => {
           id="slug"
           value={slug}
           onChange={(e) => setSlug(e.target.value)}
-          className="mt-2 w-full p-3 border border-gray-400 rounded-lg"
+          className="outline-none opacity-50 mt-2 w-full p-3 border border-gray-400 rounded-lg"
           placeholder="Enter article slug"
+          readOnly
         />
       </div>
 
@@ -150,20 +243,20 @@ const TambahArtikel = () => {
         >
           <AiFillStar className="text-[10px] text-red-500 mr-2" />{" "}
           {/* Red star icon */}
-          Description
+          Content
         </label>
         <div className="ckeditor-container pt-3">
           <CKEditor
             editor={ClassicEditor}
-            data={description}
-            onChange={(event, editor) => setDescription(editor.getData())}
+            data={content}
+            onChange={(event, editor) => setContent(editor.getData())}
             config={{
               placeholder: "Enter article description",
             }}
           />
         </div>
       </div>
-    </div>
+    </form>
   );
 };
 

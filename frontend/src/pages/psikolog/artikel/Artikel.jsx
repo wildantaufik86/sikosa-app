@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   FiPlus,
   FiSettings,
@@ -8,10 +8,35 @@ import {
   FiTrash2,
 } from "react-icons/fi";
 import { Link } from "react-router-dom";
+import { deleteArticle, getArticlesByWriter } from "../../../utils/api";
+import CONFIG from "../../../config/config";
+import { useAuth } from "../../../hooks/hooks";
+import { toast } from "react-toastify";
+import ModalConfirm from "../../../components/ModalConfirm";
 
 const ArtikelPage = () => {
+  const { authUser } = useAuth();
   const [isManageMode, setIsManageMode] = useState(false); // To toggle manage mode
   const [selectedArticles, setSelectedArticles] = useState([]); // To keep track of selected articles
+  const [articles, setArticles] = useState([]);
+  const [filteredArticles, setFilteredArticles] = useState([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  useEffect(() => {
+    const fetchArticles = async () => {
+      try {
+        const response = await getArticlesByWriter(authUser._id);
+        if (response.error) {
+          throw new Error(response.message);
+        }
+        setArticles(response.articles);
+        setFilteredArticles(response.articles);
+      } catch (error) {
+        alert(error.message);
+      }
+    };
+    fetchArticles();
+  }, []);
 
   // Function to toggle article selection
   const handleSelectArticle = (id) => {
@@ -24,6 +49,41 @@ const ArtikelPage = () => {
     }
   };
 
+  const handleDeleteArticle = async () => {
+    try {
+      const deletePromise = selectedArticles.map(async (article) => {
+        const response = await deleteArticle(article);
+        if (response.error) {
+          throw new Error(response.message);
+        }
+
+        return article;
+      });
+
+      const deletedArticlesId = await Promise.all(deletePromise);
+
+      setFilteredArticles(
+        articles.filter((article) => !deletedArticlesId.includes(article._id))
+      );
+      setSelectedArticles([]);
+      setIsModalOpen(false);
+      toast.success("Article successfully deleted ");
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
+
+  const handleSearchArtikel = (e) => {
+    const query = e.target.value.toLowerCase();
+    if (query) {
+      setFilteredArticles(
+        articles.filter((str) => str.title.toLowerCase().includes(query))
+      );
+    } else {
+      setFilteredArticles(articles);
+    }
+  };
+
   return (
     <div className="pt-16 lg:pt-0 lg:px-4">
       {/* Search Input with Icon */}
@@ -31,6 +91,7 @@ const ArtikelPage = () => {
         <input
           type="text"
           placeholder="Search articles..."
+          onChange={handleSearchArtikel}
           className="w-1/2 p-2 pl-10 border border-gray-500 rounded-lg focus:outline-none focus:border-[#35A7FF] text-gray-700"
         />
         <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-600" />
@@ -50,7 +111,10 @@ const ArtikelPage = () => {
         {/* Manage Button with Delete Icon */}
         <div className="flex items-center space-x-4">
           {isManageMode && selectedArticles.length > 0 && (
-            <button className="ml-4 text-black text-2xl">
+            <button
+              onClick={() => setIsModalOpen(true)}
+              className="ml-4 text-black text-2xl"
+            >
               <FiTrash2 className="inline-block" />
             </button>
           )}
@@ -68,43 +132,74 @@ const ArtikelPage = () => {
       {/* Artikel Cards */}
       <div>
         {/* Article Card 1 */}
-        <div className="p-2 mb-4 bg-white border border-gray-400 rounded-lg flex items-center">
-          {isManageMode && (
-            <input
-              type="checkbox"
-              checked={selectedArticles.includes(1)}
-              onChange={() => handleSelectArticle(1)}
-              className="mr-4"
+        {filteredArticles.length !== 0 ? (
+          filteredArticles.map((data, index) => (
+            <ArticleCard
+              key={index}
+              isManageMode={isManageMode}
+              handleSelectArticle={handleSelectArticle}
+              selectedArticles={selectedArticles}
+              articleData={data}
             />
-          )}
-          <img
-            src="/assets/caroulsel1.png"
-            alt="Article 1"
-            className="w-16 h-16 object-cover mr-4"
-          />
-          <div className="space-y-2 w-full">
-            <h3 className="text-md font-normal">Article Title 1</h3>
-            <div className="flex justify-between">
-              <p className="text-gray-600 text-sm flex justify-between items-center">
-                Brief description of the article content goes here...
-              </p>
-              {/* Add Eye and Edit icons */}
-              <div className="space-x-2 mr-2">
-                <Link to="" className="text-gray-500 hover:text-[#35A7FF]">
-                  <FiEye className="inline-block mr-2" />
-                </Link>
-                <Link
-                  to="/psikolog/artikel/edit/1"
-                  className="text-gray-500 hover:text-[#35A7FF]"
-                >
-                  <FiEdit className="inline-block" />
-                </Link>
-              </div>
-            </div>
+          ))
+        ) : (
+          <div className="flex justify-center">
+            <p>Tidak ada artikel</p>
+          </div>
+        )}
+
+        {/* modal confirm */}
+        <ModalConfirm
+          message={"Apa kamu ingin menghapus artikel ini"}
+          isOpen={isModalOpen}
+          confirmHandle={handleDeleteArticle}
+          cancelHandle={() => setIsModalOpen(false)}
+        />
+      </div>
+    </div>
+  );
+};
+
+const ArticleCard = ({
+  isManageMode,
+  handleSelectArticle,
+  selectedArticles,
+  articleData,
+}) => {
+  return (
+    <div className="p-2 mb-4 bg-white border border-gray-400 rounded-lg flex items-center">
+      {isManageMode && (
+        <input
+          type="checkbox"
+          checked={selectedArticles.includes(articleData._id)}
+          onChange={() => handleSelectArticle(articleData._id)}
+          className="mr-4"
+        />
+      )}
+      <img
+        src={CONFIG.BASE_URL + articleData.thumbnail}
+        alt="Article 1"
+        className="w-16 h-16 object-cover mr-4"
+      />
+      <div className="space-y-2 w-full">
+        <h3 className="text-md font-normal">{articleData.title}</h3>
+        <div className="flex justify-between">
+          {/* Add Eye and Edit icons */}
+          <div className="space-x-2 mr-2">
+            <Link
+              to={`/psikolog/artikel/${articleData.slug}`}
+              className="text-gray-500 hover:text-[#35A7FF]"
+            >
+              <FiEye className="inline-block mr-2" />
+            </Link>
+            <Link
+              to={`/psikolog/artikel/edit/${articleData.slug}`}
+              className="text-gray-500 hover:text-[#35A7FF]"
+            >
+              <FiEdit className="inline-block" />
+            </Link>
           </div>
         </div>
-
-        {/* Add more article cards similarly */}
       </div>
     </div>
   );

@@ -4,8 +4,10 @@ import TitleAndDescription from "../../../components/user/components/daftar-laya
 import ServiceCard from "../../../components/user/components/daftar-layanan/ServiceCard";
 import ServicePagination from "../../../components/user/components/daftar-layanan/PaginationService";
 import { getAllPsikolog } from "../../../utils/api";
+import { useAuth } from "../../../hooks/hooks";
 
 const Service = () => {
+  const { authUser } = useAuth();
   const [currentPage, setCurrentPage] = useState(1);
   const servicesPerPage = 8;
   const [psikologs, setPsikologs] = useState([]);
@@ -16,6 +18,70 @@ const Service = () => {
     indexOfFirstService,
     indexOfLastService
   );
+
+  // dummy data psikolog when user not log in
+  const dummyPsikologs = [
+    {
+      profile: {
+        picture: "/assets/login.png",
+        fullname: "psikolog",
+        description: "",
+        educationBackground: [],
+        specialization: "psikolog",
+      },
+      id: "1",
+      email: "",
+      nim: "",
+      verified: false,
+      role: "psikolog",
+      __v: 1,
+    },
+    {
+      profile: {
+        picture: "/assets/login.png",
+        fullname: "psikolog",
+        description: "",
+        educationBackground: [],
+        specialization: "psikolog",
+      },
+      id: "2",
+      email: "",
+      nim: "",
+      verified: false,
+      role: "psikolog",
+      __v: 1,
+    },
+    {
+      profile: {
+        picture: "/assets/login.png",
+        fullname: "psikolog",
+        description: "",
+        educationBackground: [],
+        specialization: "psikolog",
+      },
+      id: "3",
+      email: "",
+      nim: "",
+      verified: false,
+      role: "psikolog",
+      __v: 1,
+    },
+    {
+      profile: {
+        picture: "/assets/login.png",
+        fullname: "psikolog",
+        description: "",
+        educationBackground: [],
+        specialization: "psikolog",
+      },
+      id: "4",
+      email: "",
+      nim: "",
+      verified: false,
+      role: "psikolog",
+      __v: 1,
+    },
+  ];
 
   useEffect(() => {
     const fetchPsikologs = async () => {
@@ -38,7 +104,11 @@ const Service = () => {
         console.log(error.message);
       }
     };
-    fetchPsikologs();
+    if (authUser) {
+      fetchPsikologs();
+    } else {
+      setPsikologs(dummyPsikologs);
+    }
   }, []);
 
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
@@ -57,7 +127,7 @@ const Service = () => {
       <TitleAndDescription />
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mb-6">
         {currentServices.map((data, index) => (
-          <ServiceCard key={data.id} data={data} index={index} />
+          <ServiceCard key={index} data={data} index={index} />
         ))}
       </div>
       <ServicePagination

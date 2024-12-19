@@ -4,8 +4,10 @@ import LayananItem from "../../../components/user/components/layanan/LayananItem
 import Pagination from "../../../components/user/components/layanan/LayananPagination";
 import ReasonsSection from "../../../components/user/components/layanan/reasonsection";
 import { getAllPsikolog } from "../../../utils/api";
+import { useAuth } from "../../../hooks/hooks";
 
 const DaftarLayanan = () => {
+  const { authUser } = useAuth();
   const itemsPerPage = 2;
   const [currentPage, setCurrentPage] = useState(1);
   const [psikologs, setPsikologs] = useState([]);
@@ -13,6 +15,25 @@ const DaftarLayanan = () => {
   const totalPages = Math.ceil(psikologs.length / itemsPerPage);
   const startIdx = (currentPage - 1) * itemsPerPage;
   const currentLayanan = psikologs.slice(startIdx, startIdx + itemsPerPage);
+
+  // dummy data psikolog when user not log in
+  const dummyPsikologs = [
+    {
+      profile: {
+        picture: "/assets/login.png",
+        fullname: "psikolog",
+        description: "",
+        educationBackground: [],
+        specialization: "psikolog",
+      },
+      _id: "1",
+      email: "",
+      nim: "",
+      verified: false,
+      role: "psikolog",
+      __v: 1,
+    },
+  ];
 
   useEffect(() => {
     const fetchPsikologs = async () => {
@@ -35,8 +56,12 @@ const DaftarLayanan = () => {
         console.log(error.message);
       }
     };
-    fetchPsikologs();
-  }, []);
+    if (authUser) {
+      fetchPsikologs();
+    } else {
+      setPsikologs(dummyPsikologs);
+    }
+  }, [authUser]);
 
   const handlePrev = () => {
     if (currentPage > 1) setCurrentPage(currentPage - 1);
@@ -64,9 +89,9 @@ const DaftarLayanan = () => {
         {/* Left: Grid layanan */}
         <div className="w-full lg:w-1/2 flex flex-col my-auto justify-center">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {currentLayanan.map((data) => (
+            {currentLayanan.map((data, index) => (
               <motion.div
-                key={data.id}
+                key={index}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4, delay: data.id * 0.1 }}

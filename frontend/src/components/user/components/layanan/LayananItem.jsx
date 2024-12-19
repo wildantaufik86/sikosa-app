@@ -2,15 +2,25 @@ import React from "react";
 import CONFIG from "../../../../config/config";
 import { formattedString } from "../../../../utils/utils";
 import { Link } from "react-router-dom";
+import { useAuth } from "../../../../hooks/hooks";
 
 const LayananItem = ({ data }) => {
+  const { authUser } = useAuth();
   return (
     <div className="p-4 border rounded-lg shadow-lg bg-white">
-      <img
-        src={CONFIG.BASE_URL + data.profile.picture}
-        alt={data.profile.fullname}
-        className="w-full h-40 object-cover rounded-md"
-      />
+      {authUser ? (
+        <img
+          src={CONFIG.BASE_URL + data.profile.picture}
+          alt={data.profile.fullname}
+          className="w-full h-40 object-cover rounded-md"
+        />
+      ) : (
+        <img
+          src={data.profile.picture}
+          alt={data.profile.fullname}
+          className="w-full h-30 object-cover rounded-md"
+        />
+      )}
       <h2 className="mt-2 font-semibold text-sm text-center  my-3">
         {formattedString(data.profile.fullname)}
       </h2>

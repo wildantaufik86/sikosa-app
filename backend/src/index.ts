@@ -14,6 +14,7 @@ import consultationRoutes from "./routes/psikolog.routes";
 import path from "path";
 import psikologRoutes from "./routes/psikolog.routes";
 import articleRoutes from "./routes/article.routes";
+import adminRoutes from "./routes/admin.routes";
 
 const app = express();
 
@@ -32,6 +33,9 @@ app.get("/", ({ req, res }: any) => {
     status: "Connected!!!",
   });
 });
+
+app.use("/admin", adminRoutes);
+
 // general API
 app.use("/api/v1", articleRoutes);
 

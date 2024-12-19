@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../../hooks/hooks";
 import CONFIG from "../../../config/config";
 import { updateProfilePsikolog } from "../../../utils/api";
+import { toast } from "react-toastify";
 
 const EditProfilePsikolog = () => {
   const { authUser, handleAuthUserChange } = useAuth();
@@ -61,10 +62,9 @@ const EditProfilePsikolog = () => {
       const { profile: profileUpdated } = response.data;
       const updatedPsikolog = { ...authUser, profile: profileUpdated };
       handleAuthUserChange(updatedPsikolog);
-      alert(response.message);
-      navigate("/psikolog/profile");
+      toast.success(response.message);
     } catch (error) {
-      alert(error.message);
+      toast.error(error.message);
     }
   };
 

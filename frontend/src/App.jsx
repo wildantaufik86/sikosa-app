@@ -32,10 +32,14 @@ import LoginPsikolog from "./pages/psikolog/auth/LoginPsikolog";
 import AddUser from "./pages/admin/users/AddUser";
 import EditUser from "./pages/admin/users/EditUser";
 import ArtikelView from "./pages/psikolog/artikel/ArticleView";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 function App() {
   return (
     <Router>
+      {/* toast */}
+      <ToastContainer />
       <Routes>
         {/* Star Routes User */}
         <Route path="/login" element={<LoginPage />} />

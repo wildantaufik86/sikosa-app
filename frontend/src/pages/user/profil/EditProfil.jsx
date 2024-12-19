@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { useAuth } from "../../../hooks/hooks";
 import { updateProfile } from "../../../utils/api";
 import CONFIG from "../../../config/config";
+import { toast } from "react-toastify";
 
 const EditProfile = () => {
   const { authUser, handleAuthUserChange } = useAuth();
@@ -41,11 +42,10 @@ const EditProfile = () => {
         const { profile } = result.data;
         const updatedUser = { ...authUser, profile };
         handleAuthUserChange(updatedUser);
-        alert(result.message);
-        navigate("/profile");
+        toast.success(result.message);
       }
     } catch (error) {
-      alert(error.message);
+      toast.error(error.message);
     }
   };
 

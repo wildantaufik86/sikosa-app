@@ -96,7 +96,7 @@ const getArticlesByWriter = async (writerId) => {
     }
     const result = await response.json();
     const articlesFilter = result.data.filter(
-      (article) => article.writer_id === writerId
+      (article) => article.writer === writerId
     );
     return { error: false, message: result.message, articles: articlesFilter };
   } catch (error) {

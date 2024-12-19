@@ -11,6 +11,7 @@ import { Link } from "react-router-dom";
 import { deleteArticle, getArticlesByWriter } from "../../../utils/api";
 import CONFIG from "../../../config/config";
 import { useAuth } from "../../../hooks/hooks";
+import { toast } from "react-toastify";
 
 const ArtikelPage = () => {
   const { authUser } = useAuth();
@@ -61,9 +62,9 @@ const ArtikelPage = () => {
         articles.filter((article) => !deletedArticlesId.includes(article._id))
       );
       setSelectedArticles([]);
-      alert("Article successfully deleted ");
+      toast.success("Article successfully deleted ");
     } catch (error) {
-      alert(error.message);
+      toast.error(error.message);
     }
   };
 

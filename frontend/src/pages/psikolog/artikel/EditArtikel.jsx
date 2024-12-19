@@ -6,6 +6,7 @@ import { CKEditor } from "@ckeditor/ckeditor5-react";
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 import { editArticle, getArticleBySlug } from "../../../utils/api";
 import CONFIG from "../../../config/config";
+import { toast } from "react-toastify";
 
 const EditArtikel = () => {
   const [title, setTitle] = useState("");
@@ -75,10 +76,9 @@ const EditArtikel = () => {
       if (response.error) {
         throw new Error(response.message);
       }
-      alert(response.message);
-      navigate("/psikolog/artikel");
+      toast.success(response.message);
     } catch (error) {
-      alert(error.message);
+      toast.error(error.message);
     }
   };
 

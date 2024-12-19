@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
 import { IoIosArrowBack } from "react-icons/io";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { CKEditor } from "@ckeditor/ckeditor5-react";
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 import { AiFillStar } from "react-icons/ai"; // Import the star icon
 import { createArticle } from "../../../utils/api";
+import { toast } from "react-toastify";
 
 const TambahArtikel = () => {
   const [title, setTitle] = useState("");
@@ -43,7 +44,7 @@ const TambahArtikel = () => {
 
   const handlePreview = () => {
     if (!title || !content || !image) {
-      alert("please fill the required input");
+      toast.warning("please fill the required input");
       return false;
     }
 
@@ -92,17 +93,25 @@ const TambahArtikel = () => {
       if (response.error) {
         throw new Error(response.message);
       }
-      alert(response.message);
+      toast.success(response.message);
       sessionStorage.removeItem("artikelData");
-      navigate("/psikolog/artikel");
+      handleResetAll();
     } catch (error) {
-      alert(error.message);
+      toast.error(error.message);
     }
   };
 
   const handleCancelPost = () => {
     sessionStorage.removeItem("artikelData");
     navigate("/psikolog/artikel");
+  };
+
+  const handleResetAll = () => {
+    setTitle("");
+    setContent("");
+    setSlug("");
+    setImage(null);
+    setThumbnail(null);
   };
 
   return (

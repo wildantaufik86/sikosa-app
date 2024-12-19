@@ -10,7 +10,7 @@ const ArticleContent = ({ article }) => {
   useEffect(() => {
     const fetchPsikolog = async () => {
       try {
-        const response = await getPsikologById(article.writer_id);
+        const response = await getPsikologById(article.writer);
         if (response.error) {
           return false;
         }

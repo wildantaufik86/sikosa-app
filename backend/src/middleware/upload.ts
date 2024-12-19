@@ -5,11 +5,9 @@ import crypto, { randomBytes } from "crypto";
 // Konfigurasi multer untuk menyimpan file di folder uploads
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    console.log(path.join(__dirname, "../../uploads"));
     cb(null, path.join(__dirname, "../../uploads")); // Folder tujuan
   },
   filename: (req, file, cb) => {
-    console.log(file);
     // Tambahkan ekstensi dengan pasti
     const uniqueFileName = `${crypto
       .randomBytes(16)
@@ -28,7 +26,6 @@ const upload = multer({
       "image/jpg",
       "image/webp",
     ];
-    console.log("tes");
     if (allowedMimeTypes.includes(file.mimetype)) {
       cb(null, true); // File diterima
     } else {

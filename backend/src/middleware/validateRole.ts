@@ -7,11 +7,10 @@ import AppErrorCode from "../constants/appErrorCode";
 const validateRole = (requiredRole: string): RequestHandler => {
   return async (req, res, next) => {
     try {
-      console.log("Validating role for userId:", req.userId);
+      // console.log("Validating role for userId:", req.userId);
 
       // Ambil user berdasarkan req.userId
       const user = await UserModel.findById(req.userId);
-      console.log("User found:", user);
 
       appAssert(
         user, // Pastikan user ditemukan

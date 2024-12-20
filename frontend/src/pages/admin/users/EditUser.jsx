@@ -1,25 +1,56 @@
-import { useState } from 'react';
-import { IoIosArrowBack } from 'react-icons/io';
-import { Link } from 'react-router-dom';
+import { useEffect, useState } from "react";
+import { IoIosArrowBack } from "react-icons/io";
+import { Link, useParams } from "react-router-dom";
+import { AdminUpdateUser, getUserById } from "../../../utils/api";
+import { toast } from "react-toastify";
 
 const EditUser = () => {
-  const [fullname, setFullname] = useState('');
-  const [role, setRole] = useState('mahasiswa');
+  const [fullname, setFullname] = useState("");
+  const [role, setRole] = useState("mahasiswa");
+  const { id: idUser } = useParams();
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const response = await getUserById(idUser);
+        if (response.error) {
+          throw new Error(response.message);
+        }
+        setFullname(response.user.profile.fullname);
+        setRole(response.user.role);
+      } catch (error) {
+        console.log(error.message);
+      }
+    };
+    fetchUser();
+  }, []);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const data = {
-      fullname: fullname.trim(),
-      role,
+    const update = async () => {
+      try {
+        const data = {
+          fullname: fullname.trim(),
+          role,
+        };
+
+        const response = await AdminUpdateUser(data, idUser);
+        if (response.error) {
+          throw new Error(response.message);
+        }
+        toast.success(response.message);
+      } catch (error) {
+        toast.error(error.message);
+      }
     };
+
+    update();
   };
 
   return (
     <div className="pt-16 lg:pt-5 flex flex-col">
       {/* Title with Bottom Border */}
-      <h1 className="text-2xl font-semibold border-b-2 border-black pb-2 mb-6">
-        Edit User
-      </h1>
+      <h1 className="text-2xl font-semibold border-b-2 border-black pb-2 mb-6">Edit User</h1>
 
       <Link to="/admin/user">
         <div className="mb-6 flex items-center space-x-2">

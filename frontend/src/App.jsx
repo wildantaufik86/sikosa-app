@@ -254,7 +254,7 @@ function App() {
           }
         />
         <Route
-          path="/admin/artikel-manajemen/edit/1"
+          path="/admin/artikel-manajemen/edit/:id"
           element={
             <AdminLayout>
               <EditArtikelAdmin />

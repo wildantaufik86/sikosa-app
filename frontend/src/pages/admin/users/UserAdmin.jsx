@@ -16,6 +16,14 @@ const UserAdmin = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
 
+  // Calculate total pages based on filtered data
+  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+
+  // Get the current page's data
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentData = filteredData.slice(indexOfFirstItem, indexOfLastItem);
+
   useEffect(() => {
     const fetchAllUsers = async () => {
       try {
@@ -32,9 +40,6 @@ const UserAdmin = () => {
     };
     fetchAllUsers();
   }, []);
-
-  // Calculate total pages based on filtered data
-  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
 
   // Paginate the filtered data
   const paginate = (pageNumber) => {
@@ -74,11 +79,6 @@ const UserAdmin = () => {
       toast.error(error.message);
     }
   };
-
-  // Get the current page's data
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentData = filteredData.slice(indexOfFirstItem, indexOfLastItem);
 
   return (
     <div className="pt-16 lg:pt-5">
@@ -131,7 +131,9 @@ const UserAdmin = () => {
           <tbody>
             {currentData.map((data, index) => (
               <tr key={index}>
-                <td className="py-2 px-4 border-b border-gray-200">{index + 1}</td>
+                <td className="py-2 px-4 border-b border-gray-200">
+                  {indexOfFirstItem + index + 1}
+                </td>
                 <td className="py-2 px-4 border-b border-gray-200">
                   {data.profile.fullname || "default " + data.role}
                 </td>

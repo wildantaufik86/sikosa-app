@@ -325,6 +325,120 @@ const AdminUpdateUser = async (data, idUser) => {
   }
 };
 
+// admin
+const AdminGetArticles = async () => {
+  try {
+    const accessToken = getAccessToken();
+    if (!accessToken) {
+      throw new Error("Invalid access token");
+    }
+    const response = await fetch(`${CONFIG.BASE_URL}/admin/articles`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+    if (!response.ok) {
+      throw new Error("Failed to get articles");
+    }
+    const result = await response.json();
+    return { error: false, message: result.message, articles: result.data };
+  } catch (error) {
+    return { error: true, message: error.message, articles: null };
+  }
+};
+
+const AdmincreateArticle = async (formData) => {
+  try {
+    const accessToken = getAccessToken();
+    if (!accessToken) {
+      throw new Error("Invalid access token");
+    }
+    const response = await fetch(`${CONFIG.BASE_URL}/admin/articles`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+      body: formData,
+    });
+    if (!response.ok) {
+      throw new Error("Failed to create article");
+    }
+
+    const result = await response.json();
+    return { error: false, message: result.message, data: result.data };
+  } catch (error) {
+    return { error: true, message: error.message, data: null };
+  }
+};
+
+const AdminDeleteArticle = async (articleId) => {
+  try {
+    const accessToken = getAccessToken();
+    if (!accessToken) {
+      throw new Error("Invalid access token");
+    }
+    const response = await fetch(`${CONFIG.BASE_URL}/admin/articles/${articleId}`, {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+    if (!response.ok) {
+      throw new Error("Failed to delete article");
+    }
+
+    const result = await response.json();
+    return { error: false, message: result.message };
+  } catch (error) {
+    return { error: true, message: error.message };
+  }
+};
+
+const AdminEditArticle = async (formData, articleId) => {
+  try {
+    const accessToken = getAccessToken();
+    if (!accessToken) {
+      throw new Error("Invalid access token");
+    }
+    const response = await fetch(`${CONFIG.BASE_URL}/admin/articles/${articleId}`, {
+      method: "PUT",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+      body: formData,
+    });
+    if (!response.ok) {
+      throw new Error("Failed to update article");
+    }
+
+    const result = await response.json();
+    return { error: false, message: result.message, data: result.data };
+  } catch (error) {
+    return { error: true, message: error.message, data: null };
+  }
+};
+
+const getArticleById = async (idArticle) => {
+  try {
+    const accessToken = getAccessToken();
+    if (!accessToken) {
+      throw new Error("Invalid access token");
+    }
+    const response = await fetch(`${CONFIG.BASE_URL}/admin/articles/${idArticle}`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+    if (!response.ok) {
+      throw new Error("Failed to get articles");
+    }
+    const result = await response.json();
+    return { error: false, message: result.message, article: result.data };
+  } catch (error) {
+    return { error: true, message: error.message, article: null };
+  }
+};
+
 export {
   updateProfile,
   getAllPsikolog,
@@ -341,4 +455,9 @@ export {
   createUser,
   getUserById,
   AdminUpdateUser,
+  AdminGetArticles,
+  AdmincreateArticle,
+  AdminDeleteArticle,
+  AdminEditArticle,
+  getArticleById,
 };

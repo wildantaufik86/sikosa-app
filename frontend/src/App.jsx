@@ -230,7 +230,7 @@ function App() {
           }
         />
         <Route
-          path="/admin/user/edit-user/1"
+          path="/admin/user/edit-user/:id"
           element={
             <AdminLayout>
               <EditUser />
@@ -254,7 +254,7 @@ function App() {
           }
         />
         <Route
-          path="/admin/artikel-manajemen/edit/1"
+          path="/admin/artikel-manajemen/edit/:id"
           element={
             <AdminLayout>
               <EditArtikelAdmin />

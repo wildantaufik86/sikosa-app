@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { FaUser, FaLock, FaEye, FaEyeSlash, FaEnvelope } from "react-icons/fa";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Navbar from "../../../components/user/components/Navbar";
+import CONFIG from "../../../config/config";
 
 const RegisterPage = () => {
   const [passwordVisible, setPasswordVisible] = useState(false);
@@ -13,13 +14,14 @@ const RegisterPage = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState(null);
   const [isSuccess, setIsSucess] = useState(null);
+    const navigate = useNavigate();
 
   const togglePasswordVisibility = () => {
     setPasswordVisible(!passwordVisible);
   };
 
   const toggleConfirmPasswordVisibility = () => {
-    setConfirmPasswordVisible(!confirmPasswordVisible); // Toggle Confirm Password visibility
+    setConfirmPasswordVisible(!confirmPasswordVisible);
   };
 
   const handleRegister = (event) => {
@@ -37,7 +39,7 @@ const RegisterPage = () => {
 
     const fetchRegister = async () => {
       try {
-        const response = await fetch(`http://localhost:5000/auth/register`, {
+        const response = await fetch(`${CONFIG.BASE_URL}/auth/register`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -52,6 +54,10 @@ const RegisterPage = () => {
         const result = await response.json();
         setErrorMessage(null);
         setIsSucess(true);
+
+        // Navigasi ke /login setelah berhasil registrasi
+        navigate("/login");
+
         return result;
       } catch (error) {
         setErrorMessage(error.message);
@@ -73,16 +79,16 @@ const RegisterPage = () => {
       return false;
     }
 
-    if (password.length < 6 && confirmPassword.length < 6) {
-      setErrorMessage("Password must be contain at least 6 characters");
+    if (password.length < 6 || confirmPassword.length < 6) {
+      setErrorMessage("Password must contain at least 6 characters");
       return false;
     }
 
-    // check match password and confirm password
     if (confirmPassword !== password) {
-      setErrorMessage("Password do Not Match");
+      setErrorMessage("Password do not match");
       return false;
     }
+
     fetchRegister();
   };
 
@@ -103,9 +109,7 @@ const RegisterPage = () => {
         {/* Right Side - Form */}
         <div className="flex flex-col justify-center w-full lg:w-2/5 bg-white p-6">
           <h2 className="text-3xl font-bold mb-4 text-[#35A7FF]">Sign Up</h2>
-          <p className="text-sm text-gray-600 font-medium">
-            If you already have an account
-          </p>
+          <p className="text-sm text-gray-600 font-medium">If you already have an account</p>
           <p className="text-sm text-gray-600 font-medium mb-6">
             You can{" "}
             <Link to="/login" className="text-blue-500 hover:underline">
@@ -146,14 +150,17 @@ const RegisterPage = () => {
                   placeholder="Enter your NIM"
                   className="w-full p-2 bg-transparent outline-none"
                   value={nim}
-                  onChange={(e) => setNim(e.target.value)}
+                  onChange={(e) => {
+                    const input = e.target.value;
+                    if (/^\d*$/.test(input)) {
+                      setNim(input);
+                    }
+                  }}
                   required
                 />
               </div>
               {nim.length > 10 && (
-                <p className="text-[10px] text-red-600 mt-2">
-                  maximum length is 10
-                </p>
+                <p className="text-[10px] text-red-600 mt-2">maximum length is 10</p>
               )}
             </div>
 
@@ -193,11 +200,7 @@ const RegisterPage = () => {
                   onChange={(e) => setPassword(e.target.value)}
                   required
                 />
-                <button
-                  type="button"
-                  onClick={togglePasswordVisibility}
-                  className="ml-2"
-                >
+                <button type="button" onClick={togglePasswordVisibility} className="ml-2">
                   {passwordVisible ? (
                     <FaEyeSlash className="text-gray-500" />
                   ) : (
@@ -209,10 +212,7 @@ const RegisterPage = () => {
 
             {/* Confirm Password Input */}
             <div className="w-full mb-4">
-              <label
-                className="block text-sm text-gray-600"
-                htmlFor="confirmPassword"
-              >
+              <label className="block text-sm text-gray-600" htmlFor="confirmPassword">
                 Confirm Password
               </label>
               <div className="flex items-center border-b border-gray-300">
@@ -226,11 +226,7 @@ const RegisterPage = () => {
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   required
                 />
-                <button
-                  type="button"
-                  onClick={toggleConfirmPasswordVisibility}
-                  className="ml-2"
-                >
+                <button type="button" onClick={toggleConfirmPasswordVisibility} className="ml-2">
                   {confirmPasswordVisible ? (
                     <FaEyeSlash className="text-gray-500" />
                   ) : (
@@ -243,9 +239,7 @@ const RegisterPage = () => {
             {/* error message */}
             {errorMessage && (
               <div className="mb-2">
-                <p className="text-xs text-center text-red-500">
-                  {errorMessage}
-                </p>
+                <p className="text-xs text-center text-red-500">{errorMessage}</p>
               </div>
             )}
 

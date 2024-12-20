@@ -11,8 +11,7 @@ const ArtikelPage = () => {
   const [articles, setArticles] = useState([]);
   const articlesPerPage = 4;
 
-  const filteredArticles =
-    selectedCategory === "Terbaru" ? articles.slice(0, 4) : articles;
+  const filteredArticles = selectedCategory === "Terbaru" ? articles.slice(0, 4) : articles;
   const totalPages = Math.ceil(filteredArticles.length / articlesPerPage);
   const startIndex = (currentPage - 1) * articlesPerPage;
   const endIndex = startIndex + articlesPerPage;
@@ -27,7 +26,7 @@ const ArtikelPage = () => {
         }
         setArticles(response.articles);
       } catch (error) {
-        alert(error.message);
+        console.log(error.message);
       }
     };
 

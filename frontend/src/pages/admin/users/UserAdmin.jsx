@@ -1,48 +1,74 @@
 import React, { useState } from "react";
-import { FiSearch } from "react-icons/fi"; // Importing React Icons
-import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io"; // Importing arrow icons
+import { FiSearch } from "react-icons/fi";
+import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
 import { Link } from "react-router-dom";
+import useSWR from "swr";
+import { deleteUserById, getAllUsers } from "../../../utils/api";
+import ModalConfirm from "../../../components/ModalConfirm";
+import { toast } from "react-toastify";
+
+const fetcher = async () => {
+  const response = await getAllUsers();
+  if (response.error) {
+    throw new Error(response.message);
+  }
+  return response.users;
+};
 
 const UserAdmin = () => {
+  const { data: users, error, mutate } = useSWR("/users", fetcher);
+
   const [searchQuery, setSearchQuery] = useState(""); // State for search query
   const [currentPage, setCurrentPage] = useState(1); // State for current page
   const itemsPerPage = 10; // Number of items per page
+  const [isOpen, setIsOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
 
-  // Sample data for the table
-  const data = [
-    { no: 1, nim: "123456", nama: "John Doe", role: "Admin" },
-    { no: 2, nim: "654321", nama: "Jane Smith", role: "User" },
-    { no: 3, nim: "987654", nama: "Alice Brown", role: "User" },
-    { no: 4, nim: "192837", nama: "Bob Green", role: "Admin" },
-    { no: 5, nim: "564738", nama: "Charlie White", role: "User" },
-    { no: 6, nim: "102938", nama: "David Black", role: "Admin" },
-    { no: 7, nim: "203948", nama: "Eva Blue", role: "User" },
-    { no: 8, nim: "304950", nama: "Frank Red", role: "Admin" },
-    { no: 9, nim: "405061", nama: "Grace Yellow", role: "User" },
-    { no: 10, nim: "506172", nama: "Hannah Purple", role: "Admin" },
-    { no: 11, nim: "506172", nama: "Hannah Purple", role: "Psikolog" },
-    // Add more data if needed
-  ];
+  if (error) return <div>Error: {error.message}</div>;
+  if (!users) return <div>Loading...</div>;
 
-  // Filtered data based on the search query
-  const filteredData = data.filter(
-    (item) =>
-      item.nim.includes(searchQuery) ||
-      item.nama.toLowerCase().includes(searchQuery.toLowerCase())
+  // Filter data based on search query
+  const filteredData = users.filter((user) =>
+    user.profile.fullname.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   // Calculate total pages based on filtered data
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
 
-  // Paginate the filtered data
-  const paginate = (pageNumber) => {
-    setCurrentPage(pageNumber);
-  };
-
   // Get the current page's data
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentData = filteredData.slice(indexOfFirstItem, indexOfLastItem);
+
+  const paginate = (pageNumber) => {
+    setCurrentPage(pageNumber);
+  };
+
+  const handleSearchUsers = (e) => {
+    setSearchQuery(e.target.value);
+    setCurrentPage(1);
+  };
+
+  const handleCloseModal = () => {
+    setIsOpen(false);
+  };
+
+  const handleConfirmModal = async () => {
+    try {
+      if (!selectedUser) {
+        throw new Error("Failed to delete user");
+      }
+      const response = await deleteUserById(selectedUser);
+      if (response.error) {
+        throw new Error(response.message);
+      }
+      toast.success(response.message);
+      setIsOpen(false);
+      mutate();
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
 
   return (
     <div className="pt-16 lg:pt-5">
@@ -54,7 +80,7 @@ const UserAdmin = () => {
             className="w-full p-2 pl-10 border border-gray-500 rounded-lg text-sm"
             placeholder="Search "
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={handleSearchUsers}
           />
           {/* Search Icon */}
           <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
@@ -62,9 +88,7 @@ const UserAdmin = () => {
       </div>
 
       {/* Title with Bottom Border */}
-      <h1 className="text-2xl font-semibold border-b-2 border-black pb-2 mb-6">
-        User
-      </h1>
+      <h1 className="text-2xl font-semibold border-b-2 border-black pb-2 mb-6">User</h1>
 
       <div className="mb-5">
         <Link
@@ -84,9 +108,6 @@ const UserAdmin = () => {
                 No
               </th>
               <th className="py-2 px-4 border-b text-m font-medium text-left border-gray-200">
-                NIM
-              </th>
-              <th className="py-2 px-4 border-b text-m font-medium text-left border-gray-200">
                 Nama
               </th>
               <th className="py-2 px-4 border-b text-m font-medium text-center border-gray-200">
@@ -98,30 +119,33 @@ const UserAdmin = () => {
             </tr>
           </thead>
           <tbody>
-            {currentData.map((item) => (
-              <tr key={item.no}>
+            {currentData.map((data, index) => (
+              <tr key={index}>
                 <td className="py-2 px-4 border-b border-gray-200">
-                  {item.no}
+                  {indexOfFirstItem + index + 1}
                 </td>
                 <td className="py-2 px-4 border-b border-gray-200">
-                  {item.nim}
-                </td>
-                <td className="py-2 px-4 border-b border-gray-200">
-                  {item.nama}
+                  {data.profile.fullname || "default " + data.role}
                 </td>
                 <td className="py-2 px-4 border-b text-center border-gray-200">
                   <span className="bg-[#35A7FF] text-white px-3 py-1 text-sm rounded-full">
-                    {item.role}
+                    {data.role}
                   </span>
                 </td>
                 <td className="py-2 px-4 border-b text-center border-gray-200">
                   <Link
-                    to="/admin/user/edit-user/1"
+                    to={`/admin/user/edit-user/${data._id}`}
                     className="px-3 py-1 text-sm font-semibold bg-yellow-400 text-white rounded-lg hover:bg-blue-600"
                   >
                     Edit
                   </Link>
-                  <button className="px-3 py-1 text-sm font-semibold bg-red-500 text-white rounded-lg hover:bg-red-600 ml-2">
+                  <button
+                    onClick={() => {
+                      setIsOpen(true);
+                      setSelectedUser(data._id);
+                    }}
+                    className="px-3 py-1 text-sm font-semibold bg-red-500 text-white rounded-lg hover:bg-red-600 ml-2"
+                  >
                     Delete
                   </button>
                 </td>
@@ -168,6 +192,14 @@ const UserAdmin = () => {
           </button>
         </div>
       </div>
+
+      {/* Modal Confirm */}
+      <ModalConfirm
+        message={"Anda yakin ingin menghapus user ini"}
+        isOpen={isOpen}
+        confirmHandle={handleConfirmModal}
+        cancelHandle={handleCloseModal}
+      />
     </div>
   );
 };

@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import CONFIG from "../../../../config/config";
-import { formattedTitle } from "../../../../utils/utils";
+import { formattedDate, formattedTitle } from "../../../../utils/utils";
 
 const ArtikelCard = ({ article }) => {
   return (
@@ -17,7 +17,10 @@ const ArtikelCard = ({ article }) => {
         </div>
 
         <div className="px-4 py-2 flex-1 mt-4">
-          <h3 className="text-lg font-bold">{formattedTitle(article.title)}</h3>
+          <h3 className="text-sm font-semibold">{formattedTitle(article.title)}</h3>
+        </div>
+        <div className="flex flex-col px-4">
+          <p className="text-[8px] font-light">{formattedDate(article.createdAt)}</p>
         </div>
       </div>
     </Link>

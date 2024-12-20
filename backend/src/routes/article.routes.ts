@@ -16,7 +16,7 @@ articleRoutes.get("/articles", async (req, res) => {
   }
 });
 
-articleRoutes.get("/articles/:id", async (req, res) => {
+articleRoutes.get("/articles/id/:id", async (req, res) => {
   try {
     const { id } = req.params;
     const articles = await ArticleModel.findById(id).populate("writer", "profile.fullname");
@@ -33,7 +33,7 @@ articleRoutes.get("/articles/:id", async (req, res) => {
 
 
 // GET artikel berdasarkan slug (Publik)
-articleRoutes.get("/articles/:slug", async (req, res) => {
+articleRoutes.get("/articles/slug/:slug", async (req, res) => {
   try {
     const { slug } = req.params;
     const article = await ArticleModel.findOne({ slug });

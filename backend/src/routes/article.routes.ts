@@ -19,7 +19,7 @@ articleRoutes.get("/articles", async (req, res) => {
 articleRoutes.get("/articles/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    const articles = await ArticleModel.findById(id);
+    const articles = await ArticleModel.findById(id).populate("writer", "profile.fullname");
     if (!articles) {
       return res.status(NOT_FOUND).json({ message: "Artikel tidak ditemukan" });
     }

@@ -1,20 +1,36 @@
-import React, { useEffect, useState } from "react";
-import { FiSearch } from "react-icons/fi"; // Importing React Icons
-import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io"; // Importing arrow icons
+import React, { useState } from "react";
+import { FiSearch } from "react-icons/fi";
+import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
 import { Link } from "react-router-dom";
+import useSWR from "swr";
 import { deleteUserById, getAllUsers } from "../../../utils/api";
 import ModalConfirm from "../../../components/ModalConfirm";
 import { toast } from "react-toastify";
 
+const fetcher = async () => {
+  const response = await getAllUsers();
+  if (response.error) {
+    throw new Error(response.message);
+  }
+  return response.users;
+};
+
 const UserAdmin = () => {
+  const { data: users, error, mutate } = useSWR("/users", fetcher);
+
   const [searchQuery, setSearchQuery] = useState(""); // State for search query
   const [currentPage, setCurrentPage] = useState(1); // State for current page
   const itemsPerPage = 10; // Number of items per page
-
-  const [users, setUsers] = useState([]);
-  const [filteredData, setFilteredData] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
+
+  if (error) return <div>Error: {error.message}</div>;
+  if (!users) return <div>Loading...</div>;
+
+  // Filter data based on search query
+  const filteredData = users.filter((user) =>
+    user.profile.fullname.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   // Calculate total pages based on filtered data
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
@@ -24,39 +40,13 @@ const UserAdmin = () => {
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentData = filteredData.slice(indexOfFirstItem, indexOfLastItem);
 
-  useEffect(() => {
-    const fetchAllUsers = async () => {
-      try {
-        const response = await getAllUsers();
-
-        if (response.error) {
-          throw new Error(response.message);
-        }
-        setUsers(response.users);
-        setFilteredData(response.users);
-      } catch (error) {
-        console.log(error.message);
-      }
-    };
-    fetchAllUsers();
-  }, []);
-
-  // Paginate the filtered data
   const paginate = (pageNumber) => {
     setCurrentPage(pageNumber);
   };
 
   const handleSearchUsers = (e) => {
-    const query = e.target.value.toLowerCase();
-    setSearchQuery(query);
-    if (query) {
-      const searchUser = users.filter((user) =>
-        user.profile.fullname.toLowerCase().includes(query)
-      );
-      setFilteredData(searchUser);
-    } else {
-      setFilteredData(users);
-    }
+    setSearchQuery(e.target.value);
+    setCurrentPage(1);
   };
 
   const handleCloseModal = () => {
@@ -74,7 +64,7 @@ const UserAdmin = () => {
       }
       toast.success(response.message);
       setIsOpen(false);
-      setFilteredData(users.filter((user) => user._id !== selectedUser));
+      mutate();
     } catch (error) {
       toast.error(error.message);
     }
@@ -202,7 +192,8 @@ const UserAdmin = () => {
           </button>
         </div>
       </div>
-      {/* modal confirm */}
+
+      {/* Modal Confirm */}
       <ModalConfirm
         message={"Anda yakin ingin menghapus user ini"}
         isOpen={isOpen}

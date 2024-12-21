@@ -93,7 +93,7 @@ const ChatDokter = () => {
       </Link>
 
       <div className="flex flex-col lg:flex-row space-y-4 lg:space-y-0 lg:space-x-6">
-        <DokterDetail doctor={doctorData} psikolog={psikolog} />
+        <DokterDetail psikolog={psikolog} />
 
         <div className="w-full lg:w-2/3 border bg-[#EBF6FF] px-4 py-8 rounded-lg shadow-lg flex flex-col">
           <PesanChat messages={messages} doctorImage={doctorData.image} />

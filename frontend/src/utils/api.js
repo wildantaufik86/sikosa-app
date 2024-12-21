@@ -117,7 +117,7 @@ const getArticlesByWriter = async (writerId) => {
       throw new Error("Failed to get articles");
     }
     const result = await response.json();
-    const articlesFilter = result.data.filter((article) => article.writer === writerId);
+    const articlesFilter = result.data.filter((article) => article.writer._id === writerId);
     return { error: false, message: result.message, articles: articlesFilter };
   } catch (error) {
     return { error: true, message: error.message, articles: null };
@@ -126,7 +126,7 @@ const getArticlesByWriter = async (writerId) => {
 
 const getArticleBySlug = async (slug) => {
   try {
-    const response = await fetch(`${CONFIG.BASE_URL}/api/v1/articles/${slug}`);
+    const response = await fetch(`${CONFIG.BASE_URL}/api/v1/articles/slug/${slug}`);
     if (!response.ok) {
       throw new Error("Failed to get articles");
     }

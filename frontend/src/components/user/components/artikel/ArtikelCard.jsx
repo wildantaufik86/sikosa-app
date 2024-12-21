@@ -19,10 +19,10 @@ const ArtikelCard = ({ article }) => {
         </div>
 
         <div className="px-4 py-2 flex-1 mt-4">
-          <h3 className="text-sm font-semibold">{formattedTitle(article.title)}</h3>
+          <h3 className="text-sm font-semibold line-clamp-2">{article.title}</h3>
         </div>
         <div className="px-4 py-2 flex-1">
-          <p className="text-sm font-normal line-clamp-2">{parse(article.content)}</p>
+          <div className="text-sm font-normal line-clamp-2">{parse(article.content)}</div>
         </div>
         <div className="flex flex-col px-4 py-2">
           <p className="text-[8px] font-light">{formattedDate(article.createdAt)}</p>

@@ -6,7 +6,9 @@ import ChatInput from "../../../components/user/components/chat-dokter/ChatInput
 import DokterDetail from "../../../components/user/components/chat-dokter/DokterDetail";
 import PesanChat from "../../../components/user/components/chat-dokter/PesanChat";
 import { useAuth } from "../../../hooks/hooks";
-import { getPsikologById } from "../../../utils/api";
+import { createPengajuanKonsultasi, getPsikologById } from "../../../utils/api";
+import { toast } from "react-toastify";
+import { formattedDate } from "../../../utils/utils";
 
 const doctorData = {
   id: 1,
@@ -14,10 +16,7 @@ const doctorData = {
   image: "https://via.placeholder.com/150",
   profile:
     "Dr. John Doe is a specialist in mental health, focusing on anxiety and depression treatment. ",
-  education: [
-    "S1 Psikologi - Universitas X",
-    "S2 Psikologi Klinis - Universitas Y",
-  ],
+  education: ["S1 Psikologi - Universitas X", "S2 Psikologi Klinis - Universitas Y"],
 };
 
 const ChatDokter = () => {
@@ -34,6 +33,8 @@ const ChatDokter = () => {
   const [psikolog, setPsikolog] = useState(null);
   const { authUser } = useAuth();
   const navigate = useNavigate();
+  const [statusPengajuan, setStatusPengajuan] = useState({ status: "not consultation" });
+
   useEffect(() => {
     if (!authUser) {
       navigate("/login");
@@ -49,7 +50,7 @@ const ChatDokter = () => {
         }
         setPsikolog(result.data);
       } catch (error) {
-        alert(error.message);
+        console.log(error.message);
       }
     };
     if (authUser) {
@@ -60,6 +61,23 @@ const ChatDokter = () => {
   if (!authUser || !psikolog) {
     return null;
   }
+
+  const handlePengajun = async () => {
+    const messageInput = "Saya ingin melakukan konsultasi";
+    try {
+      const { error, message, data } = await createPengajuanKonsultasi({
+        message: messageInput,
+        psychologistId: id_psikolog,
+      });
+      if (error) {
+        throw new Error(message);
+      }
+      toast.success(message);
+      setStatusPengajuan(data);
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
 
   const sendMessage = () => {
     if (message.trim()) {
@@ -94,16 +112,100 @@ const ChatDokter = () => {
 
       <div className="flex flex-col lg:flex-row space-y-4 lg:space-y-0 lg:space-x-6">
         <DokterDetail psikolog={psikolog} />
-
-        <div className="w-full lg:w-2/3 border bg-[#EBF6FF] px-4 py-8 rounded-lg shadow-lg flex flex-col">
-          <PesanChat messages={messages} doctorImage={doctorData.image} />
-          <ChatInput
+        {statusPengajuan?.status === "not consultation" || statusPengajuan?.status === "pending" ? (
+          <PengajuanKonsultasi
+            statusPengajuan={statusPengajuan}
+            psikolog={psikolog}
+            handlePengajuan={handlePengajun}
+            authUser={authUser}
+          />
+        ) : (
+          <ChatSection
             message={message}
+            messages={messages}
             setMessage={setMessage}
             sendMessage={sendMessage}
+            doctorData={doctorData}
           />
-        </div>
+        )}
       </div>
+    </div>
+  );
+};
+
+const PengajuanKonsultasi = ({ handlePengajuan, psikolog, statusPengajuan, authUser }) => {
+  return (
+    <div className="w-full flex flex-col justify-center items-center px-12">
+      {/* tabel status pengajuan */}
+      {statusPengajuan.status !== "not consultation" && (
+        <div className="mb-4 w-full">
+          <table className="min-w-full table-auto border-collapse">
+            <thead className="bg-[#EBF6FF]">
+              <tr>
+                <th className="px-4 py-2 font-medium text-left border-y border-gray-200 text-sm">
+                  No
+                </th>
+                <th className="px-4 py-2 font-medium text-left border-y border-gray-200 text-sm">
+                  User
+                </th>
+                <th className="px-4 py-2 font-medium text-left border-y border-gray-200 text-sm">
+                  Psikolog
+                </th>
+                <th className="px-4 py-2 font-medium text-left border-y border-gray-200 text-sm">
+                  Status
+                </th>
+                <th className="px-4 py-2 font-medium text-left border-y border-gray-200 text-sm">
+                  Tanggal
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr className="bg-white">
+                <td className="px-4 py-2 border-b border-gray-200 text-xs">1</td>
+                <td className="px-4 py-2 border-b border-gray-200 text-xs">
+                  {authUser.profile.fullname}
+                </td>
+                <td className="px-4 py-2 border-b border-gray-200 text-xs">
+                  {psikolog.profile.fullname}
+                </td>
+                <td
+                  className={`px-4 py-2 border-b font-semibold border-gray-200 text-xs ${
+                    statusPengajuan.status === "pending" ? "text-yellow-500" : "text-red-500"
+                  }`}
+                >
+                  {statusPengajuan.status}
+                </td>
+                <td className="px-4 py-2 border-b border-gray-200 text-xs">
+                  {formattedDate(statusPengajuan?.createdAt)}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {/* form pengajuan konsul */}
+      <div className="w-full bg-white shadow-md rounded-md flex flex-col justify-center items-center py-4 ">
+        <h4 className="text-sm md:text-lg mb-2">
+          Ajukan konsultasi bersama{" "}
+          <span className="text-[#35A7FF]">{psikolog.profile.fullname}</span>
+        </h4>
+        <button
+          onClick={handlePengajuan}
+          className="bg-[#35A7FF] hover:bg-[#3297e5] transition-all font-semibold text-white text-xs py-2 px-4 rounded-md md:text-sm"
+        >
+          Konsultasi
+        </button>
+      </div>
+    </div>
+  );
+};
+
+const ChatSection = ({ messages, message, setMessage, sendMessage, doctorData }) => {
+  return (
+    <div className="w-full lg:w-2/3 border bg-[#EBF6FF] px-4 py-8 rounded-lg shadow-lg flex flex-col">
+      <PesanChat messages={messages} doctorImage={doctorData.image} />
+      <ChatInput message={message} setMessage={setMessage} sendMessage={sendMessage} />
     </div>
   );
 };

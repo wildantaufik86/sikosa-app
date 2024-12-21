@@ -439,6 +439,32 @@ const getArticleById = async (idArticle) => {
   }
 };
 
+const createPengajuanKonsultasi = async ({ message, psychologistId }) => {
+  try {
+    const accessToken = getAccessToken();
+    if (!accessToken) {
+      throw new Error("Invalid access token");
+    }
+
+    const response = await fetch(`${CONFIG.BASE_URL}/consultation/apply`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`,
+      },
+      body: JSON.stringify({ message, psychologistId }),
+    });
+
+    if (!response.ok) {
+      throw new Error("Gagal melakukan pengajuan konsultasi");
+    }
+    const result = await response.json();
+    return { error: false, message: result.message, data: result.data };
+  } catch (error) {
+    return { error: true, message: error.message, data: null };
+  }
+};
+
 export {
   updateProfile,
   getAllPsikolog,
@@ -460,4 +486,5 @@ export {
   AdminDeleteArticle,
   AdminEditArticle,
   getArticleById,
+  createPengajuanKonsultasi,
 };

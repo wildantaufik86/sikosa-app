@@ -18,7 +18,7 @@ const Beranda = () => {
           throw new Error(response.message);
         }
         const filteredArticleByWriter = response.articles.filter(
-          (article) => article.writer === authUser._id
+          (article) => article.writer._id === authUser._id
         );
         setArticles(filteredArticleByWriter);
       } catch (error) {

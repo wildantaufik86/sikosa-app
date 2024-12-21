@@ -1,33 +1,38 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
+import useSWR from "swr";
 import SearchInput from "../../../components/admin/artikel-manajemen/SearchInput";
 import TableArtikel from "../../../components/admin/artikel-manajemen/TabelArtikel";
 import PaginationArtikelAdmin from "../../../components/admin/artikel-manajemen/PaginationArtikelAdmin";
 import { AdminGetArticles } from "../../../utils/api";
+
+const fetchArticles = async () => {
+  const response = await AdminGetArticles();
+  if (response.error) {
+    throw new Error(response.message);
+  }
+  return response.articles;
+};
 
 const ArtikelManajemen = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
-  const [articles, setArticles] = useState([]);
+  // Use SWR to fetch articles
+  const { data: articles, error, isLoading, mutate } = useSWR(
+    "/api/articles",
+    fetchArticles
+  );
+
+  // Handle filtered data and pagination
   const [filteredData, setFilteredData] = useState([]);
 
-  useEffect(() => {
-    const fetchArticles = async () => {
-      try {
-        const response = await AdminGetArticles();
-        if (response.error) {
-          throw new Error(response.message);
-        }
-        setArticles(response.articles);
-        setFilteredData(response.articles);
-      } catch (error) {
-        console.log(error.message);
-      }
-    };
-    fetchArticles();
-  }, []);
+  React.useEffect(() => {
+    if (articles) {
+      setFilteredData(articles);
+    }
+  }, [articles]);
 
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
 
@@ -36,23 +41,37 @@ const ArtikelManajemen = () => {
   };
 
   const getCurrendArticles = (selectedArticle) => {
-    setFilteredData(articles.filter((article) => article._id !== selectedArticle));
+    setFilteredData(
+      filteredData.filter((article) => article._id !== selectedArticle)
+    );
+    // Update data in SWR cache
+    mutate();
   };
 
   const handleSearchArtikel = (e) => {
     const query = e.target.value.toLowerCase();
     setSearchQuery(query);
     if (query) {
-      setFilteredData(articles.filter((article) => article.title.toLowerCase().includes(query)));
+      setFilteredData(
+        articles.filter((article) =>
+          article.title.toLowerCase().includes(query)
+        )
+      );
     } else {
       setFilteredData(articles);
     }
   };
 
+  if (isLoading) return <p>Loading...</p>;
+  if (error) return <p>Error loading articles: {error.message}</p>;
+
   return (
     <section className="pt-16 lg:pt-5">
       <header className="mb-4 flex justify-between items-center">
-        <SearchInput searchQuery={searchQuery} handleSearchArtikel={handleSearchArtikel} />
+        <SearchInput
+          searchQuery={searchQuery}
+          handleSearchArtikel={handleSearchArtikel}
+        />
       </header>
 
       <h1 className="text-2xl font-semibold border-b-2 border-black pb-2 mb-6">

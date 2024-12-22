@@ -3,9 +3,9 @@ import {
   updateUserProfileHandler,
   getDoctorProfile,
   getUserChat,
-  getUserConsultationHistory,
   getUserConsultationDetail,
   getAllPsychologist,
+  getConsultationsForUser,
 } from "../controllers/user.controller";
 import authenticate from "../middleware/authenticate";
 import validateRole from "../middleware/validateRole";
@@ -25,7 +25,7 @@ userRoutes.get("/psikolog/:id", authenticate, validateRole("mahasiswa"), getDoct
 userRoutes.get("/chat/:id", authenticate, validateRole("mahasiswa"), getUserChat);
 
 // Riwayat Konsultasi
-userRoutes.get("/consultation/history", authenticate, validateRole("mahasiswa"), getUserConsultationHistory);
+userRoutes.get("/consultation/history", authenticate, validateRole("mahasiswa"), getConsultationsForUser);
 userRoutes.get("/consultation/history/:id", authenticate, validateRole("mahasiswa"), getUserConsultationDetail);
 
 // Apply Consultation

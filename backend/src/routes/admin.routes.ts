@@ -9,6 +9,7 @@ import {
   createUser,
   deleteArticle,
   deleteProfileUser,
+  getAllConsultations,
   getArticleAll,
   getArticleDetail,
   getUserProfile,
@@ -35,22 +36,10 @@ adminRoutes.get("/users/all", authenticate, validateRole("admin"), getUserProfil
 adminRoutes.get("/users/:id", authenticate, validateRole("admin"), getUserProfile);
 
 // POST Membuat User
-adminRoutes.post(
-  "/users",
-  authenticate,
-  validateRole("admin"),
-  upload.single("picture"),
-  createUser
-);
+adminRoutes.post("/users", authenticate, validateRole("admin"), upload.single("picture"), createUser);
 
 // PUT Update data User
-adminRoutes.put(
-  "/users/:id",
-  authenticate,
-  validateRole("admin"),
-  upload.single("picture"),
-  userProfileEdit
-);
+adminRoutes.put("/users/:id", authenticate, validateRole("admin"), upload.single("picture"), userProfileEdit);
 
 // DELETE User
 adminRoutes.delete("/users/:id", authenticate, validateRole("admin"), deleteProfileUser);
@@ -62,25 +51,15 @@ adminRoutes.get("/articles", authenticate, validateRole("admin"), getArticleAll)
 adminRoutes.get("/articles/:id", authenticate, validateRole("admin"), getArticleDetail);
 
 // POST membuat artikel
-adminRoutes.post(
-  "/articles",
-  authenticate,
-  validateRole("admin"),
-  upload.single("thumbnail"),
-  createArticle
-);
+adminRoutes.post("/articles", authenticate, validateRole("admin"), upload.single("thumbnail"), createArticle);
 
 // PUT Update artikel
-adminRoutes.put(
-  "/articles/:id",
-  authenticate,
-  validateRole("admin"),
-  upload.single("thumbnail"),
-  ArticleEdit
-);
+adminRoutes.put("/articles/:id", authenticate, validateRole("admin"), upload.single("thumbnail"), ArticleEdit);
 
 // DELETE Menghapus artikel
 adminRoutes.delete("/articles/:id", authenticate, validateRole("admin"), deleteArticle);
+
+adminRoutes.get("/consultation/all", authenticate, validateRole("admin"), getAllConsultations);
 
 // View logs
 adminRoutes.get("/logs", authenticate, validateRole("admin"), async (req, res) => {

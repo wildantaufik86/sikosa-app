@@ -1,8 +1,10 @@
-import { Request, Response } from "express";
+import { Request, RequestHandler, Response } from "express";
 import UserModel from "../models/userModel";
 import { CREATED, INTERNAL_SERVER_ERROR, NOT_FOUND, OK } from "../constants/http";
 import { hashValue } from "../utils/bcrypt";
 import ArticleModel from "../models/articleModel";
+import { ConsultationModel } from "../models/consultationModel";
+import mongoose from "mongoose";
 
 export const getUserProfileAll = async (req: Request, res: Response) => {
   try {
@@ -31,9 +33,7 @@ export const getUserProfile = async (req: Request, res: Response) => {
       data: userProfile,
     });
   } catch (error) {
-    return res
-      .status(INTERNAL_SERVER_ERROR)
-      .json({ message: "Failed to get detail profile", error });
+    return res.status(INTERNAL_SERVER_ERROR).json({ message: "Failed to get detail profile", error });
   }
 };
 
@@ -60,8 +60,7 @@ export const createUser = async (req: Request, res: Response) => {
 
 export const userProfileEdit = async (req: Request, res: Response) => {
   const { id } = req.params;
-  const { email, password, role, fullname, description, educationBackground, specialization, nim } =
-    req.body;
+  const { email, password, role, fullname, description, educationBackground, specialization, nim } = req.body;
 
   try {
     const user = await UserModel.findById(id);
@@ -109,9 +108,7 @@ export const getArticleAll = async (req: Request, res: Response) => {
     const articles = await ArticleModel.find().populate("writer", "profile.fullname");
     res.status(OK).json({ message: "Data Artikel berhasil di dapatkan", data: articles });
   } catch (error) {
-    return res
-      .status(INTERNAL_SERVER_ERROR)
-      .json({ message: "Gagal mendapatkan data artikel", error });
+    return res.status(INTERNAL_SERVER_ERROR).json({ message: "Gagal mendapatkan data artikel", error });
   }
 };
 
@@ -124,9 +121,7 @@ export const getArticleDetail = async (req: Request, res: Response) => {
     }
     res.status(OK).json({ message: "Data Artikel berhasil di dapatkan", data: articles });
   } catch (error) {
-    return res
-      .status(INTERNAL_SERVER_ERROR)
-      .json({ message: "Gagal mendapatkan data artikel", INTERNAL_SERVER_ERROR });
+    return res.status(INTERNAL_SERVER_ERROR).json({ message: "Gagal mendapatkan data artikel", INTERNAL_SERVER_ERROR });
   }
 };
 
@@ -215,3 +210,56 @@ function formatArticle(article: any) {
     updatedAt,
   };
 }
+
+export const getAllConsultations: RequestHandler = async (req, res) => {
+  try {
+    // Ambil semua data konsultasi dengan populate untuk user dan psychologist
+    const consultations = await ConsultationModel.find()
+      .populate({
+        path: "psychologistId",
+        select: "profile fullname email",
+      })
+      .populate({
+        path: "userId",
+        select: "profile fullname email",
+      })
+      .exec();
+
+    // Format data konsultasi
+    const formattedConsultations = consultations.map((consultation) => {
+      const typedConsultation = consultation as unknown as {
+        _id: mongoose.Types.ObjectId;
+        psychologistId: { _id: mongoose.Types.ObjectId; profile?: { fullname: string }; email: string };
+        userId: { _id: mongoose.Types.ObjectId; profile?: { fullname: string }; email: string };
+        status: "pending" | "accepted" | "rejected";
+        createdAt: Date;
+      };
+
+      return {
+        consultationId: typedConsultation._id.toString(),
+        psychologist: {
+          _id: typedConsultation.psychologistId._id.toString(),
+          fullname: typedConsultation.psychologistId.profile?.fullname || "",
+          email: typedConsultation.psychologistId.email,
+        },
+        user: {
+          _id: typedConsultation.userId._id.toString(),
+          fullname: typedConsultation.userId.profile?.fullname || "",
+          email: typedConsultation.userId.email,
+        },
+        status: typedConsultation.status,
+        createdAt: typedConsultation.createdAt,
+      };
+    });
+
+    res.status(200).json({
+      message: "Consultations fetched successfully",
+      data: formattedConsultations,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(400).json({
+      message: "Failed to fetch consultations",
+    });
+  }
+};

@@ -71,7 +71,7 @@ export const getNotificationsForPsychologist: RequestHandler = async (req, res) 
   try {
     const consultations = await ConsultationModel.find({
       psychologistId,
-      status: { $in: ["pending", "accepted"] },
+      status: { $in: ["pending", "accepted", "rejected"] },
     })
       .populate("userId", "profile fullname email")
       .exec();
@@ -81,6 +81,7 @@ export const getNotificationsForPsychologist: RequestHandler = async (req, res) 
         _id: mongoose.Types.ObjectId;
         userId: { _id: mongoose.Types.ObjectId; profile?: { fullname: string }; email: string };
         status: "pending" | "accepted" | "rejected";
+        createdAt: Date;
       };
 
       return {
@@ -92,6 +93,7 @@ export const getNotificationsForPsychologist: RequestHandler = async (req, res) 
         },
         message: `Consultation request from ${typedConsultation.userId.profile?.fullname} is ${typedConsultation.status}`,
         status: typedConsultation.status,
+        createdAt: typedConsultation.createdAt,
       };
     });
 

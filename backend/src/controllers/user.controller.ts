@@ -4,6 +4,8 @@ import appAssert from "../utils/appAssert";
 import { BAD_REQUEST, INTERNAL_SERVER_ERROR, OK } from "../constants/http";
 import AppErrorCode from "../constants/appErrorCode";
 import path from "path";
+import { ConsultationModel } from "../models/consultationModel";
+import mongoose from "mongoose";
 
 export const updateUserProfileHandler: RequestHandler = async (req, res) => {
   const userId = req.userId;
@@ -39,10 +41,7 @@ export const updateUserProfileHandler: RequestHandler = async (req, res) => {
     // Hapus file lama jika ada
     if (oldProfilePicture && oldProfilePicture !== picture) {
       try {
-        const oldFilePath = path.join(
-          __dirname,
-          `../public${oldProfilePicture}`
-        );
+        const oldFilePath = path.join(__dirname, `../public${oldProfilePicture}`);
         // await fs.unlink(oldFilePath);
       } catch (error) {
         console.error("Gagal menghapus file lama:", error);
@@ -78,9 +77,7 @@ export const getDoctorProfile = async (req: Request, res: Response) => {
     );
 
     if (!doctorProfile) {
-      return res
-        .status(404)
-        .json({ message: "Dokter/Psikolog tidak ditemukan" });
+      return res.status(404).json({ message: "Dokter/Psikolog tidak ditemukan" });
     }
 
     return res.status(OK).json({
@@ -88,9 +85,7 @@ export const getDoctorProfile = async (req: Request, res: Response) => {
       data: doctorProfile,
     });
   } catch (error) {
-    return res
-      .status(INTERNAL_SERVER_ERROR)
-      .json({ message: "Error fetching doctor profile" });
+    return res.status(INTERNAL_SERVER_ERROR).json({ message: "Error fetching doctor profile" });
   }
 };
 
@@ -140,25 +135,52 @@ export const getUserChat = async ({ req, res }: any) => {
       },
     });
   } catch (error) {
-    return res
-      .status(INTERNAL_SERVER_ERROR)
-      .json({ message: "Error fetching chat data" });
+    return res.status(INTERNAL_SERVER_ERROR).json({ message: "Error fetching chat data" });
   }
 };
 
-// GET /user/consultation/history
-export const getUserConsultationHistory = async ({ req, res }: any) => {
+export const getConsultationsForUser: RequestHandler = async (req, res) => {
+  const userId = req.userId; // Mengambil userId dari middleware authentication
+
   try {
-    return res.status(OK).json({
-      message: "Riwayat konsultasi",
-      data: {
-        /* Tambahkan data */
-      },
+    // Ambil semua konsultasi yang terkait dengan user
+    const consultations = await ConsultationModel.find({ userId })
+      .populate({
+        path: "psychologistId",
+        select: "profile fullname email", // Pastikan field yang dibutuhkan diambil
+      })
+      .exec();
+
+    const formattedConsultations = consultations.map((consultation) => {
+      const typedConsultation = consultation as unknown as {
+        _id: mongoose.Types.ObjectId;
+        psychologistId: { _id: mongoose.Types.ObjectId; profile?: { fullname: string }; email: string };
+        status: "pending" | "accepted" | "rejected";
+        createdAt: Date;
+      };
+
+      return {
+        consultationId: typedConsultation._id.toString(),
+        psychologist: {
+          _id: typedConsultation.psychologistId?._id?.toString() || "",
+          fullname: typedConsultation.psychologistId?.profile?.fullname || "Unknown",
+          email: typedConsultation.psychologistId?.email || "Unknown",
+        },
+        status: typedConsultation.status,
+        createdAt: typedConsultation.createdAt,
+      };
+    });
+
+    // Kirimkan data dalam respons
+    res.status(200).json({
+      message: "Consultations fetched successfully",
+      data: formattedConsultations,
     });
   } catch (error) {
-    return res
-      .status(INTERNAL_SERVER_ERROR)
-      .json({ message: "Error fetching consultation history" });
+    console.error(error);
+    res.status(400).json({
+      message: "Failed to fetch consultations",
+    });
   }
 };
 
@@ -173,8 +195,6 @@ export const getUserConsultationDetail = async ({ req, res }: any) => {
       },
     });
   } catch (error) {
-    return res
-      .status(INTERNAL_SERVER_ERROR)
-      .json({ message: "Error fetching consultation detail" });
+    return res.status(INTERNAL_SERVER_ERROR).json({ message: "Error fetching consultation detail" });
   }
 };

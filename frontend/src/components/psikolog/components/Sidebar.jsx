@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link, NavLink } from "react-router-dom";
 import { FiMenu } from "react-icons/fi";
 import { IoMdNotificationsOutline, IoMdLogOut } from "react-icons/io";
@@ -7,17 +7,37 @@ import { BiMessageAlt } from "react-icons/bi";
 import { useAuth } from "../../../hooks/hooks";
 import CONFIG from "../../../config/config";
 import { FaUser } from "react-icons/fa";
+import { getNotifications } from "../../../utils/api";
 
 const PsikologSidebar = () => {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const { authUser, handleLogout } = useAuth();
 
-  const notificationsCount = 5; // Gantilah sesuai dengan jumlah notifikasi yang sebenarnya
+  const [notificationsCount, setNotificationsCount] = useState(0);
   const messagesCount = 3;
 
   const toggleDrawer = () => {
     setIsDrawerOpen(!isDrawerOpen);
   };
+
+  // get notification
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      try {
+        const { error, message, notifications } = await getNotifications();
+        if (error) {
+          throw new Error(message);
+        }
+        const notifFiltered = notifications.filter((notif) => notif.status === "pending");
+        setNotificationsCount(notifFiltered.length);
+      } catch (error) {
+        console.log(error.message);
+      }
+    };
+    fetchNotifications();
+  }, []);
+
+  console.log(notificationsCount);
 
   return (
     <div className="bg-white">
@@ -28,11 +48,7 @@ const PsikologSidebar = () => {
         </button>
 
         <Link to="/psikolog/dashboard" className="flex items-center space-x-2">
-          <img
-            src="/assets/nav-logo.png"
-            alt="Logo"
-            className="w-5 h-5 object-cover"
-          />
+          <img src="/assets/nav-logo.png" alt="Logo" className="w-5 h-5 object-cover" />
           <h2 className="text-xl font-bold text-[#35A7FF]">Sikosa</h2>
         </Link>
       </div>
@@ -45,23 +61,13 @@ const PsikologSidebar = () => {
       >
         <div>
           {/* Close Button for Drawer */}
-          <button
-            className="absolute top-4 right-4 text-gray-800 text-2xl lg:hidden"
-            onClick={toggleDrawer}
-          >
+          <button className="absolute top-4 right-4 text-gray-800 text-2xl lg:hidden" onClick={toggleDrawer}>
             <AiOutlineClose />
           </button>
 
           {/* Sidebar Header with Logo and Title */}
-          <Link
-            to="/psikolog/dashboard"
-            className="flex items-center p-3 space-x-1"
-          >
-            <img
-              src="/assets/nav-logo.png"
-              alt="Logo"
-              className="w-5 h-5 object-cover"
-            />
+          <Link to="/psikolog/dashboard" className="flex items-center p-3 space-x-1">
+            <img src="/assets/nav-logo.png" alt="Logo" className="w-5 h-5 object-cover" />
             <h2 className="text-xl font-bold text-[#35A7FF]">Sikosa</h2>
           </Link>
 
@@ -72,9 +78,7 @@ const PsikologSidebar = () => {
                 to="/psikolog/dashboard"
                 className={({ isActive }) =>
                   `block text-sm font-semibold py-2 px-4 rounded ${
-                    isActive
-                      ? "bg-[#EFF6FF] text-[#35A7FF]"
-                      : "text-gray-800 hover:bg-[#EFF6FF] hover:text-[#35A7FF]"
+                    isActive ? "bg-[#EFF6FF] text-[#35A7FF]" : "text-gray-800 hover:bg-[#EFF6FF] hover:text-[#35A7FF]"
                   }`
                 }
               >
@@ -86,9 +90,7 @@ const PsikologSidebar = () => {
                 to="/psikolog/artikel"
                 className={({ isActive }) =>
                   `block text-sm font-semibold py-2 px-4 rounded ${
-                    isActive
-                      ? "bg-[#EFF6FF] text-[#35A7FF]"
-                      : "text-gray-800 hover:bg-[#EFF6FF] hover:text-[#35A7FF]"
+                    isActive ? "bg-[#EFF6FF] text-[#35A7FF]" : "text-gray-800 hover:bg-[#EFF6FF] hover:text-[#35A7FF]"
                   }`
                 }
               >
@@ -100,9 +102,7 @@ const PsikologSidebar = () => {
                 to="/psikolog/profile"
                 className={({ isActive }) =>
                   `block text-sm font-semibold py-2 px-4 rounded ${
-                    isActive
-                      ? "bg-[#EFF6FF] text-[#35A7FF]"
-                      : "text-gray-800 hover:bg-[#EFF6FF] hover:text-[#35A7FF]"
+                    isActive ? "bg-[#EFF6FF] text-[#35A7FF]" : "text-gray-800 hover:bg-[#EFF6FF] hover:text-[#35A7FF]"
                   }`
                 }
               >
@@ -114,9 +114,7 @@ const PsikologSidebar = () => {
                 to="/psikolog/layanan"
                 className={({ isActive }) =>
                   `block text-sm font-semibold py-2 px-4 rounded ${
-                    isActive
-                      ? "bg-[#EFF6FF] text-[#35A7FF]"
-                      : "text-gray-800 hover:bg-[#EFF6FF] hover:text-[#35A7FF]"
+                    isActive ? "bg-[#EFF6FF] text-[#35A7FF]" : "text-gray-800 hover:bg-[#EFF6FF] hover:text-[#35A7FF]"
                   }`
                 }
               >
@@ -134,9 +132,7 @@ const PsikologSidebar = () => {
               to="/psikolog/messages"
               className={({ isActive }) =>
                 `flex items-center justify-between space-x-2 text-gray-800 py-2 px-4 rounded ${
-                  isActive
-                    ? "bg-[#EFF6FF] text-[#35A7FF]"
-                    : "hover:bg-[#EFF6FF] hover:text-[#35A7FF]"
+                  isActive ? "bg-[#EFF6FF] text-[#35A7FF]" : "hover:bg-[#EFF6FF] hover:text-[#35A7FF]"
                 }`
               }
             >
@@ -156,9 +152,7 @@ const PsikologSidebar = () => {
               to="/psikolog/notifikasi"
               className={({ isActive }) =>
                 `flex justify-between items-center space-x-2 text-gray-800 py-2 px-4 rounded ${
-                  isActive
-                    ? "bg-[#EFF6FF] text-[#35A7FF]"
-                    : "hover:bg-[#EFF6FF] hover:text-[#35A7FF]"
+                  isActive ? "bg-[#EFF6FF] text-[#35A7FF]" : "hover:bg-[#EFF6FF] hover:text-[#35A7FF]"
                 }`
               }
             >
@@ -197,9 +191,7 @@ const PsikologSidebar = () => {
               </div>
             )}
             <div>
-              <p className="font-semibold text-md text-gray-800">
-                {authUser.profile.fullname}
-              </p>
+              <p className="font-semibold text-md text-gray-800">{authUser.profile.fullname}</p>
               <p className="text-gray-500 text-xs">{authUser.email}</p>
             </div>
           </div>
@@ -207,12 +199,7 @@ const PsikologSidebar = () => {
       </aside>
 
       {/* Overlay for Drawer */}
-      {isDrawerOpen && (
-        <div
-          className="fixed inset-0 bg-black opacity-50 lg:hidden z-40"
-          onClick={toggleDrawer}
-        />
-      )}
+      {isDrawerOpen && <div className="fixed inset-0 bg-black opacity-50 lg:hidden z-40" onClick={toggleDrawer} />}
     </div>
   );
 };

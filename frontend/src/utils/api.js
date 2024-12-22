@@ -465,6 +465,57 @@ const createPengajuanKonsultasi = async ({ message, psychologistId }) => {
   }
 };
 
+// psikolog get notification
+const getNotifications = async () => {
+  try {
+    const accessToken = getAccessToken();
+    if (!accessToken) {
+      throw new Error("Invalid access token");
+    }
+
+    const response = await fetch(`${CONFIG.BASE_URL}/psikolog/notifications`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error("Gagal mengambil notifications");
+    }
+    const result = await response.json();
+    return { error: false, message: result.message, notifications: result.data };
+  } catch (error) {
+    return { error: true, message: error.message, notifications: null };
+  }
+};
+
+// psikolog accept konsultasi
+const psikologHandleConcultationRequest = async (consultationId, status) => {
+  try {
+    const accessToken = getAccessToken();
+    if (!accessToken) {
+      throw new Error("Invalid access token");
+    }
+
+    const response = await fetch(`${CONFIG.BASE_URL}/consultation/${consultationId}/status`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`,
+      },
+      body: JSON.stringify(status),
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to update consultation request");
+    }
+    const result = await response.json();
+    return { error: false, message: result.message, data: result.data };
+  } catch (error) {
+    return { error: true, message: error.message, data: null };
+  }
+};
+
 export {
   updateProfile,
   getAllPsikolog,
@@ -487,4 +538,6 @@ export {
   AdminEditArticle,
   getArticleById,
   createPengajuanKonsultasi,
+  getNotifications,
+  psikologHandleConcultationRequest,
 };

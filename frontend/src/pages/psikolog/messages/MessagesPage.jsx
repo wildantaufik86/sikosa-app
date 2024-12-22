@@ -118,17 +118,27 @@ const MessagesPage = () => {
       return;
     }
 
+    // Immediately update the messages state
+    const newMessageObj = {
+      ...messageData,
+      timestamp: new Date().toISOString(),
+      _id: Date.now().toString(), // Create a temporary ID
+    };
+
+    setMessages((prevMessages) => [...prevMessages, newMessageObj]);
+
     try {
+      // Send the message to the backend
       await axios.post("http://localhost:5000/chat/messages", messageData, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
 
-      // Emit pesan ke backend
+      // Emit the message to the socket server
       socket.current.emit("sendMessage", messageData);
 
-      // Jangan langsung tambahkan ke state di sini
+      // Clear the input field
       setNewMessage("");
       scrollToBottom();
     } catch (err) {

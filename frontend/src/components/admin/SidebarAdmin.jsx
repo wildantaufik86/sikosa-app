@@ -23,11 +23,7 @@ const AdminSidebar = () => {
         </button>
 
         <Link to="/admin/dashboard" className="flex items-center space-x-2">
-          <img
-            src="/assets/nav-logo.png"
-            alt="Logo"
-            className="w-5 h-5 object-cover"
-          />
+          <img src="/assets/nav-logo.png" alt="Logo" className="w-5 h-5 object-cover" />
           <h2 className="text-xl font-bold text-[#35A7FF]">Sikosa</h2>
         </Link>
       </div>
@@ -40,23 +36,13 @@ const AdminSidebar = () => {
       >
         <div>
           {/* Close Button for Drawer */}
-          <button
-            className="absolute top-4 right-4 text-gray-800 text-2xl lg:hidden"
-            onClick={toggleDrawer}
-          >
+          <button className="absolute top-4 right-4 text-gray-800 text-2xl lg:hidden" onClick={toggleDrawer}>
             <AiOutlineClose />
           </button>
 
           {/* Sidebar Header with Logo and Title */}
-          <Link
-            to="/admin/dashboard"
-            className="flex items-center p-3 space-x-1"
-          >
-            <img
-              src="/assets/nav-logo.png"
-              alt="Logo"
-              className="w-5 h-5 object-cover"
-            />
+          <Link to="/admin/dashboard" className="flex items-center p-3 space-x-1">
+            <img src="/assets/nav-logo.png" alt="Logo" className="w-5 h-5 object-cover" />
             <h2 className="text-xl font-bold text-[#35A7FF]">Sikosa</h2>
           </Link>
 
@@ -64,12 +50,10 @@ const AdminSidebar = () => {
           <ul className="space-y-2">
             <li>
               <NavLink
-                to="s"
+                to="/admin/logs"
                 className={({ isActive }) =>
                   `block text-sm font-semibold py-2 px-4 rounded ${
-                    isActive
-                      ? "bg-[#EFF6FF] text-[#35A7FF]"
-                      : "text-gray-800 hover:bg-[#EFF6FF] hover:text-[#35A7FF]"
+                    isActive ? "bg-[#EFF6FF] text-[#35A7FF]" : "text-gray-800 hover:bg-[#EFF6FF] hover:text-[#35A7FF]"
                   }`
                 }
               >
@@ -81,9 +65,7 @@ const AdminSidebar = () => {
                 to="/admin/user"
                 className={({ isActive }) =>
                   `block text-sm font-semibold py-2 px-4 rounded ${
-                    isActive
-                      ? "bg-[#EFF6FF] text-[#35A7FF]"
-                      : "text-gray-800 hover:bg-[#EFF6FF] hover:text-[#35A7FF]"
+                    isActive ? "bg-[#EFF6FF] text-[#35A7FF]" : "text-gray-800 hover:bg-[#EFF6FF] hover:text-[#35A7FF]"
                   }`
                 }
               >
@@ -92,26 +74,10 @@ const AdminSidebar = () => {
             </li>
             <li>
               <NavLink
-                to="admin/layanan"
-                className={({ isActive }) =>
-                  `block text-sm font-semibold py-2 px-4 rounded ${
-                    isActive
-                      ? "bg-[#EFF6FF] text-[#35A7FF]"
-                      : "text-gray-800 hover:bg-[#EFF6FF] hover:text-[#35A7FF]"
-                  }`
-                }
-              >
-                Layanan Manajemen
-              </NavLink>
-            </li>
-            <li>
-              <NavLink
                 to="/admin/artikel-manajemen"
                 className={({ isActive }) =>
                   `block text-sm font-semibold py-2 px-4 rounded ${
-                    isActive
-                      ? "bg-[#EFF6FF] text-[#35A7FF]"
-                      : "text-gray-800 hover:bg-[#EFF6FF] hover:text-[#35A7FF]"
+                    isActive ? "bg-[#EFF6FF] text-[#35A7FF]" : "text-gray-800 hover:bg-[#EFF6FF] hover:text-[#35A7FF]"
                   }`
                 }
               >
@@ -136,15 +102,9 @@ const AdminSidebar = () => {
 
           {/* Profile Section */}
           <div className="flex items-center px-4 space-x-4">
-            <img
-              src="/assets/home-image.png"
-              alt="Profile"
-              className="w-12 h-12 object-cover rounded-full"
-            />
+            <img src="/assets/home-image.png" alt="Profile" className="w-12 h-12 object-cover rounded-full" />
             <div>
-              <p className="font-semibold text-md text-gray-800">
-                {authUser.profile.fullname}
-              </p>
+              <p className="font-semibold text-md text-gray-800">{authUser.profile.fullname}</p>
               <p className="text-gray-500 text-xs">{authUser.email}</p>
             </div>
           </div>
@@ -152,12 +112,7 @@ const AdminSidebar = () => {
       </aside>
 
       {/* Overlay for Drawer */}
-      {isDrawerOpen && (
-        <div
-          className="fixed inset-0 bg-black opacity-50 lg:hidden z-40"
-          onClick={toggleDrawer}
-        />
-      )}
+      {isDrawerOpen && <div className="fixed inset-0 bg-black opacity-50 lg:hidden z-40" onClick={toggleDrawer} />}
     </div>
   );
 };

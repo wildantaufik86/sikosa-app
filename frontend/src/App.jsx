@@ -34,7 +34,7 @@ import EditUser from "./pages/admin/users/EditUser";
 import ArtikelView from "./pages/psikolog/artikel/ArticleView";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import Logs from "./pages/admin/logs/Logs";
+import Logs from "./pages/admin/logsAdmin/Logs";
 
 function App() {
   return (

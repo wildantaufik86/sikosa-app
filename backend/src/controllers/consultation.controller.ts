@@ -6,26 +6,37 @@ import AppErrorCode from "../constants/appErrorCode";
 import chatRoom from "../models/chatRoom";
 import mongoose from "mongoose";
 
+// Handler for user sending consultation request
 export const applyConsultationHandler: RequestHandler = async (req, res) => {
   const { psychologistId, message } = req.body;
-  const userId = req.userId; // Dari middleware authenticate
+  const userId = req.userId; // From authentication middleware
 
-  // Validasi input
+  // Validate input
   appAssert(psychologistId && message, BAD_REQUEST, "Psychologist ID and message are required.");
 
-  // Simpan data konsultasi
+  // Create consultation with "inactive" room status
   const consultation = await ConsultationModel.create({
     userId,
     psychologistId,
     message,
+    status: "pending", // Set initial consultation status as "pending"
+  });
+
+  // Create a room with "inactive" status
+  const room = await chatRoom.create({
+    consultationId: consultation._id,
+    participants: [userId, psychologistId],
+    status: "inactive", // Set room status as "inactive" initially
   });
 
   res.status(CREATED).json({
     message: "Consultation request sent successfully.",
     data: consultation,
+    room: room,
   });
 };
 
+// Handler for psychologist accepting or rejecting the consultation
 export const updateConsultationStatus: RequestHandler = async (req, res) => {
   const psychologistId = req.userId;
   const { id } = req.params;
@@ -46,16 +57,15 @@ export const updateConsultationStatus: RequestHandler = async (req, res) => {
   consultation.status = status;
   await consultation.save();
 
+  // If the psychologist accepts the consultation, update room to "active"
   if (status === "accepted") {
-    const existingRoom = await chatRoom.findOne({
+    const room = await chatRoom.findOne({
       consultationId: consultation._id,
     });
 
-    if (!existingRoom) {
-      await chatRoom.create({
-        consultationId: consultation._id,
-        participants: [consultation.userId, psychologistId],
-      });
+    if (room && room.status === "inactive") {
+      room.status = "active"; // Change room status to "active"
+      await room.save();
     }
   }
 

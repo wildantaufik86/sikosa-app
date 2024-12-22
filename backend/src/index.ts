@@ -66,32 +66,46 @@ app.use(errorHandler);
 io.on("connection", (socket) => {
   console.log(`New client connected: ${socket.id}`);
 
-  // Join Room
-  socket.on("joinRoom", (roomId) => {
-    socket.join(roomId);
-    console.log(`Client joined room: ${roomId}`);
+  // Handle client joining room
+  socket.on("joinRoom", async ({ roomId, userId }) => {
+    try {
+      const chatRoomInstance = await chatRoom.findById(roomId);
+      if (!chatRoomInstance) {
+        socket.emit("error", { message: "Chat room not found." });
+        return;
+      }
+      socket.join(roomId);
+      console.log(`Client ${userId} joined room: ${roomId}`);
+    } catch (error) {
+      console.error("Error while joining room:", error);
+      socket.emit("error", { message: "Failed to join room." });
+    }
   });
 
-  // Emit event ke user tertentu untuk update daftar chat
+  // Handle incoming messages
   socket.on("sendMessage", async ({ roomId, senderId, message }) => {
     const timestamp = new Date();
 
     try {
       const chatRoomInstance = await chatRoom.findById(roomId);
-      if (chatRoomInstance) {
-        chatRoomInstance.messages.push({ senderId, message, timestamp });
-        await chatRoomInstance.save();
-
-        // Emit pesan baru ke semua user di room
-        io.to(roomId).emit("receiveMessage", { senderId, message, timestamp });
+      if (!chatRoomInstance) {
+        socket.emit("error", { message: "Chat room not found." });
+        return;
       }
+
+      // Save the message to the chat room document
+      chatRoomInstance.messages.push({ senderId, message, timestamp });
+      await chatRoomInstance.save();
+
+      // Emit the new message to all clients in the room
+      io.to(roomId).emit("receiveMessage", { senderId, message, timestamp });
     } catch (error) {
       console.error("Error handling chat room messages:", error);
       socket.emit("error", { message: "Failed to save message." });
     }
   });
 
-  // Handle Disconnect
+  // Handle client disconnecting
   socket.on("disconnect", () => {
     console.log("Client disconnected:", socket.id);
   });

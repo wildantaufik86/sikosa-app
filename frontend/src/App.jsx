@@ -86,7 +86,7 @@ function App() {
           }
         />
         <Route
-          path="/chat-dokter/:id_psikolog"
+          path="/dokter/:id_psikolog"
           element={
             <UserLayout>
               <ChatDokter />

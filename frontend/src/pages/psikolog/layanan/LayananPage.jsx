@@ -1,6 +1,25 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { getNotifications } from "../../../utils/api";
 
 const LayananPage = () => {
+  const [consultations, setConsultations] = useState([]);
+
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      try {
+        const { error, message, notifications: consulData } = await getNotifications();
+        if (error) {
+          throw new Error(message);
+        }
+        setConsultations(consulData);
+      } catch (error) {
+        console.log(error.message);
+      }
+    };
+    fetchNotifications();
+  }, []);
+
+  console.log(consultations);
   return (
     <div className="pt-16 lg:pt-5 ">
       {/* Judul dengan Border Bawah */}
@@ -12,27 +31,27 @@ const LayananPage = () => {
         <table className="w-full">
           <thead>
             <tr className="bg-[#EBF6FF]">
-              <th className="py-2 px-4 border-b text-m font-medium text-left border-gray-200">Service</th>
-              <th className="py-2 px-4 border-b text-m font-medium text-left border-gray-200">Status</th>
-              <th className="py-2 px-4 border-b text-m font-medium text-left border-gray-200">Date</th>
+              <th className="py-2 px-4 border-b text-m font-medium text-left border-gray-200">NO</th>
+              <th className="py-2 px-4 border-b text-m font-medium text-left border-gray-200">USER</th>
+              <th className="py-2 px-4 border-b text-m font-medium text-left border-gray-200">EMAIL</th>
+              <th className="py-2 px-4 border-b text-m font-medium text-left border-gray-200">STATUS</th>
             </tr>
           </thead>
           <tbody>
-            <tr>
-              <td className="py-2 px-4 border-b border-gray-200">Consultation</td>
-              <td className="py-2 px-4 border-b border-gray-200">Active</td>
-              <td className="py-2 px-4 border-b border-gray-200">2024-11-09</td>
-            </tr>
-            <tr>
-              <td className="py-2 px-4 border-b border-gray-200">Therapy Session</td>
-              <td className="py-2 px-4 border-b border-gray-200">Inactive</td>
-              <td className="py-2 px-4 border-b border-gray-200">2024-11-10</td>
-            </tr>
-            <tr>
-              <td className="py-2 px-4 border-b border-gray-200">Group Session</td>
-              <td className="py-2 px-4 border-b border-gray-200">Active</td>
-              <td className="py-2 px-4 border-b border-gray-200">2024-11-12</td>
-            </tr>
+            {consultations.map((data, index) => (
+              <tr key={index}>
+                <td className="py-2 px-4 border-b border-gray-200">{index + 1}</td>
+                <td className="py-2 px-4 border-b border-gray-200">{data.user.fullname}</td>
+                <td className="py-2 px-4 border-b border-gray-200">{data.user.email}</td>
+                {data.status === "pending" && (
+                  <td className="py-2 px-4 border-b border-gray-200 text-orange-500">{data.status}</td>
+                )}
+                {data.status === "accepted" && (
+                  <td className="py-2 px-4 border-b border-gray-200 text-green-500">{data.status}</td>
+                )}
+                {data.status === "rejected" && <td className="py-2 px-4 border-b border-gray-200 text-red-500">{data.status}</td>}
+              </tr>
+            ))}
           </tbody>
         </table>
       </div>

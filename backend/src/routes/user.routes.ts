@@ -17,58 +17,21 @@ import upload from "../middleware/upload";
 
 const userRoutes = Router();
 
-userRoutes.get(
-  "/psikolog/all",
-  authenticate,
-  validateRole("mahasiswa"),
-  getAllPsychologist
-);
+userRoutes.get("/psikolog/all", authenticate, validateRole("mahasiswa"), getAllPsychologist);
 
-userRoutes.get(
-  "/psikolog/:id",
-  authenticate,
-  validateRole("mahasiswa"),
-  getDoctorProfile
-);
+userRoutes.get("/psikolog/:id", authenticate, validateRole("mahasiswa"), getDoctorProfile);
 
 // Chat
-userRoutes.get(
-  "/chat/:id",
-  authenticate,
-  validateRole("mahasiswa"),
-  getUserChat
-);
+userRoutes.get("/chat/:id", authenticate, validateRole("mahasiswa"), getUserChat);
 
 // Riwayat Konsultasi
-userRoutes.get(
-  "/consultation/history",
-  authenticate,
-  validateRole("mahasiswa"),
-  getUserConsultationHistory
-);
-userRoutes.get(
-  "/consultation/history/:id",
-  authenticate,
-  validateRole("mahasiswa"),
-  getUserConsultationDetail
-);
+userRoutes.get("/consultation/history", authenticate, validateRole("mahasiswa"), getUserConsultationHistory);
+userRoutes.get("/consultation/history/:id", authenticate, validateRole("mahasiswa"), getUserConsultationDetail);
 
 // Apply Consultation
-userRoutes.post(
-  "/apply",
-  authenticate,
-  validateRole("mahasiswa"),
-  validatePsychologistId,
-  applyConsultationHandler
-);
+userRoutes.post("/apply", authenticate, validateRole("mahasiswa"), validatePsychologistId, applyConsultationHandler);
 
 // Update profile
-userRoutes.put(
-  "/profile",
-  authenticate,
-  upload.single("picture"),
-  validateRole("mahasiswa"),
-  updateUserProfileHandler
-);
+userRoutes.put("/profile", authenticate, upload.single("picture"), validateRole("mahasiswa"), updateUserProfileHandler);
 
 export default userRoutes;

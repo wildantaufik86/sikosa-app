@@ -22,7 +22,7 @@ const RiwayatPages = () => {
   return (
     <>
       <motion.div
-        className="py-8 bg-white lg:py-10 px-6 lg:px-20 font-jakarta"
+        className="py-8 bg-white lg:py-10 px-6 lg:px-20 font-jakarta min-h-screen"
         initial={{ opacity: 0 }} // Start with opacity 0
         animate={{ opacity: 1 }} // Fade in to opacity 1
         transition={{ duration: 0.9, delay: 0.3 }} // Fade transition duration
@@ -39,15 +39,6 @@ const RiwayatPages = () => {
           </Link>{" "}
           <span>&gt;</span>
           <span className="font-semibold">Riwayat</span>
-        </motion.div>
-
-        {/* Search Component with Animation */}
-        <motion.div
-          initial={{ opacity: 0, x: -100 }} // Start from the left with hidden opacity
-          animate={{ opacity: 1, x: 0 }} // Animate to its normal position with full opacity
-          transition={{ duration: 0.8 }}
-        >
-          <SearchRiwayat />
         </motion.div>
 
         {/* Table Component with Animation */}

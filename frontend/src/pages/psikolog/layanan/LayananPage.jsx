@@ -19,7 +19,6 @@ const LayananPage = () => {
     fetchNotifications();
   }, []);
 
-  console.log(consultations);
   return (
     <div className="pt-16 lg:pt-5 ">
       {/* Judul dengan Border Bawah */}

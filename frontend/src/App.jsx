@@ -34,6 +34,7 @@ import EditUser from "./pages/admin/users/EditUser";
 import ArtikelView from "./pages/psikolog/artikel/ArticleView";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import Logs from "./pages/admin/logs/Logs";
 
 function App() {
   return (
@@ -213,6 +214,14 @@ function App() {
         {/* End Routes Psikolog */}
 
         {/* Start Routes Admin */}
+        <Route
+          path="/admin/logs"
+          element={
+            <AdminLayout>
+              <Logs />
+            </AdminLayout>
+          }
+        />
         <Route
           path="/admin/user"
           element={

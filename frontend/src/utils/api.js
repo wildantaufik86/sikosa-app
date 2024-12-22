@@ -540,6 +540,29 @@ const getHistoryConsultations = async () => {
   }
 };
 
+// admin get consultation
+const adminGetConsultations = async () => {
+  try {
+    const accessToken = getAccessToken();
+    if (!accessToken) {
+      throw new Error("Invalid access token");
+    }
+
+    const response = await fetch(`${CONFIG.BASE_URL}/admin/consultation/all`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to get consultation history");
+    }
+    const result = await response.json();
+    return { error: false, message: result.message, consultations: result.data };
+  } catch (error) {
+    return { error: true, message: error.message, consultations: null };
+  }
+};
 export {
   updateProfile,
   getAllPsikolog,
@@ -565,4 +588,5 @@ export {
   getNotifications,
   psikologHandleConcultationRequest,
   getHistoryConsultations,
+  adminGetConsultations,
 };

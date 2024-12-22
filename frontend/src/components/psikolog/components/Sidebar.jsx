@@ -37,8 +37,6 @@ const PsikologSidebar = () => {
     fetchNotifications();
   }, []);
 
-  console.log(notificationsCount);
-
   return (
     <div className="bg-white">
       {/* Mobile and Tablet Navbar */}

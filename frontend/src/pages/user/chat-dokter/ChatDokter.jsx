@@ -14,8 +14,7 @@ const doctorData = {
   id: 1,
   name: "Dr. John Doe",
   image: "https://via.placeholder.com/150",
-  profile:
-    "Dr. John Doe is a specialist in mental health, focusing on anxiety and depression treatment. ",
+  profile: "Dr. John Doe is a specialist in mental health, focusing on anxiety and depression treatment. ",
   education: ["S1 Psikologi - Universitas X", "S2 Psikologi Klinis - Universitas Y"],
 };
 
@@ -33,7 +32,7 @@ const ChatDokter = () => {
   const [psikolog, setPsikolog] = useState(null);
   const { authUser } = useAuth();
   const navigate = useNavigate();
-  const [statusPengajuan, setStatusPengajuan] = useState({ status: "not consultation" });
+  const [statusPengajuan, setStatusPengajuan] = useState({ status: "accepted" });
 
   useEffect(() => {
     if (!authUser) {
@@ -142,32 +141,18 @@ const PengajuanKonsultasi = ({ handlePengajuan, psikolog, statusPengajuan, authU
           <table className="min-w-full table-auto border-collapse">
             <thead className="bg-[#EBF6FF]">
               <tr>
-                <th className="px-4 py-2 font-medium text-left border-y border-gray-200 text-sm">
-                  No
-                </th>
-                <th className="px-4 py-2 font-medium text-left border-y border-gray-200 text-sm">
-                  User
-                </th>
-                <th className="px-4 py-2 font-medium text-left border-y border-gray-200 text-sm">
-                  Psikolog
-                </th>
-                <th className="px-4 py-2 font-medium text-left border-y border-gray-200 text-sm">
-                  Status
-                </th>
-                <th className="px-4 py-2 font-medium text-left border-y border-gray-200 text-sm">
-                  Tanggal
-                </th>
+                <th className="px-4 py-2 font-medium text-left border-y border-gray-200 text-sm">No</th>
+                <th className="px-4 py-2 font-medium text-left border-y border-gray-200 text-sm">User</th>
+                <th className="px-4 py-2 font-medium text-left border-y border-gray-200 text-sm">Psikolog</th>
+                <th className="px-4 py-2 font-medium text-left border-y border-gray-200 text-sm">Status</th>
+                <th className="px-4 py-2 font-medium text-left border-y border-gray-200 text-sm">Tanggal</th>
               </tr>
             </thead>
             <tbody>
               <tr className="bg-white">
                 <td className="px-4 py-2 border-b border-gray-200 text-xs">1</td>
-                <td className="px-4 py-2 border-b border-gray-200 text-xs">
-                  {authUser.profile.fullname}
-                </td>
-                <td className="px-4 py-2 border-b border-gray-200 text-xs">
-                  {psikolog.profile.fullname}
-                </td>
+                <td className="px-4 py-2 border-b border-gray-200 text-xs">{authUser.profile.fullname}</td>
+                <td className="px-4 py-2 border-b border-gray-200 text-xs">{psikolog.profile.fullname}</td>
                 <td
                   className={`px-4 py-2 border-b font-semibold border-gray-200 text-xs ${
                     statusPengajuan.status === "pending" ? "text-yellow-500" : "text-red-500"
@@ -175,9 +160,7 @@ const PengajuanKonsultasi = ({ handlePengajuan, psikolog, statusPengajuan, authU
                 >
                   {statusPengajuan.status}
                 </td>
-                <td className="px-4 py-2 border-b border-gray-200 text-xs">
-                  {formattedDate(statusPengajuan?.createdAt)}
-                </td>
+                <td className="px-4 py-2 border-b border-gray-200 text-xs">{formattedDate(statusPengajuan?.createdAt)}</td>
               </tr>
             </tbody>
           </table>
@@ -187,8 +170,7 @@ const PengajuanKonsultasi = ({ handlePengajuan, psikolog, statusPengajuan, authU
       {/* form pengajuan konsul */}
       <div className="w-full bg-white shadow-md rounded-md flex flex-col justify-center items-center py-4 ">
         <h4 className="text-sm md:text-lg mb-2">
-          Ajukan konsultasi bersama{" "}
-          <span className="text-[#35A7FF]">{psikolog.profile.fullname}</span>
+          Ajukan konsultasi bersama <span className="text-[#35A7FF]">{psikolog.profile.fullname}</span>
         </h4>
         <button
           onClick={handlePengajuan}

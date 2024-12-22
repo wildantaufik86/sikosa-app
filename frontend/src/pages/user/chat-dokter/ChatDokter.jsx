@@ -1,5 +1,5 @@
 // ChatDokter.js
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { FaChevronLeft } from "react-icons/fa";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import ChatInput from "../../../components/user/components/chat-dokter/ChatInput";
@@ -9,6 +9,8 @@ import { useAuth } from "../../../hooks/hooks";
 import { createPengajuanKonsultasi, getPsikologById } from "../../../utils/api";
 import { toast } from "react-toastify";
 import { formattedDate } from "../../../utils/utils";
+import axios from "axios";
+import io from "socket.io-client";
 
 const doctorData = {
   id: 1,
@@ -20,19 +22,15 @@ const doctorData = {
 
 const ChatDokter = () => {
   const [message, setMessage] = useState("");
-  const [messages, setMessages] = useState([
-    { sender: "doctor", content: "Hello, how can I help you today?" },
-    { sender: "user", content: "I have been feeling very anxious lately." },
-    {
-      sender: "doctor",
-      content: "I'm here to help. Could you tell me more about your symptoms?",
-    },
-  ]);
+  const [messages, setMessages] = useState([]);
   const { id_psikolog } = useParams();
   const [psikolog, setPsikolog] = useState(null);
   const { authUser } = useAuth();
   const navigate = useNavigate();
   const [statusPengajuan, setStatusPengajuan] = useState({ status: "accepted" });
+
+  const socket = useRef(io("http://localhost:5000"));
+  const [roomChat, setRoomChat] = useState(null);
 
   useEffect(() => {
     if (!authUser) {
@@ -57,9 +55,86 @@ const ChatDokter = () => {
     }
   }, [authUser, id_psikolog]);
 
+  useEffect(() => {
+    const fetchChatRooms = async () => {
+      try {
+        const token = sessionStorage.getItem("accessToken");
+        if (!token) {
+          throw new Error("No token found");
+        }
+
+        const response = await axios.get("http://localhost:5000/chat/rooms", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        const indexed = response.data.length - 1;
+        const dataMessages = response.data[indexed].messages;
+        setMessages(
+          dataMessages.map((data) => ({
+            ...data,
+            content: data.message,
+          }))
+        );
+        setStatusPengajuan({ status: response.data[indexed].status });
+        setRoomChat(response.data[indexed]._id);
+      } catch (err) {
+        setLoading(false);
+      }
+    };
+
+    fetchChatRooms();
+  }, []);
+
   if (!authUser || !psikolog) {
     return null;
   }
+
+  // testing handle send message
+  const handleSendMessage = async () => {
+    const token = sessionStorage.getItem("accessToken");
+    if (!token) {
+      console.error("No token found. Please log in.");
+      return;
+    }
+    const selectedRoom = {
+      _id: roomChat,
+    };
+
+    console.log(selectedRoom._id);
+
+    const messageData = {
+      roomId: selectedRoom._id,
+      senderId: authUser._id,
+      message: message,
+    };
+
+    // Immediately update the messages state
+    const newMessageObj = {
+      ...messageData,
+      timestamp: new Date().toISOString(),
+      _id: Date.now().toString(), // Create a temporary ID
+    };
+
+    setMessages((prevMessages) => [...prevMessages, newMessageObj]);
+
+    try {
+      // Send the message to the backend
+      await axios.post("http://localhost:5000/chat/messages", messageData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      // Emit the message to the socket server
+      socket.current.emit("sendMessage", messageData);
+
+      // Clear the input field
+      setMessage("");
+    } catch (err) {
+      console.error("Failed to send message:", err);
+    }
+  };
 
   const handlePengajun = async () => {
     const messageInput = "Saya ingin melakukan konsultasi";
@@ -111,7 +186,7 @@ const ChatDokter = () => {
 
       <div className="flex flex-col lg:flex-row space-y-4 lg:space-y-0 lg:space-x-6">
         <DokterDetail psikolog={psikolog} />
-        {statusPengajuan?.status === "not consultation" || statusPengajuan?.status === "pending" ? (
+        {statusPengajuan?.status === "inactive" || statusPengajuan?.status === "pending" ? (
           <PengajuanKonsultasi
             statusPengajuan={statusPengajuan}
             psikolog={psikolog}
@@ -125,6 +200,7 @@ const ChatDokter = () => {
             setMessage={setMessage}
             sendMessage={sendMessage}
             doctorData={doctorData}
+            handleSendMessage={handleSendMessage}
           />
         )}
       </div>
@@ -183,11 +259,11 @@ const PengajuanKonsultasi = ({ handlePengajuan, psikolog, statusPengajuan, authU
   );
 };
 
-const ChatSection = ({ messages, message, setMessage, sendMessage, doctorData }) => {
+const ChatSection = ({ messages, message, setMessage, sendMessage, doctorData, handleSendMessage }) => {
   return (
     <div className="w-full lg:w-2/3 border bg-[#EBF6FF] px-4 py-8 rounded-lg shadow-lg flex flex-col">
       <PesanChat messages={messages} doctorImage={doctorData.image} />
-      <ChatInput message={message} setMessage={setMessage} sendMessage={sendMessage} />
+      <ChatInput message={message} setMessage={setMessage} sendMessage={sendMessage} handleSendMessage={handleSendMessage} />
     </div>
   );
 };

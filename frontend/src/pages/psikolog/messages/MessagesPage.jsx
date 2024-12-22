@@ -32,8 +32,7 @@ const MessagesPage = () => {
             Authorization: `Bearer ${token}`,
           },
         });
-
-        setChatRooms(response.data);
+        setChatRooms(response.data.filter((item) => item.status !== "inactive"));
         setFilteredRooms(response.data); // Default filter
         setLoading(false);
       } catch (err) {
@@ -48,7 +47,10 @@ const MessagesPage = () => {
   // Filter chat rooms based on search query
   useEffect(() => {
     setFilteredRooms(
-      chatRooms.filter((room) => room.participants.some((p) => p.email?.toLowerCase().includes(searchQuery.toLowerCase())))
+      chatRooms
+        .filter((room) => room.participants.some((p) => p.email?.toLowerCase().includes(searchQuery.toLowerCase())))
+        .slice()
+        .reverse()
     );
   }, [searchQuery, chatRooms]);
 
@@ -106,7 +108,7 @@ const MessagesPage = () => {
       console.error("No token found. Please log in.");
       return;
     }
-
+    console.log(selectedRoom._id);
     const messageData = {
       roomId: selectedRoom._id,
       senderId: userId,
@@ -199,6 +201,7 @@ const MessagesPage = () => {
             <p className="text-center text-gray-500">No chat rooms found.</p>
           ) : (
             filteredRooms.map((room) => {
+              console.log(room);
               const otherParticipant = room.participants?.find((p) => p._id !== userId);
               return (
                 <div

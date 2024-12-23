@@ -18,6 +18,7 @@ import http from "http";
 import { Server } from "socket.io";
 import chatRoutes from "./routes/chat.routes";
 import chatRoom from "./models/chatRoom";
+import serverless from "serverless-http";
 
 const app = express();
 app.use(express.json());
@@ -31,7 +32,7 @@ app.use(
 );
 app.use(cookieParser());
 
-app.get("/", ({ req, res }: any) => {
+app.get("/api", ({ req, res }: any) => {
   return res.status(OK).json({
     status: "Connected!!!",
   });
@@ -54,11 +55,8 @@ app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 app.use(errorHandler);
 
 // Socket.IO Event Handlers
-const serverless = require("serverless-http");
-const { createServer } = require("http");
-const server = createServer(app);
-
-const io = new Server(server, {
+// Socket.IO Event Handlers
+const io = new Server(http.createServer(app), {
   cors: {
     origin: [APP_ORIGIN, FE_ORIGIN],
     methods: ["GET", "POST", "PATCH", "PUT"],
@@ -122,11 +120,6 @@ io.on("connection", (socket) => {
 });
 
 const handler = serverless(app);
-
-server.listen(PORT, async () => {
-  console.log(`Server listening on port ${PORT} in ${NODE_ENV} environment`);
-  await connectToDatabase();
-});
 
 export { handler };
 

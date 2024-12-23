@@ -17,7 +17,6 @@ const EditUser = () => {
           throw new Error(response.message);
         }
         setFullname(response.user.profile.fullname);
-        setRole(response.user.role);
       } catch (error) {
         console.log(error.message);
       }
@@ -25,13 +24,15 @@ const EditUser = () => {
     fetchUser();
   }, []);
 
+  console.log(role);
+
   const handleSubmit = (e) => {
     e.preventDefault();
     const update = async () => {
       try {
         const data = {
           fullname: fullname.trim(),
-          role,
+          role: role.trim(),
         };
 
         const response = await AdminUpdateUser(data, idUser);
@@ -84,7 +85,7 @@ const EditUser = () => {
               name="role"
               id="role"
               className="outline-none py-2 px-3 text-xs rounded-sm bg-slate-100"
-              defaultValue={role}
+              value={role}
               onChange={(e) => setRole(e.target.value)}
             >
               <option value="mahasiswa">mahasiswa</option>
@@ -93,16 +94,10 @@ const EditUser = () => {
             </select>
           </div>
           <div className="flex items-center gap-4">
-            <button
-              type="submit"
-              className="font-semibold bg-green-500 py-2 px-4 rounded-md text-white text-sm"
-            >
+            <button type="submit" className="font-semibold bg-green-500 py-2 px-4 rounded-md text-white text-sm">
               Save
             </button>
-            <Link
-              to="/admin/user"
-              className="font-semibold bg-red-500 py-2 px-4 rounded-md text-white text-sm"
-            >
+            <Link to="/admin/user" className="font-semibold bg-red-500 py-2 px-4 rounded-md text-white text-sm">
               Cancel
             </Link>
           </div>

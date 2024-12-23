@@ -1,6 +1,6 @@
 import React from "react";
 import RightSection from "../../../components/user/components/beranda/RightSection";
-import LeftSection from "../../../components/user/components/beranda/LeftSection.jsx";
+import LeftSection from "../../../components/user/components/beranda/LeftSection";
 const Beranda = () => {
   return (
     <>

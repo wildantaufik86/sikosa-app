@@ -4,6 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import Navbar from "../../../components/user/components/Navbar";
 import { useAuth } from "../../../hooks/hooks";
 import { putAccessTokenSession } from "../../../utils/utils";
+import CONFIG from "../../../config/config";
 
 const LoginPage = () => {
   const [passwordVisible, setPasswordVisible] = useState(false);
@@ -45,7 +46,7 @@ const LoginPage = () => {
 
     const fetchDataLogin = async () => {
       try {
-        const response = await fetch(`http://localhost:5000/auth/login`, {
+        const response = await fetch(`${CONFIG.BASE_URL}/auth/login`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

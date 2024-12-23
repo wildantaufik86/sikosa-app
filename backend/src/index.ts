@@ -40,7 +40,7 @@ app.use("/api/chat", authenticate, chatRoutes);
 app.use("/api/admin", adminRoutes);
 
 // general API
-app.use("/api/v1", articleRoutes);
+app.use("/api/api/v1", articleRoutes);
 
 // api konsul
 app.use("/api/consultation", consultationRoutes, userRoutes);

@@ -5,6 +5,7 @@ import ArtikelPage from "./landing/Artikel";
 import RiwayatPage from "./landing/Riwayat";
 import AboutSikosa from "./landing/AboutSikosa";
 import FiturSikosa from "./landing/FiturSikosa";
+import Faq from "./landing/Faq";
 
 const Home = () => {
   return (
@@ -15,6 +16,7 @@ const Home = () => {
       <FiturSikosa />
       <DaftarLayanan />
       <ArtikelPage />
+      <Faq />
     </>
   );
 };

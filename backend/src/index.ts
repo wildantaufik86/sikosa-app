@@ -31,7 +31,7 @@ app.use(
 );
 app.use(cookieParser());
 
-app.get("/", ({ req, res }: any) => {
+app.get("/api", ({ req, res }: any) => {
   return res.status(OK).json({
     status: "Connected!!!",
   });

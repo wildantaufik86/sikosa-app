@@ -14,7 +14,7 @@ import path from "path";
 import psikologRoutes from "./routes/psikolog.routes";
 import articleRoutes from "./routes/article.routes";
 import adminRoutes from "./routes/admin.routes";
-import http from "http";
+import { createServer } from "http";
 import { Server } from "socket.io";
 import chatRoutes from "./routes/chat.routes";
 import chatRoom from "./models/chatRoom";
@@ -54,16 +54,16 @@ app.use("/api/uploads", express.static(path.join(__dirname, "../uploads")));
 app.use(errorHandler);
 
 // Socket.IO Event Handlers
-const serverless = require("serverless-http");
-const { createServer } = require("http");
 const server = createServer(app);
 
 const io = new Server(server, {
   cors: {
-    origin: "*",
+    origin: "https://wildantfq.my.id",
     methods: ["GET", "POST", "PATCH", "PUT"],
+    credentials: true,
   },
 });
+
 io.on("connection", (socket) => {
   console.log(`New client connected: ${socket.id}`);
 
@@ -120,11 +120,7 @@ io.on("connection", (socket) => {
   });
 });
 
-const handler = serverless(app);
-
 server.listen(PORT, async () => {
   console.log(`Server listening on port ${PORT} in ${NODE_ENV} environment`);
   await connectToDatabase();
 });
-
-export { handler };

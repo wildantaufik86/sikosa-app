@@ -5,7 +5,7 @@ import { INTERNAL_SERVER_ERROR, NOT_FOUND, OK } from "../constants/http";
 const articleRoutes = express.Router();
 
 // GET semua artikel (Publik)
-articleRoutes.get("/articles", async (req, res) => {
+articleRoutes.get("/all", async (req, res) => {
   try {
     const articles = await ArticleModel.find().populate("writer", "profile.fullname");
     res.status(OK).json({ message: "Data Artikel berhasil di dapatkan", data: articles });
@@ -14,7 +14,7 @@ articleRoutes.get("/articles", async (req, res) => {
   }
 });
 
-articleRoutes.get("/articles/id/:id", async (req, res) => {
+articleRoutes.get("/id/:id", async (req, res) => {
   try {
     const { id } = req.params;
     const articles = await ArticleModel.findById(id).populate("writer", "profile.fullname");
@@ -28,7 +28,7 @@ articleRoutes.get("/articles/id/:id", async (req, res) => {
 });
 
 // GET artikel berdasarkan slug (Publik)
-articleRoutes.get("/articles/slug/:slug", async (req, res) => {
+articleRoutes.get("/slug/:slug", async (req, res) => {
   try {
     const { slug } = req.params;
     const article = await ArticleModel.findOne({ slug });

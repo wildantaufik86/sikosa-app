@@ -24,7 +24,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(
   cors({
-    origin: [APP_ORIGIN, FE_ORIGIN],
+    origin: "*",
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
     credentials: true,
   })
@@ -40,7 +40,7 @@ app.use("/api/chat", authenticate, chatRoutes);
 app.use("/api/admin", adminRoutes);
 
 // general API
-app.use("/api/api/v1", articleRoutes);
+app.use("/api/articles", articleRoutes);
 
 // api konsul
 app.use("/api/consultation", consultationRoutes, userRoutes);
@@ -60,7 +60,7 @@ const server = createServer(app);
 
 const io = new Server(server, {
   cors: {
-    origin: [APP_ORIGIN, FE_ORIGIN],
+    origin: "*",
     methods: ["GET", "POST", "PATCH", "PUT"],
   },
 });

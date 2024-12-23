@@ -2,23 +2,57 @@
   "version": 2,
   "builds": [
     {
-      "src": "frontend/package.json",
-      "use": "@vercel/static-build",
-      "config": { "distDir": "dist" }
+      "src": "backend/src/index.ts",
+      "use": "@vercel/node"
     },
     {
-      "src": "backend/src/**/*.ts",
-      "use": "@vercel/node"
+      "src": "frontend/package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "dist"
+      }
     }
   ],
   "routes": [
     {
-      "src": "/api/(.*)",
-      "dest": "/backend/src/index.ts"
+      "src": "/socket.io/(.*)",
+      "dest": "backend/src/index.ts"
+    },
+    {
+      "src": "/api/v1/(.*)",
+      "dest": "backend/src/index.ts"
+    },
+    {
+      "src": "/auth/(.*)",
+      "dest": "backend/src/index.ts"
+    },
+    {
+      "src": "/user/(.*)",
+      "dest": "backend/src/index.ts"
+    },
+    {
+      "src": "/psikolog/(.*)",
+      "dest": "backend/src/index.ts"
+    },
+    {
+      "src": "/consultation/(.*)",
+      "dest": "backend/src/index.ts"
+    },
+    {
+      "src": "/admin/(.*)",
+      "dest": "backend/src/index.ts"
+    },
+    {
+      "src": "/chat/(.*)",
+      "dest": "backend/src/index.ts"
+    },
+    {
+      "src": "/uploads/(.*)",
+      "dest": "backend/src/index.ts"
     },
     {
       "src": "/(.*)",
-      "dest": "/frontend/dist/$1"
+      "dest": "frontend/dist/$1"
     }
   ]
 }

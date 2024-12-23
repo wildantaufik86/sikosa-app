@@ -58,7 +58,7 @@ const server = createServer(app);
 
 const io = new Server(server, {
   cors: {
-    origin: "https://wildantfq.my.id",
+    origin: ["https://wildantfq.my.id", "http://localhost:5173"],
     methods: ["GET", "POST", "PATCH", "PUT"],
     credentials: true,
   },

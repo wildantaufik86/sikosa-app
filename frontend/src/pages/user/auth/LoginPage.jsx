@@ -100,9 +100,7 @@ const LoginPage = () => {
         {/* Right Side - Form */}
         <div className="flex flex-col justify-center w-full lg:w-2/5  bg-white p-6">
           <h2 className="text-3xl font-bold mb-4 text-[#35A7FF]">Sign In</h2>
-          <p className="text-sm text-gray-600 font-medium mb-2">
-            If you don't have an account
-          </p>
+          <p className="text-sm text-gray-600 font-medium mb-2">If you don't have an account</p>
           <p className="text-sm text-gray-600 font-medium mb-6">
             You can{" "}
             <Link to="/register" className="text-blue-500 hover:underline">
@@ -113,10 +111,7 @@ const LoginPage = () => {
           <form onSubmit={handleLogin}>
             {/* Email Input */}
             <div className="w-full mb-4">
-              <label
-                className="block text-sm text-gray-600 mb-2"
-                htmlFor="email"
-              >
+              <label className="block text-sm text-gray-600 mb-2" htmlFor="email">
                 Email
               </label>
               <div className="flex items-center border-b border-gray-300">
@@ -135,10 +130,7 @@ const LoginPage = () => {
 
             {/* Password Input */}
             <div className="w-full mb-4">
-              <label
-                className="block text-sm text-gray-600 mb-2"
-                htmlFor="password"
-              >
+              <label className="block text-sm text-gray-600 mb-2" htmlFor="password">
                 Password
               </label>
               <div className="flex items-center border-b border-gray-300">
@@ -157,16 +149,8 @@ const LoginPage = () => {
                   }}
                   required
                 />
-                <button
-                  type="button"
-                  onClick={togglePasswordVisibility}
-                  className="ml-2"
-                >
-                  {passwordVisible ? (
-                    <FaEyeSlash className="text-gray-500" />
-                  ) : (
-                    <FaEye className="text-gray-500" />
-                  )}
+                <button type="button" onClick={togglePasswordVisibility} className="ml-2">
+                  {passwordVisible ? <FaEyeSlash className="text-gray-500" /> : <FaEye className="text-gray-500" />}
                 </button>
               </div>
               {errorMessagePassword && (
@@ -176,32 +160,15 @@ const LoginPage = () => {
               )}
             </div>
 
-            {/* Remember Me and Forgot Password */}
-            <div className="w-full flex justify-between items-center mb-4">
-              <label className="flex items-center text-sm text-gray-600">
-                <input type="checkbox" className="mr-2" /> Remember Me
-              </label>
-              <Link
-                to="/forgot-password"
-                className="text-sm text-blue-500 hover:underline"
-              >
-                Forgot Password?
-              </Link>
-            </div>
-
             {/* error message */}
             {errorMessage && (
               <div className="mb-2">
-                <p className="text-center text-xs text-red-500">
-                  {errorMessage}
-                </p>
+                <p className="text-center text-xs text-red-500">{errorMessage}</p>
               </div>
             )}
 
             {/* Sign In Button */}
-            <button className="w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600">
-              Sign In
-            </button>
+            <button className="w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600">Sign In</button>
           </form>
         </div>
       </div>

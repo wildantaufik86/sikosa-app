@@ -63,7 +63,6 @@ const io = new Server(server, {
     origin: [APP_ORIGIN, FE_ORIGIN],
     methods: ["GET", "POST", "PATCH", "PUT"],
   },
-  path: "/socket.io/",
 });
 io.on("connection", (socket) => {
   console.log(`New client connected: ${socket.id}`);
@@ -129,5 +128,3 @@ server.listen(PORT, async () => {
 });
 
 export { handler };
-
-export default app;

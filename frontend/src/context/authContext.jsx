@@ -1,10 +1,6 @@
 import { createContext, useState } from "react";
-import {
-  getAccessToken,
-  getAuthUserSession,
-  putAccessTokenSession,
-  putAuthUserSession,
-} from "../utils/utils";
+import { getAccessToken, getAuthUserSession, putAccessTokenSession, putAuthUserSession } from "../utils/utils";
+import CONFIG from "../config/config";
 
 export const AuthContext = createContext();
 
@@ -23,7 +19,7 @@ export const AuthProvider = ({ children }) => {
 
   const handleLogout = async () => {
     try {
-      const response = await fetch("http://localhost:5000/auth/logout", {
+      const response = await fetch(`${CONFIG.BASE_URL}/auth/logout`, {
         method: "POST",
       });
       if (!response.ok) {

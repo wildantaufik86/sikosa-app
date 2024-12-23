@@ -8,13 +8,13 @@ import { useAuth } from "../../../hooks/hooks";
 import CONFIG from "../../../config/config";
 import { FaUser } from "react-icons/fa";
 import { getNotifications } from "../../../utils/api";
+import axios from "axios";
 
 const PsikologSidebar = () => {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const { authUser, handleLogout } = useAuth();
-
   const [notificationsCount, setNotificationsCount] = useState(0);
-  const messagesCount = 3;
+  const [messagesCount, setMessagesCount] = useState(0);
 
   const toggleDrawer = () => {
     setIsDrawerOpen(!isDrawerOpen);
@@ -35,6 +35,30 @@ const PsikologSidebar = () => {
       }
     };
     fetchNotifications();
+  }, []);
+
+  // get message total
+  useEffect(() => {
+    const fetchChatRooms = async () => {
+      try {
+        const token = sessionStorage.getItem("accessToken");
+        if (!token) {
+          throw new Error("No token found");
+        }
+
+        const response = await axios.get(`${CONFIG.BASE_URL}/chat/rooms`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        const totalChatValid = response.data.filter((data) => data.status === "active");
+        setMessagesCount(totalChatValid.length);
+      } catch (err) {
+        console.log(err.message);
+      }
+    };
+
+    fetchChatRooms();
   }, []);
 
   return (

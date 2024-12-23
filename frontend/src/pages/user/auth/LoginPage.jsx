@@ -17,7 +17,7 @@ const LoginPage = () => {
   useEffect(() => {
     // route admin
     if (authUser && authUser.role === "admin") {
-      navigate("/admin/user");
+      navigate("/admin/logs");
     }
 
     // route psikolog/dokter

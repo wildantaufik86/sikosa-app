@@ -14,7 +14,6 @@ import path from "path";
 import psikologRoutes from "./routes/psikolog.routes";
 import articleRoutes from "./routes/article.routes";
 import adminRoutes from "./routes/admin.routes";
-import http from "http";
 import { Server } from "socket.io";
 import chatRoutes from "./routes/chat.routes";
 import chatRoom from "./models/chatRoom";
@@ -53,78 +52,58 @@ app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 
 app.use(errorHandler);
 
-// Socket.IO Event Handlers
-const serverless = require("serverless-http");
-const { createServer } = require("http");
-const server = createServer(app);
+if (process.env.NODE_ENV === "production") {
+  const server = require("http").createServer(app);
+  const io = new Server(server, {
+    cors: {
+      origin: [APP_ORIGIN, FE_ORIGIN],
+      methods: ["GET", "POST", "PATCH", "PUT"],
+    },
+  });
 
-const io = new Server(server, {
-  cors: {
-    origin: [APP_ORIGIN, FE_ORIGIN],
-    methods: ["GET", "POST", "PATCH", "PUT"],
-  },
-});
-io.on("connection", (socket) => {
-  console.log(`New client connected: ${socket.id}`);
-
-  // Handle client joining room
-  socket.on("joinRoom", async ({ roomId, userId }) => {
-    try {
-      const chatRoomInstance = await chatRoom.findById(roomId);
-      if (!chatRoomInstance) {
-        socket.emit("error", { message: "Chat room not found." });
-        return;
+  io.on("connection", (socket) => {
+    socket.on("joinRoom", async ({ roomId, userId }) => {
+      try {
+        const chatRoomInstance = await chatRoom.findById(roomId);
+        if (!chatRoomInstance) {
+          socket.emit("error", { message: "Chat room not found." });
+          return;
+        }
+        socket.join(roomId);
+      } catch (error) {
+        socket.emit("error", { message: "Failed to join room." });
       }
-      socket.join(roomId);
-      console.log(`Client ${userId} joined room: ${roomId}`);
-    } catch (error) {
-      console.error("Error while joining room:", error);
-      socket.emit("error", { message: "Failed to join room." });
-    }
-  });
+    });
 
-  socket.on("leaveRoom", (roomId) => {
-    socket.leave(roomId);
-  });
-
-  // Handle incoming messages
-  socket.on("sendMessage", async ({ roomId, senderId, message }) => {
-    const timestamp = new Date();
-
-    try {
-      const chatRoomInstance = await chatRoom.findById(roomId);
-      if (!chatRoomInstance) {
-        socket.emit("error", { message: "Chat room not found." });
-        return;
+    socket.on("sendMessage", async ({ roomId, senderId, message }) => {
+      const timestamp = new Date();
+      try {
+        const chatRoomInstance = await chatRoom.findById(roomId);
+        if (!chatRoomInstance) {
+          socket.emit("error", { message: "Chat room not found." });
+          return;
+        }
+        chatRoomInstance.messages.push({ senderId, message, timestamp });
+        await chatRoomInstance.save();
+        io.to(roomId).emit("receiveMessage", { senderId, message, timestamp });
+      } catch (error) {
+        socket.emit("error", { message: "Failed to save message." });
       }
+    });
 
-      // Save the message to the chat room document
-      chatRoomInstance.messages.push({ senderId, message, timestamp });
-      await chatRoomInstance.save();
-
-      // Emit the new message to all clients in the room
-      io.to(roomId).emit("receiveMessage", { senderId, message, timestamp });
-    } catch (error) {
-      console.error("Error handling chat room messages:", error);
-      socket.emit("error", { message: "Failed to save message." });
-    }
+    socket.on("roomUpdate", ({ roomId, status }) => {
+      io.emit("roomUpdate", { _id: roomId, status });
+    });
   });
 
-  // Handle client disconnecting
-  socket.on("disconnect", () => {
-    console.log("Client disconnected:", socket.id);
+  server.listen(PORT, async () => {
+    await connectToDatabase();
+    console.log(`Server listening on port ${PORT} in ${NODE_ENV} environment`);
   });
+}
+// erver.listen(PORT, async () => {
+//   console.log(`Server listening on port ${PORT} in ${NODE_ENV} environment`);
+//   await connectToDatabase();
+// });
 
-  socket.on("roomUpdate", ({ roomId, status }) => {
-    io.emit("roomUpdate", { _id: roomId, status });
-  });
-});
-
-const handler = serverless(app);
-
-server.listen(PORT, async () => {
-  console.log(`Server listening on port ${PORT} in ${NODE_ENV} environment`);
-  await connectToDatabase();
-});
-
-export { handler };
+// export { handler };

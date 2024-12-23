@@ -24,7 +24,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(
   cors({
-    origin: "*",
+    origin: ["https://wildantfq.my.id", "http://localhost:5173"],
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
     credentials: true,
   })
@@ -59,7 +59,7 @@ const server = createServer(app);
 const io = new Server(server, {
   cors: {
     origin: ["https://wildantfq.my.id", "http://localhost:5173"],
-    methods: ["GET", "POST", "PATCH", "PUT"],
+    methods: ["GET", "POST", "PATCH", "PUT", "DELETE"],
     credentials: true,
   },
 });

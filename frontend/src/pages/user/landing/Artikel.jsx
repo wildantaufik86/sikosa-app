@@ -9,9 +9,9 @@ const ArtikelPage = () => {
   const [selectedCategory, setSelectedCategory] = useState("Semua");
   const [currentPage, setCurrentPage] = useState(1);
   const [articles, setArticles] = useState([]);
+  const [filteredArticles, setFilteredArticles] = useState([]);
   const articlesPerPage = 4;
 
-  const filteredArticles = selectedCategory === "Terbaru" ? articles.slice(0, 4) : articles;
   const totalPages = Math.ceil(filteredArticles.length / articlesPerPage);
   const startIndex = (currentPage - 1) * articlesPerPage;
   const endIndex = startIndex + articlesPerPage;
@@ -25,6 +25,7 @@ const ArtikelPage = () => {
           throw new Error(response.message);
         }
         setArticles(response.articles);
+        setFilteredArticles(response.articles);
       } catch (error) {
         console.log(error.message);
       }
@@ -32,6 +33,15 @@ const ArtikelPage = () => {
 
     fetchArticles();
   }, []);
+
+  // handle filtered articles by semua atau terbaru
+  useEffect(() => {
+    if (selectedCategory === "Terbaru") {
+      setFilteredArticles(articles.slice().reverse());
+    } else {
+      setFilteredArticles(articles);
+    }
+  }, [selectedCategory]);
 
   // Pagination handlers
   const handlePrev = () => {
@@ -61,10 +71,7 @@ const ArtikelPage = () => {
   return (
     <div className="container mx-auto py-8 lg:py-10 px-6 lg:px-20 font-jakarta">
       {/* Title and Category Tabs */}
-      <KategoriArtikel
-        selectedCategory={selectedCategory}
-        setSelectedCategory={setSelectedCategory}
-      />
+      <KategoriArtikel selectedCategory={selectedCategory} setSelectedCategory={setSelectedCategory} />
 
       {/* Animated Article Grid */}
       <motion.div

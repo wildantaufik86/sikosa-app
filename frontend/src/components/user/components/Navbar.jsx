@@ -46,22 +46,14 @@ const Navbar = () => {
     >
       <div className="container mx-auto flex justify-between items-center">
         <NavLink to="/" className="flex items-center">
-          <img
-            src="/assets/nav-logo.png"
-            alt="Logo"
-            className="h-7 mr-2 text-[#35A7FF]"
-          />
+          <img src="/assets/nav-logo.png" alt="Logo" className="h-7 mr-2 text-[#35A7FF]" />
           <span className="text-lg font-bold text-[#35A7FF]">Sikosa</span>
         </NavLink>
 
         {/* Menu Icon for Mobile */}
         <div className="lg:hidden">
           <button onClick={toggleDrawer}>
-            {isOpen ? (
-              <FaTimes className="text-[#35A7FF] text-xl" />
-            ) : (
-              <FaBars className="text-[#35A7FF] text-xl" />
-            )}
+            {isOpen ? <FaTimes className="text-[#35A7FF] text-xl" /> : <FaBars className="text-[#35A7FF] text-xl" />}
           </button>
         </div>
 
@@ -76,11 +68,7 @@ const Navbar = () => {
           <NavLink
             to="/"
             className={({ isActive }) =>
-              `hover:text-[#5DB9FF] ${
-                isActive
-                  ? "text-[#35A7FF] font-semibold"
-                  : "text-black font-semibold"
-              }`
+              `hover:text-[#5DB9FF] ${isActive ? "text-[#35A7FF] font-semibold" : "text-black font-semibold"}`
             }
           >
             Beranda
@@ -88,11 +76,7 @@ const Navbar = () => {
           <NavLink
             to="/daftar-layanan"
             className={({ isActive }) =>
-              `hover:text-[#5DB9FF] ${
-                isActive
-                  ? "text-[#35A7FF] font-semibold"
-                  : "text-black font-semibold"
-              }`
+              `hover:text-[#5DB9FF] ${isActive ? "text-[#35A7FF] font-semibold" : "text-black font-semibold"}`
             }
           >
             Daftar Layanan
@@ -100,11 +84,7 @@ const Navbar = () => {
           <NavLink
             to="/artikel"
             className={({ isActive }) =>
-              `hover:text-[#5DB9FF] ${
-                isActive
-                  ? "text-[#35A7FF] font-semibold"
-                  : "text-black font-semibold"
-              }`
+              `hover:text-[#5DB9FF] ${isActive ? "text-[#35A7FF] font-semibold" : "text-black font-semibold"}`
             }
           >
             Artikel
@@ -113,11 +93,7 @@ const Navbar = () => {
             <NavLink
               to="/riwayat"
               className={({ isActive }) =>
-                `hover:text-[#5DB9FF] ${
-                  isActive
-                    ? "text-[#35A7FF] font-semibold"
-                    : "text-black font-semibold"
-                }`
+                `hover:text-[#5DB9FF] ${isActive ? "text-[#35A7FF] font-semibold" : "text-black font-semibold"}`
               }
             >
               Riwayat
@@ -155,10 +131,7 @@ const Navbar = () => {
           {/* User Profile Section */}
           {authUser && (
             <>
-              <div
-                onClick={() => setIsUserSettingOpen(!isUserSettingOpen)}
-                className="flex items-center pl-4 cursor-pointer"
-              >
+              <div onClick={() => setIsUserSettingOpen(!isUserSettingOpen)} className="flex items-center pl-4 cursor-pointer">
                 {user.image ? (
                   <img
                     src={`${CONFIG.BASE_URL}${user.image}`}
@@ -180,10 +153,7 @@ const Navbar = () => {
                 }`}
               >
                 <div className="flex flex-col px-4 gap-4">
-                  <Link
-                    to="/profile"
-                    className="text-slate-700 text-sm font-semibold transition-all hover:text-[#35A7FF]"
-                  >
+                  <Link to="/profile" className="text-slate-700 text-sm font-semibold transition-all hover:text-[#35A7FF]">
                     <span className="flex items-center gap-2">
                       <FaUser /> Profile
                     </span>
@@ -221,7 +191,7 @@ const Navbar = () => {
             <div className="flex items-center pl-4 mt-5">
               {user.image ? (
                 <img
-                  src={user.image}
+                  src={CONFIG.BASE_URL + user.image}
                   alt="Profile"
                   className="w-10 h-10 rounded-full border border-[#35A7FF] object-cover mr-2 shrink-0"
                 />
@@ -239,33 +209,21 @@ const Navbar = () => {
           <div className="flex flex-col px-5">
             <NavLink
               to="/"
-              className={({ isActive }) =>
-                `py-2 text-lg font-semibold ${
-                  isActive ? "text-[#35A7FF]" : "text-black"
-                }`
-              }
+              className={({ isActive }) => `py-2 text-lg font-semibold ${isActive ? "text-[#35A7FF]" : "text-black"}`}
               onClick={toggleDrawer}
             >
               Beranda
             </NavLink>
             <NavLink
               to="/daftar-layanan"
-              className={({ isActive }) =>
-                `py-2 text-lg font-semibold ${
-                  isActive ? "text-[#35A7FF]" : "text-black"
-                }`
-              }
+              className={({ isActive }) => `py-2 text-lg font-semibold ${isActive ? "text-[#35A7FF]" : "text-black"}`}
               onClick={toggleDrawer}
             >
               Daftar Layanan
             </NavLink>
             <NavLink
               to="/artikel"
-              className={({ isActive }) =>
-                `py-2 text-lg font-semibold ${
-                  isActive ? "text-[#35A7FF]" : "text-black"
-                }`
-              }
+              className={({ isActive }) => `py-2 text-lg font-semibold ${isActive ? "text-[#35A7FF]" : "text-black"}`}
               onClick={toggleDrawer}
             >
               Artikel
@@ -274,22 +232,14 @@ const Navbar = () => {
               <>
                 <NavLink
                   to="/riwayat"
-                  className={({ isActive }) =>
-                    `py-2 text-lg font-semibold ${
-                      isActive ? "text-[#35A7FF]" : "text-black"
-                    }`
-                  }
+                  className={({ isActive }) => `py-2 text-lg font-semibold ${isActive ? "text-[#35A7FF]" : "text-black"}`}
                   onClick={toggleDrawer}
                 >
                   Riwayat
                 </NavLink>
                 <NavLink
                   to="/profile"
-                  className={({ isActive }) =>
-                    `py-2 text-lg font-semibold ${
-                      isActive ? "text-[#35A7FF]" : "text-black"
-                    }`
-                  }
+                  className={({ isActive }) => `py-2 text-lg font-semibold ${isActive ? "text-[#35A7FF]" : "text-black"}`}
                   onClick={toggleDrawer}
                 >
                   Profile

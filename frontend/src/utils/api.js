@@ -99,7 +99,7 @@ const getPsikologById = async (psikologId) => {
 
 const getArticles = async () => {
   try {
-    const response = await fetch(`${CONFIG.BASE_URL}/api/v1/articles`);
+    const response = await fetch(`${CONFIG.BASE_URL}/articles/all`);
     if (!response.ok) {
       throw new Error("Failed to get articles");
     }
@@ -112,7 +112,7 @@ const getArticles = async () => {
 
 const getArticlesByWriter = async (writerId) => {
   try {
-    const response = await fetch(`${CONFIG.BASE_URL}/api/v1/articles`);
+    const response = await fetch(`${CONFIG.BASE_URL}/articles/all`);
     if (!response.ok) {
       throw new Error("Failed to get articles");
     }
@@ -126,7 +126,7 @@ const getArticlesByWriter = async (writerId) => {
 
 const getArticleBySlug = async (slug) => {
   try {
-    const response = await fetch(`${CONFIG.BASE_URL}/api/v1/articles/slug/${slug}`);
+    const response = await fetch(`${CONFIG.BASE_URL}/articles/slug/${slug}`);
     if (!response.ok) {
       throw new Error("Failed to get articles");
     }

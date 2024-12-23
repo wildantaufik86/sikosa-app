@@ -1,7 +1,7 @@
 import { RequestHandler, Request, Response } from "express";
 import UserModel from "../models/userModel";
 import appAssert from "../utils/appAssert";
-import { BAD_REQUEST, INTERNAL_SERVER_ERROR, OK } from "../constants/http";
+import { BAD_REQUEST, INTERNAL_SERVER_ERROR, NOT_FOUND, OK } from "../constants/http";
 import AppErrorCode from "../constants/appErrorCode";
 import path from "path";
 import { ConsultationModel } from "../models/consultationModel";
@@ -77,7 +77,7 @@ export const getDoctorProfile = async (req: Request, res: Response) => {
     );
 
     if (!doctorProfile) {
-      return res.status(404).json({ message: "Dokter/Psikolog tidak ditemukan" });
+      return res.status(NOT_FOUND).json({ message: "Dokter/Psikolog tidak ditemukan" });
     }
 
     return res.status(OK).json({
@@ -172,13 +172,13 @@ export const getConsultationsForUser: RequestHandler = async (req, res) => {
     });
 
     // Kirimkan data dalam respons
-    res.status(200).json({
+    res.status(OK).json({
       message: "Consultations fetched successfully",
       data: formattedConsultations,
     });
   } catch (error) {
     console.error(error);
-    res.status(400).json({
+    res.status(BAD_REQUEST).json({
       message: "Failed to fetch consultations",
     });
   }

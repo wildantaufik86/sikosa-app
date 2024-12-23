@@ -10,9 +10,7 @@ articleRoutes.get("/articles", async (req, res) => {
     const articles = await ArticleModel.find().populate("writer", "profile.fullname");
     res.status(OK).json({ message: "Data Artikel berhasil di dapatkan", data: articles });
   } catch (error) {
-    return res
-      .status(INTERNAL_SERVER_ERROR)
-      .json({ message: "Gagal mendapatkan data artikel", error });
+    return res.status(INTERNAL_SERVER_ERROR).json({ message: "Gagal mendapatkan data artikel", error });
   }
 });
 
@@ -25,12 +23,9 @@ articleRoutes.get("/articles/id/:id", async (req, res) => {
     }
     res.status(OK).json({ message: "Data Artikel berhasil di dapatkan", data: articles });
   } catch (error) {
-    return res
-      .status(INTERNAL_SERVER_ERROR)
-      .json({ message: "Gagal mendapatkan data artikel", INTERNAL_SERVER_ERROR });
+    return res.status(INTERNAL_SERVER_ERROR).json({ message: "Gagal mendapatkan data artikel", INTERNAL_SERVER_ERROR });
   }
 });
-
 
 // GET artikel berdasarkan slug (Publik)
 articleRoutes.get("/articles/slug/:slug", async (req, res) => {
@@ -38,15 +33,12 @@ articleRoutes.get("/articles/slug/:slug", async (req, res) => {
     const { slug } = req.params;
     const article = await ArticleModel.findOne({ slug });
     if (!article) {
-      return res.status(404).json({ message: "Article not found" });
+      return res.status(NOT_FOUND).json({ message: "Article not found" });
     }
-    res.status(200).json({ message: "Success", data: article });
+    res.status(OK).json({ message: "Success", data: article });
   } catch (error) {
-    res.status(500).json({ message: "Failed to fetch article", error });
+    res.status(INTERNAL_SERVER_ERROR).json({ message: "Failed to fetch article", error });
   }
 });
-
-
-
 
 export default articleRoutes;

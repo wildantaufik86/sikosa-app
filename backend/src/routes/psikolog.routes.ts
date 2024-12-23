@@ -5,6 +5,7 @@ import validateRole from "../middleware/validateRole";
 import upload from "../middleware/upload";
 import { updatePsychologistProfileHandler } from "../controllers/psikolog.controller";
 import ArticleModel from "../models/articleModel";
+import { CREATED, INTERNAL_SERVER_ERROR, OK, UNAUTHORIZED } from "../constants/http";
 
 const multer = require("multer");
 const psikologRoutes = Router();
@@ -45,12 +46,12 @@ psikologRoutes.post("/articles", authenticate, validateRole("psikolog"), upload.
       select: "_id profile.fullname",
     });
 
-    res.status(201).json({
+    res.status(CREATED).json({
       message: "Article published",
       data: formatArticle(articleWithWriter),
     });
   } catch (error) {
-    res.status(500).json({ message: "Failed to publish article", error });
+    res.status(INTERNAL_SERVER_ERROR).json({ message: "Failed to publish article", error });
   }
 });
 
@@ -65,7 +66,7 @@ psikologRoutes.put("/articles/:id", authenticate, validateRole("psikolog"), uplo
       writer: req.userId,
     });
     if (!article) {
-      return res.status(403).json({ message: "Unauthorized to edit this article" });
+      return res.status(UNAUTHORIZED).json({ message: "Unauthorized to edit this article" });
     }
 
     if (title) {
@@ -83,12 +84,12 @@ psikologRoutes.put("/articles/:id", authenticate, validateRole("psikolog"), uplo
       select: "_id profile.fullname",
     });
 
-    res.status(200).json({
+    res.status(OK).json({
       message: "Article updated",
       data: formatArticle(updatedArticle),
     });
   } catch (error) {
-    res.status(500).json({ message: "Failed to update article", error });
+    res.status(INTERNAL_SERVER_ERROR).json({ message: "Failed to update article", error });
   }
 });
 
@@ -103,12 +104,12 @@ psikologRoutes.delete("/articles/:id", authenticate, validateRole("psikolog"), a
     });
 
     if (!article) {
-      return res.status(403).json({ message: "Unauthorized to delete this article" });
+      return res.status(UNAUTHORIZED).json({ message: "Unauthorized to delete this article" });
     }
 
-    res.status(200).json({ message: "Article deleted successfully" });
+    res.status(OK).json({ message: "Article deleted successfully" });
   } catch (error) {
-    res.status(500).json({ message: "Failed to delete article", error });
+    res.status(INTERNAL_SERVER_ERROR).json({ message: "Failed to delete article", error });
   }
 });
 function formatArticle(article: any) {

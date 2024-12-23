@@ -1,6 +1,6 @@
 import { Request, RequestHandler, Response } from "express";
 import UserModel from "../models/userModel";
-import { CREATED, INTERNAL_SERVER_ERROR, NOT_FOUND, OK } from "../constants/http";
+import { BAD_REQUEST, CREATED, INTERNAL_SERVER_ERROR, NOT_FOUND, OK } from "../constants/http";
 import { hashValue } from "../utils/bcrypt";
 import ArticleModel from "../models/articleModel";
 import { ConsultationModel } from "../models/consultationModel";
@@ -252,13 +252,13 @@ export const getAllConsultations: RequestHandler = async (req, res) => {
       };
     });
 
-    res.status(200).json({
+    res.status(OK).json({
       message: "Consultations fetched successfully",
       data: formattedConsultations,
     });
   } catch (error) {
     console.error(error);
-    res.status(400).json({
+    res.status(BAD_REQUEST).json({
       message: "Failed to fetch consultations",
     });
   }

@@ -16,6 +16,7 @@ import {
   getUserProfileAll,
   userProfileEdit,
 } from "../controllers/admin.controller";
+import { OK } from "../constants/http";
 
 const adminRoutes = Router();
 
@@ -64,7 +65,7 @@ adminRoutes.get("/consultation/all", authenticate, validateRole("admin"), getAll
 // View logs
 adminRoutes.get("/logs", authenticate, validateRole("admin"), async (req, res) => {
   const logs = await LogModel.find().populate("userId", "profile.fullname");
-  res.status(200).json({ data: logs });
+  res.status(OK).json({ data: logs });
 });
 
 export default adminRoutes;

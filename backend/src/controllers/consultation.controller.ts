@@ -107,13 +107,13 @@ export const getNotificationsForPsychologist: RequestHandler = async (req, res) 
       };
     });
 
-    res.status(200).json({
+    res.status(OK).json({
       message: "Notifications fetched successfully",
       data: notifications,
     });
   } catch (error) {
     console.error(error);
-    res.status(400).json({
+    res.status(BAD_REQUEST).json({
       message: "Failed to fetch notifications",
     });
   }

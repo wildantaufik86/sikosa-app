@@ -1,6 +1,6 @@
 import { RequestHandler, Request, Response } from "express";
 import chatRoom from "../models/chatRoom";
-import { CREATED, INTERNAL_SERVER_ERROR } from "../constants/http";
+import { BAD_REQUEST, CREATED, INTERNAL_SERVER_ERROR, NOT_FOUND, OK } from "../constants/http";
 
 // Ambil semua room chat user
 export const getUserChatRooms: RequestHandler = async (req, res) => {
@@ -16,7 +16,7 @@ export const getUserChatRooms: RequestHandler = async (req, res) => {
     res.json(chatRooms);
   } catch (err) {
     console.error("Error fetching chat rooms:", err);
-    res.status(500).json({ message: "Failed to fetch chat rooms" });
+    res.status(INTERNAL_SERVER_ERROR).json({ message: "Failed to fetch chat rooms" });
   }
 };
 
@@ -32,13 +32,13 @@ export const getRoomMessages: RequestHandler = async (req, res) => {
       .populate("messages.senderId", "name email"); // Populate pengirim pesan
 
     if (!room) {
-      return res.status(404).json({ error: "Chat room not found" });
+      return res.status(NOT_FOUND).json({ error: "Chat room not found" });
     }
 
     res.json(room.messages); // Kirim pesan ke client
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: "Failed to fetch messages" });
+    res.status(INTERNAL_SERVER_ERROR).json({ error: "Failed to fetch messages" });
   }
 };
 
@@ -47,7 +47,7 @@ export const sendMessage = async (req: Request, res: Response) => {
     const { roomId, senderId, message } = req.body;
 
     if (!roomId || !senderId || !message) {
-      return res.status(400).json({ error: "Missing required fields" });
+      return res.status(BAD_REQUEST).json({ error: "Missing required fields" });
     }
 
     // Simulating saving to database
@@ -62,10 +62,10 @@ export const sendMessage = async (req: Request, res: Response) => {
     // Replace this with your actual implementation
     console.log("New Message:", newMessage); // Debugging
 
-    res.status(201).json(newMessage);
+    res.status(CREATED).json(newMessage);
   } catch (error) {
     console.error("Error creating message:", error);
-    res.status(500).json({ error: "Internal Server Error" });
+    res.status(INTERNAL_SERVER_ERROR).json({ error: "Internal Server Error" });
   }
 };
 
@@ -81,12 +81,12 @@ export const updateStatus = async (req: Request, res: Response) => {
     );
 
     if (!updatedChatRoom) {
-      return res.status(404).json({ message: "Chat room not found" });
+      return res.status(NOT_FOUND).json({ message: "Chat room not found" });
     }
 
-    res.status(200).json({ message: "Chat finished", chatRoom: updatedChatRoom });
+    res.status(OK).json({ message: "Chat finished", chatRoom: updatedChatRoom });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Failed to finish chat", error });
+    res.status(INTERNAL_SERVER_ERROR).json({ message: "Failed to finish chat", error });
   }
 };

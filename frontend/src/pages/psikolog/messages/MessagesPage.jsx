@@ -1,7 +1,9 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useCallback } from "react";
 import axios from "axios";
 import { FiSearch } from "react-icons/fi";
 import io from "socket.io-client";
+
+const SOCKET_URL = "http://localhost:5000";
 
 const MessagesPage = () => {
   const [chatRooms, setChatRooms] = useState([]);
@@ -14,61 +16,97 @@ const MessagesPage = () => {
   const [error, setError] = useState(null);
 
   const userData = JSON.parse(sessionStorage.getItem("authUser"));
-  const userId = userData?._id; // Extract userId from the user object
-  const socket = useRef(io("http://localhost:5000"));
+  const userId = userData?._id;
+  const socketRef = useRef();
   const messagesEndRef = useRef(null);
 
-  // Fetch chat rooms on mount
+  // Initialize socket connection
   useEffect(() => {
-    const fetchChatRooms = async () => {
-      try {
-        const token = sessionStorage.getItem("accessToken");
-        if (!token) {
-          throw new Error("No token found");
-        }
+    socketRef.current = io(SOCKET_URL);
 
-        const response = await axios.get("http://localhost:5000/chat/rooms", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        setChatRooms(response.data.filter((item) => item.status !== "inactive"));
-        setFilteredRooms(response.data); // Default filter
-        setLoading(false);
-      } catch (err) {
-        setError(err.message || "Failed to fetch chat rooms");
-        setLoading(false);
+    // Socket event listeners
+    socketRef.current.on("connect", () => {
+      console.log("Socket connected");
+    });
+
+    socketRef.current.on("disconnect", () => {
+      console.log("Socket disconnected");
+    });
+
+    socketRef.current.on("error", (error) => {
+      console.error("Socket error:", error);
+    });
+
+    // Cleanup on unmount
+    return () => {
+      if (socketRef.current) {
+        socketRef.current.disconnect();
       }
     };
-
-    fetchChatRooms();
   }, []);
 
-  // Filter chat rooms based on search query
+  // Fetch chat rooms
+  const fetchChatRooms = useCallback(async () => {
+    try {
+      const token = sessionStorage.getItem("accessToken");
+      if (!token) throw new Error("No token found");
+
+      const response = await axios.get(`${SOCKET_URL}/chat/rooms`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      const activeRooms = response.data.filter((item) => item.status !== "inactive");
+      setChatRooms(activeRooms);
+      setFilteredRooms(activeRooms.slice().reverse());
+      setLoading(false);
+    } catch (err) {
+      setError(err.message || "Failed to fetch chat rooms");
+      setLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
-    setFilteredRooms(
-      chatRooms
-        .filter((room) => room.participants.some((p) => p.email?.toLowerCase().includes(searchQuery.toLowerCase())))
-        .slice()
-        .reverse()
-    );
+    fetchChatRooms();
+  }, [fetchChatRooms]);
+
+  // Listen for room updates
+  useEffect(() => {
+    if (socketRef.current) {
+      socketRef.current.on("roomUpdate", (updatedRoom) => {
+        setChatRooms((prevRooms) => prevRooms.map((room) => (room._id === updatedRoom._id ? updatedRoom : room)));
+      });
+
+      return () => {
+        socketRef.current.off("roomUpdate");
+      };
+    }
+  }, []);
+
+  // Handle search filtering
+  useEffect(() => {
+    const filtered = chatRooms
+      .filter(
+        (room) =>
+          Array.isArray(room.participants) &&
+          room.participants.some((p) => p.email?.toLowerCase().includes(searchQuery.toLowerCase()))
+      )
+      .slice()
+      .reverse();
+    setFilteredRooms(filtered);
   }, [searchQuery, chatRooms]);
 
   // Fetch messages for the selected room
+  // Handle selected room and messages
   useEffect(() => {
     if (!selectedRoom) return;
 
     const fetchRoomMessages = async (roomId) => {
       try {
         const token = sessionStorage.getItem("accessToken");
-        if (!token) {
-          throw new Error("No token found");
-        }
+        if (!token) throw new Error("No token found");
 
-        const response = await axios.get(`http://localhost:5000/chat/messages/${roomId}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+        const response = await axios.get(`${SOCKET_URL}/chat/messages/${roomId}`, {
+          headers: { Authorization: `Bearer ${token}` },
         });
 
         setMessages(response.data || []);
@@ -79,68 +117,68 @@ const MessagesPage = () => {
       }
     };
 
-    fetchRoomMessages(selectedRoom._id); // Trigger fetch when room is selected
+    fetchRoomMessages(selectedRoom._id);
 
-    socket.current.emit("joinRoom", selectedRoom._id);
+    // Join room
+    socketRef.current.emit("joinRoom", {
+      roomId: selectedRoom._id,
+      userId: userId,
+    });
 
+    // Listen for new messages
     const handleReceiveMessage = (newMsg) => {
-      setMessages((prev) => [...prev, newMsg]);
+      setMessages((prev) => {
+        // Cek apakah pesan sudah ada (mencegah duplikasi)
+        const isDuplicate = prev.some(
+          (msg) => msg.senderId === newMsg.senderId && msg.message === newMsg.message && msg.timestamp === newMsg.timestamp
+        );
+
+        if (!isDuplicate) {
+          return [...prev, newMsg];
+        }
+        return prev;
+      });
       scrollToBottom();
     };
 
-    socket.current.on("receiveMessage", handleReceiveMessage);
+    socketRef.current.on("receiveMessage", handleReceiveMessage);
 
     return () => {
-      // Cleanup untuk mencegah listener duplikat
-      socket.current.off("receiveMessage", handleReceiveMessage);
+      socketRef.current.off("receiveMessage", handleReceiveMessage);
+      socketRef.current.emit("leaveRoom", selectedRoom._id);
     };
-  }, [selectedRoom]);
+  }, [selectedRoom, userId]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
   const handleSendMessage = async () => {
-    if (!newMessage.trim()) return;
+    if (!newMessage.trim() || !selectedRoom || selectedRoom.status === "inactive") return;
 
     const token = sessionStorage.getItem("accessToken");
     if (!token) {
-      console.error("No token found. Please log in.");
+      console.error("No token found");
       return;
     }
-    console.log(selectedRoom._id);
+
     const messageData = {
       roomId: selectedRoom._id,
       senderId: userId,
-      message: newMessage,
-    };
-
-    if (selectedRoom?.status === "inactive") {
-      console.error("Chat has been finished. You cannot send messages.");
-      return;
-    }
-
-    // Immediately update the messages state
-    const newMessageObj = {
-      ...messageData,
+      message: newMessage.trim(),
       timestamp: new Date().toISOString(),
-      _id: Date.now().toString(), // Create a temporary ID
     };
-
-    setMessages((prevMessages) => [...prevMessages, newMessageObj]);
 
     try {
-      // Send the message to the backend
-      await axios.post("http://localhost:5000/chat/messages", messageData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+      // Send to backend first
+      const response = await axios.post(`${SOCKET_URL}/chat/messages`, messageData, {
+        headers: { Authorization: `Bearer ${token}` },
       });
 
-      // Emit the message to the socket server
-      socket.current.emit("sendMessage", messageData);
+      // Emit to socket after successful API call
+      socketRef.current.emit("sendMessage", messageData);
 
-      // Clear the input field
+      // Clear input
       setNewMessage("");
       scrollToBottom();
     } catch (err) {
@@ -148,28 +186,24 @@ const MessagesPage = () => {
     }
   };
 
-  const handleRoomSelection = (room) => {
-    setSelectedRoom(room);
-  };
-
   const handleFinishChat = async () => {
+    if (!selectedRoom) return;
+
     try {
       const token = sessionStorage.getItem("accessToken");
-      if (!token) {
-        console.error("No token found. Please log in.");
-        return;
-      }
+      if (!token) throw new Error("No token found");
 
-      const response = await axios.patch(`http://localhost:5000/chat/finish/${selectedRoom._id}`, null, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+      await axios.patch(`${SOCKET_URL}/chat/finish/${selectedRoom._id}`, null, { headers: { Authorization: `Bearer ${token}` } });
+
+      // Update local state
+      setSelectedRoom((prev) => ({ ...prev, status: "inactive" }));
+      setChatRooms((prev) => prev.map((room) => (room._id === selectedRoom._id ? { ...room, status: "inactive" } : room)));
+
+      // Emit room update
+      socketRef.current.emit("roomUpdate", {
+        roomId: selectedRoom._id,
+        status: "inactive",
       });
-
-      if (response.data) {
-        setSelectedRoom(null); // Close the chat room UI
-        setChatRooms((prev) => prev.map((room) => (room._id === selectedRoom._id ? { ...room, status: "inactive" } : room)));
-      }
     } catch (err) {
       console.error("Failed to finish chat:", err);
     }

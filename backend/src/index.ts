@@ -82,6 +82,10 @@ io.on("connection", (socket) => {
     }
   });
 
+  socket.on("leaveRoom", (roomId) => {
+    socket.leave(roomId);
+  });
+
   // Handle incoming messages
   socket.on("sendMessage", async ({ roomId, senderId, message }) => {
     const timestamp = new Date();
@@ -108,6 +112,10 @@ io.on("connection", (socket) => {
   // Handle client disconnecting
   socket.on("disconnect", () => {
     console.log("Client disconnected:", socket.id);
+  });
+
+  socket.on("roomUpdate", ({ roomId, status }) => {
+    io.emit("roomUpdate", { _id: roomId, status });
   });
 });
 

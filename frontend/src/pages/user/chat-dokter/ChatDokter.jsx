@@ -20,6 +20,8 @@ const doctorData = {
   education: ["S1 Psikologi - Universitas X", "S2 Psikologi Klinis - Universitas Y"],
 };
 
+const SOCKET_URL = "http://localhost:5000";
+
 const ChatDokter = () => {
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
@@ -28,15 +30,58 @@ const ChatDokter = () => {
   const { authUser } = useAuth();
   const navigate = useNavigate();
   const [statusPengajuan, setStatusPengajuan] = useState({ status: "accepted" });
-
-  const socket = useRef(io("http://localhost:5000"));
+  const [loading, setLoading] = useState(true);
+  const socketRef = useRef();
   const [roomChat, setRoomChat] = useState(null);
 
+  // Initiate Socket COnnection
+  useEffect(() => {
+    socketRef.current = io(SOCKET_URL);
+
+    // Clean up socket connection on component unmount
+    return () => {
+      if (socketRef.current) {
+        socketRef.current.disconnect();
+      }
+    };
+  }, []);
+
+  // Join chat room when roomChat is set
+  useEffect(() => {
+    if (roomChat && authUser) {
+      socketRef.current.emit("joinRoom", {
+        roomId: roomChat,
+        userId: authUser._id,
+      });
+    }
+  }, [roomChat, authUser]);
+
+  // Listen for incoming messages
+  useEffect(() => {
+    if (socketRef.current) {
+      socketRef.current.on("receiveMessage", (newMessage) => {
+        setMessages((prevMessages) => [
+          ...prevMessages,
+          {
+            ...newMessage,
+            content: newMessage.message,
+          },
+        ]);
+      });
+
+      socketRef.current.on("error", (error) => {
+        console.error("Socket error:", error);
+        toast.error(error.message);
+      });
+    }
+  }, []);
+
+  // Authentication check
   useEffect(() => {
     if (!authUser) {
       navigate("/login");
     }
-  }, [authUser]);
+  }, [authUser, navigate]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -47,7 +92,8 @@ const ChatDokter = () => {
         }
         setPsikolog(result.data);
       } catch (error) {
-        console.log(error.message);
+        console.error(error.message);
+        toast.error("Failed to fetch psychologist data");
       }
     };
     if (authUser) {
@@ -55,6 +101,7 @@ const ChatDokter = () => {
     }
   }, [authUser, id_psikolog]);
 
+  // Fetch chat rooms
   useEffect(() => {
     const fetchChatRooms = async () => {
       try {
@@ -63,76 +110,68 @@ const ChatDokter = () => {
           throw new Error("No token found");
         }
 
-        const response = await axios.get("http://localhost:5000/chat/rooms", {
+        const response = await axios.get(`${SOCKET_URL}/chat/rooms`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         });
-        const indexed = response.data.length - 1;
-        const dataMessages = response.data[indexed].messages;
-        setMessages(
-          dataMessages.map((data) => ({
-            ...data,
-            content: data.message,
-          }))
-        );
-        setStatusPengajuan({ status: response.data[indexed].status });
-        setRoomChat(response.data[indexed]._id);
+
+        if (response.data.length > 0) {
+          const indexed = response.data.length - 1;
+          const dataMessages = response.data[indexed].messages;
+          setMessages(
+            dataMessages.map((data) => ({
+              ...data,
+              content: data.message,
+            }))
+          );
+          setStatusPengajuan({ status: response.data[indexed].status });
+          setRoomChat(response.data[indexed]._id);
+        }
       } catch (err) {
+        console.error("Failed to fetch chat rooms:", err);
+        toast.error("Failed to load chat history");
+      } finally {
         setLoading(false);
       }
     };
 
-    fetchChatRooms();
-  }, []);
+    if (authUser) {
+      fetchChatRooms();
+    }
+  }, [authUser]);
 
-  if (!authUser || !psikolog) {
-    return null;
-  }
-
-  // testing handle send message
   const handleSendMessage = async () => {
+    if (!message.trim()) return;
+
     const token = sessionStorage.getItem("accessToken");
     if (!token) {
-      console.error("No token found. Please log in.");
+      toast.error("No token found. Please log in.");
       return;
     }
-    const selectedRoom = {
-      _id: roomChat,
-    };
-
-    console.log(selectedRoom._id);
 
     const messageData = {
-      roomId: selectedRoom._id,
+      roomId: roomChat,
       senderId: authUser._id,
-      message: message,
+      message: message.trim(),
     };
-
-    // Immediately update the messages state
-    const newMessageObj = {
-      ...messageData,
-      timestamp: new Date().toISOString(),
-      _id: Date.now().toString(), // Create a temporary ID
-    };
-
-    setMessages((prevMessages) => [...prevMessages, newMessageObj]);
 
     try {
-      // Send the message to the backend
-      await axios.post("http://localhost:5000/chat/messages", messageData, {
+      // Send message to backend
+      await axios.post(`${SOCKET_URL}/chat/messages`, messageData, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
 
-      // Emit the message to the socket server
-      socket.current.emit("sendMessage", messageData);
+      // Emit message through socket
+      socketRef.current.emit("sendMessage", messageData);
 
-      // Clear the input field
+      // Clear input
       setMessage("");
     } catch (err) {
       console.error("Failed to send message:", err);
+      toast.error("Failed to send message");
     }
   };
 
@@ -152,6 +191,10 @@ const ChatDokter = () => {
       toast.error(error.message);
     }
   };
+
+  if (loading || !authUser || !psikolog) {
+    return <div className="flex justify-center items-center h-screen">Loading...</div>;
+  }
 
   const sendMessage = () => {
     if (message.trim()) {

@@ -6,21 +6,14 @@ import ChatInput from "../../../components/user/components/chat-dokter/ChatInput
 import DokterDetail from "../../../components/user/components/chat-dokter/DokterDetail";
 import PesanChat from "../../../components/user/components/chat-dokter/PesanChat";
 import { useAuth } from "../../../hooks/hooks";
-import { createPengajuanKonsultasi, getPsikologById } from "../../../utils/api";
+import { createPengajuanKonsultasi, getHistoryConsultations, getPsikologById } from "../../../utils/api";
 import { toast } from "react-toastify";
 import { formattedDate } from "../../../utils/utils";
 import axios from "axios";
 import io from "socket.io-client";
+import CONFIG from "../../../config/config";
 
-const doctorData = {
-  id: 1,
-  name: "Dr. John Doe",
-  image: "https://via.placeholder.com/150",
-  profile: "Dr. John Doe is a specialist in mental health, focusing on anxiety and depression treatment. ",
-  education: ["S1 Psikologi - Universitas X", "S2 Psikologi Klinis - Universitas Y"],
-};
-
-const SOCKET_URL = "http://localhost:5000";
+const SOCKET_URL = CONFIG.BASE_URL;
 
 const ChatDokter = () => {
   const [message, setMessage] = useState("");
@@ -29,7 +22,8 @@ const ChatDokter = () => {
   const [psikolog, setPsikolog] = useState(null);
   const { authUser } = useAuth();
   const navigate = useNavigate();
-  const [statusPengajuan, setStatusPengajuan] = useState({ status: "accepted" });
+  const [statusPengajuan, setStatusPengajuan] = useState({ status: "inactive" });
+  const [statusRoom, setStatusRoom] = useState({ status: "inactive" });
   const [loading, setLoading] = useState(true);
   const socketRef = useRef();
   const [roomChat, setRoomChat] = useState(null);
@@ -117,16 +111,16 @@ const ChatDokter = () => {
         });
 
         if (response.data.length > 0) {
-          const indexed = response.data.length - 1;
-          const dataMessages = response.data[indexed].messages;
+          const lastRoom = response.data.slice(-1)[0];
+          const dataMessages = lastRoom.messages;
           setMessages(
             dataMessages.map((data) => ({
               ...data,
               content: data.message,
             }))
           );
-          setStatusPengajuan({ status: response.data[indexed].status });
-          setRoomChat(response.data[indexed]._id);
+          setStatusRoom({ status: lastRoom.status });
+          setRoomChat(lastRoom._id);
         }
       } catch (err) {
         console.error("Failed to fetch chat rooms:", err);
@@ -136,12 +130,28 @@ const ChatDokter = () => {
       }
     };
 
+    // get consultation data
+    const fetchConsultations = async () => {
+      try {
+        const { error, message, consultations } = await getHistoryConsultations();
+        if (error) {
+          throw new Error(message);
+        }
+        const lastConsultation = consultations.slice(-1)[0];
+        setStatusPengajuan({ status: lastConsultation.status, createdAt: lastConsultation.createdAt });
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
     if (authUser) {
       fetchChatRooms();
+      fetchConsultations();
     }
   }, [authUser]);
 
-  const handleSendMessage = async () => {
+  const handleSendMessage = async (e) => {
+    e.preventDefault();
     if (!message.trim()) return;
 
     const token = sessionStorage.getItem("accessToken");
@@ -175,7 +185,10 @@ const ChatDokter = () => {
     }
   };
 
-  const handlePengajun = async () => {
+  console.log(statusRoom);
+  console.log(statusPengajuan);
+
+  const handlePengajuan = async () => {
     const messageInput = "Saya ingin melakukan konsultasi";
     try {
       const { error, message, data } = await createPengajuanKonsultasi({
@@ -196,13 +209,6 @@ const ChatDokter = () => {
     return <div className="flex justify-center items-center h-screen">Loading...</div>;
   }
 
-  const sendMessage = () => {
-    if (message.trim()) {
-      setMessages([...messages, { sender: "user", content: message }]);
-      setMessage("");
-    }
-  };
-
   return (
     <div className="py-8 lg:py-10 px-6 lg:px-20 font-jakarta">
       {/* Breadcrumb */}
@@ -215,7 +221,7 @@ const ChatDokter = () => {
           Daftar Layanan
         </Link>
         {" > "}
-        <span className="font-semibold ml-1">{doctorData.name}</span>
+        <span className="font-semibold ml-1">{psikolog.profile.fullname}</span>
         {" > "}
         <span className="font-semibold ml-1">Chat Dokter</span>
       </div>
@@ -229,23 +235,33 @@ const ChatDokter = () => {
 
       <div className="flex flex-col lg:flex-row space-y-4 lg:space-y-0 lg:space-x-6">
         <DokterDetail psikolog={psikolog} />
-        {statusPengajuan?.status === "inactive" || statusPengajuan?.status === "pending" ? (
-          <PengajuanKonsultasi
-            statusPengajuan={statusPengajuan}
-            psikolog={psikolog}
-            handlePengajuan={handlePengajun}
-            authUser={authUser}
-          />
-        ) : (
+        {statusPengajuan?.status === "accepted" && statusRoom.status === "active" ? (
+          // Tampilkan chat section jika pengajuan diterima dan status room aktif
           <ChatSection
             message={message}
             messages={messages}
             setMessage={setMessage}
-            sendMessage={sendMessage}
-            doctorData={doctorData}
             handleSendMessage={handleSendMessage}
+            psikolog={psikolog}
           />
-        )}
+        ) : statusPengajuan?.status === "accepted" && statusRoom.status === "inactive" ? (
+          // Tampilkan pengajuan jika pengajuan diterima tetapi status room tidak aktif
+          <PengajuanKonsultasi
+            statusPengajuan={statusPengajuan}
+            psikolog={psikolog}
+            handlePengajuan={handlePengajuan}
+            authUser={authUser}
+          />
+        ) : (statusPengajuan?.status === "pending" || statusPengajuan?.status === "inactive") &&
+          statusRoom.status === "inactive" ? (
+          // Tampilkan pengajuan jika pengajuan masih pending/inactive dan status room tidak aktif
+          <PengajuanKonsultasi
+            statusPengajuan={statusPengajuan}
+            psikolog={psikolog}
+            handlePengajuan={handlePengajuan}
+            authUser={authUser}
+          />
+        ) : null}
       </div>
     </div>
   );
@@ -253,11 +269,11 @@ const ChatDokter = () => {
 
 const PengajuanKonsultasi = ({ handlePengajuan, psikolog, statusPengajuan, authUser }) => {
   return (
-    <div className="w-full flex flex-col justify-center items-center px-12">
+    <div className="flex-1 flex flex-col items-center justify-center overflow-x-auto">
       {/* tabel status pengajuan */}
       {statusPengajuan.status !== "not consultation" && (
-        <div className="mb-4 w-full">
-          <table className="min-w-full table-auto border-collapse">
+        <div className="mb-4 w-full overflow-x-auto">
+          <table className="min-w-full table-auto border-collapse overflow-x-auto">
             <thead className="bg-[#EBF6FF]">
               <tr>
                 <th className="px-4 py-2 font-medium text-left border-y border-gray-200 text-sm">No</th>
@@ -274,7 +290,11 @@ const PengajuanKonsultasi = ({ handlePengajuan, psikolog, statusPengajuan, authU
                 <td className="px-4 py-2 border-b border-gray-200 text-xs">{psikolog.profile.fullname}</td>
                 <td
                   className={`px-4 py-2 border-b font-semibold border-gray-200 text-xs ${
-                    statusPengajuan.status === "pending" ? "text-yellow-500" : "text-red-500"
+                    statusPengajuan.status === "pending"
+                      ? "text-yellow-500"
+                      : statusPengajuan.status === "accepted"
+                      ? "text-green-500"
+                      : "text-red-500"
                   }`}
                 >
                   {statusPengajuan.status}
@@ -287,26 +307,28 @@ const PengajuanKonsultasi = ({ handlePengajuan, psikolog, statusPengajuan, authU
       )}
 
       {/* form pengajuan konsul */}
-      <div className="w-full bg-white shadow-md rounded-md flex flex-col justify-center items-center py-4 ">
-        <h4 className="text-sm md:text-lg mb-2">
-          Ajukan konsultasi bersama <span className="text-[#35A7FF]">{psikolog.profile.fullname}</span>
-        </h4>
-        <button
-          onClick={handlePengajuan}
-          className="bg-[#35A7FF] hover:bg-[#3297e5] transition-all font-semibold text-white text-xs py-2 px-4 rounded-md md:text-sm"
-        >
-          Konsultasi
-        </button>
-      </div>
+      {statusPengajuan.status !== "pending" && (
+        <div className="w-full bg-white shadow-md rounded-md flex flex-col justify-center items-center py-4 ">
+          <h4 className="text-sm md:text-lg mb-2">
+            Ajukan konsultasi bersama <span className="text-[#35A7FF]">{psikolog.profile.fullname}</span>
+          </h4>
+          <button
+            onClick={handlePengajuan}
+            className="bg-[#35A7FF] hover:bg-[#3297e5] transition-all font-semibold text-white text-xs py-2 px-4 rounded-md md:text-sm"
+          >
+            Konsultasi
+          </button>
+        </div>
+      )}
     </div>
   );
 };
 
-const ChatSection = ({ messages, message, setMessage, sendMessage, doctorData, handleSendMessage }) => {
+const ChatSection = ({ messages, message, setMessage, handleSendMessage, psikolog }) => {
   return (
-    <div className="w-full lg:w-2/3 border bg-[#EBF6FF] px-4 py-8 rounded-lg shadow-lg flex flex-col">
-      <PesanChat messages={messages} doctorImage={doctorData.image} />
-      <ChatInput message={message} setMessage={setMessage} sendMessage={sendMessage} handleSendMessage={handleSendMessage} />
+    <div className="flex-1 lg:w-2/3 border bg-[#EBF6FF] px-4 py-8 rounded-lg shadow-lg flex flex-col">
+      <PesanChat messages={messages} psikolog={psikolog} />
+      <ChatInput message={message} setMessage={setMessage} handleSendMessage={handleSendMessage} />
     </div>
   );
 };

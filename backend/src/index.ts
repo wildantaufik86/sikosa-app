@@ -45,7 +45,7 @@ app.use("/api/v1", articleRoutes);
 // api konsul
 app.use("/consultation", consultationRoutes, userRoutes);
 
-app.use("/auth", authRoutes);
+app.use("/api/auth", authRoutes);
 
 app.use("/user", authenticate, userRoutes);
 app.use("/psikolog", authenticate, psikologRoutes);

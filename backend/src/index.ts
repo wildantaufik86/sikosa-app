@@ -36,20 +36,20 @@ app.get("/api", ({ req, res }: any) => {
     status: "Connected!!!",
   });
 });
-app.use("/chat", authenticate, chatRoutes);
-app.use("/admin", adminRoutes);
+app.use("/api/chat", authenticate, chatRoutes);
+app.use("/api/admin", adminRoutes);
 
 // general API
 app.use("/api/v1", articleRoutes);
 
 // api konsul
-app.use("/consultation", consultationRoutes, userRoutes);
+app.use("/api/consultation", consultationRoutes, userRoutes);
 
 app.use("/api/auth", authRoutes);
 
-app.use("/user", authenticate, userRoutes);
-app.use("/psikolog", authenticate, psikologRoutes);
-app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
+app.use("/api/user", authenticate, userRoutes);
+app.use("/api/psikolog", authenticate, psikologRoutes);
+app.use("/api/uploads", express.static(path.join(__dirname, "../uploads")));
 
 app.use(errorHandler);
 

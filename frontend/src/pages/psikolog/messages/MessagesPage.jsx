@@ -2,8 +2,9 @@ import React, { useEffect, useRef, useState, useCallback } from "react";
 import axios from "axios";
 import { FiSearch } from "react-icons/fi";
 import io from "socket.io-client";
+import CONFIG from "../../../config/config";
 
-const SOCKET_URL = "http://localhost:5000";
+const SOCKET_URL = CONFIG.BASE_URL;
 
 const MessagesPage = () => {
   const [chatRooms, setChatRooms] = useState([]);
@@ -164,7 +165,9 @@ const MessagesPage = () => {
 
     const messageData = {
       roomId: selectedRoom._id,
-      senderId: userId,
+      senderId: {
+        _id: userId,
+      },
       message: newMessage.trim(),
       timestamp: new Date().toISOString(),
     };
@@ -264,7 +267,7 @@ const MessagesPage = () => {
         {selectedRoom ? (
           <>
             {/* Header Chat */}
-            <div className="flex items-center mb-6">
+            <div className="flex items-center mb-6 border-b pb-2">
               <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
                 <span className="text-lg text-white">
                   {selectedRoom.participants
@@ -277,6 +280,14 @@ const MessagesPage = () => {
                 <h3 className="text-md font-semibold">{selectedRoom.participants?.find((p) => p._id !== userId)?.email}</h3>
                 <p className="text-sm text-green-500">Online</p>
               </div>
+              {selectedRoom?.status !== "inactive" && (
+                <button
+                  onClick={handleFinishChat}
+                  className="ml-auto p-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+                >
+                  Finish Chat
+                </button>
+              )}
             </div>
 
             {/* Messages Section */}
@@ -286,26 +297,20 @@ const MessagesPage = () => {
               )}
 
               {messages.map((msg, index) => (
-                <div key={msg._id || index} className={`flex ${msg.senderId === userId ? "justify-end" : "justify-start"}`}>
+                <div key={msg._id || index} className={`flex ${msg.senderId._id === userId ? "justify-end" : "justify-start"}`}>
                   <div
                     className={`p-3 rounded-lg max-w-[70%] shadow ${
-                      msg.senderId === userId ? "bg-blue-500 text-white" : "bg-gray-100 text-gray-800"
+                      msg.senderId._id === userId ? "bg-blue-500 text-white" : "bg-gray-100 text-gray-800"
                     }`}
                   >
                     <p>{msg.message}</p>
-                    <span className="text-xs opacity-70">{new Date(msg.timestamp).toLocaleTimeString()}</span>
+                    <span className="text-xs opacity-70">
+                      {new Date(msg.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                    </span>
                   </div>
                 </div>
               ))}
               <div ref={messagesEndRef} />
-              {selectedRoom?.status !== "inactive" && (
-                <button
-                  onClick={handleFinishChat}
-                  className="ml-auto p-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
-                >
-                  Finish Chat
-                </button>
-              )}
             </div>
 
             {/* Input Section */}

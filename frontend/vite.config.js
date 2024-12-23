@@ -16,9 +16,4 @@ export default defineConfig({
   build: {
     outDir: "dist",
   },
-  resolve: {
-    alias: {
-      "@components": path.resolve(__dirname, "src/components"),
-    },
-  },
 });

@@ -4,7 +4,7 @@ import { FiSearch } from "react-icons/fi";
 import io from "socket.io-client";
 import CONFIG from "../../../config/config";
 
-const SOCKET_URL = import.meta.env.VITE_DEVELOPMENT === "true" ? CONFIG.LOCAL_SOCKET_URL : CONFIG.SOCKET_BASE_URL;
+const SOCKET_URL = CONFIG.SOCKET_BASE_URL;
 
 const MessagesPage = () => {
   const [chatRooms, setChatRooms] = useState([]);

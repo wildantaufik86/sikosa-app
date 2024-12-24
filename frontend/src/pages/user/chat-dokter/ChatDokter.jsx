@@ -13,7 +13,9 @@ import axios from "axios";
 import io from "socket.io-client";
 import CONFIG from "../../../config/config";
 
-const SOCKET_URL = import.meta.env.VITE_DEVELOPMENT === "true" ? CONFIG.LOCAL_SOCKET_URL : CONFIG.SOCKET_BASE_URL;
+const SOCKET_URL = CONFIG.SOCKET_BASE_URL;
+
+console.log(SOCKET_URL);
 
 const ChatDokter = () => {
   const [message, setMessage] = useState("");
@@ -30,7 +32,10 @@ const ChatDokter = () => {
 
   // Initiate Socket COnnection
   useEffect(() => {
-    socketRef.current = io(SOCKET_URL);
+    socketRef.current = io(SOCKET_URL, {
+      withCredentials: true,
+      transports: ["websocket", "polling"],
+    });
 
     // Clean up socket connection on component unmount
     return () => {

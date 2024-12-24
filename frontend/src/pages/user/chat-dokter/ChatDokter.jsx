@@ -32,10 +32,7 @@ const ChatDokter = () => {
 
   // Initiate Socket COnnection
   useEffect(() => {
-    socketRef.current = io(SOCKET_URL, {
-      withCredentials: true,
-      transports: ["websocket", "polling"],
-    });
+    socketRef.current = io(SOCKET_URL);
 
     // Clean up socket connection on component unmount
     return () => {

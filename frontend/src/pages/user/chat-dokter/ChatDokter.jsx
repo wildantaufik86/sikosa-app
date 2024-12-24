@@ -13,7 +13,7 @@ import axios from "axios";
 import io from "socket.io-client";
 import CONFIG from "../../../config/config";
 
-const SOCKET_URL = CONFIG.BASE_URL;
+const SOCKET_URL = import.meta.env.VITE_DEVELOPMENT === "true" ? CONFIG.LOCAL_SOCKET_URL : CONFIG.SOCKET_BASE_URL;
 
 const ChatDokter = () => {
   const [message, setMessage] = useState("");
@@ -104,7 +104,7 @@ const ChatDokter = () => {
           throw new Error("No token found");
         }
 
-        const response = await axios.get(`${SOCKET_URL}/chat/rooms`, {
+        const response = await axios.get(`${SOCKET_URL}/api/chat/rooms`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -168,7 +168,7 @@ const ChatDokter = () => {
 
     try {
       // Send message to backend
-      await axios.post(`${SOCKET_URL}/chat/messages`, messageData, {
+      await axios.post(`${SOCKET_URL}/api/chat/messages`, messageData, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -184,9 +184,6 @@ const ChatDokter = () => {
       toast.error("Failed to send message");
     }
   };
-
-  console.log(statusRoom);
-  console.log(statusPengajuan);
 
   const handlePengajuan = async () => {
     const messageInput = "Saya ingin melakukan konsultasi";

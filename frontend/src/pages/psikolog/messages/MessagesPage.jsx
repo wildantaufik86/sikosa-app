@@ -4,7 +4,7 @@ import { FiSearch } from "react-icons/fi";
 import io from "socket.io-client";
 import CONFIG from "../../../config/config";
 
-const SOCKET_URL = CONFIG.BASE_URL;
+const SOCKET_URL = import.meta.env.VITE_DEVELOPMENT === "true" ? CONFIG.LOCAL_SOCKET_URL : CONFIG.SOCKET_BASE_URL;
 
 const MessagesPage = () => {
   const [chatRooms, setChatRooms] = useState([]);
@@ -52,7 +52,7 @@ const MessagesPage = () => {
       const token = sessionStorage.getItem("accessToken");
       if (!token) throw new Error("No token found");
 
-      const response = await axios.get(`${SOCKET_URL}/chat/rooms`, {
+      const response = await axios.get(`${SOCKET_URL}/api/chat/rooms`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -106,7 +106,7 @@ const MessagesPage = () => {
         const token = sessionStorage.getItem("accessToken");
         if (!token) throw new Error("No token found");
 
-        const response = await axios.get(`${SOCKET_URL}/chat/messages/${roomId}`, {
+        const response = await axios.get(`${SOCKET_URL}/api/chat/messages/${roomId}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
 
@@ -174,7 +174,7 @@ const MessagesPage = () => {
 
     try {
       // Send to backend first
-      const response = await axios.post(`${SOCKET_URL}/chat/messages`, messageData, {
+      const response = await axios.post(`${SOCKET_URL}/api/chat/messages`, messageData, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -196,7 +196,9 @@ const MessagesPage = () => {
       const token = sessionStorage.getItem("accessToken");
       if (!token) throw new Error("No token found");
 
-      await axios.patch(`${SOCKET_URL}/chat/finish/${selectedRoom._id}`, null, { headers: { Authorization: `Bearer ${token}` } });
+      await axios.patch(`${SOCKET_URL}/api/chat/finish/${selectedRoom._id}`, null, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
       // Update local state
       setSelectedRoom((prev) => ({ ...prev, status: "inactive" }));
@@ -238,7 +240,6 @@ const MessagesPage = () => {
             <p className="text-center text-gray-500">No chat rooms found.</p>
           ) : (
             filteredRooms.map((room) => {
-              console.log(room);
               const otherParticipant = room.participants?.find((p) => p._id !== userId);
               return (
                 <div

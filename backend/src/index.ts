@@ -24,7 +24,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(
   cors({
-    origin: ["https://wildantfq.my.id", "http://localhost:5173", "https://wildantfq.my.id/socket.io/", "http://localhost:4173"],
+    origin: ["https://wildantfq.my.id", "http://localhost:5173", "http://localhost:4173"],
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
     credentials: true,
   })
@@ -58,7 +58,7 @@ const server = createServer(app);
 
 const io = new Server(server, {
   cors: {
-    origin: ["https://wildantfq.my.id", "http://localhost:5173", "https://wildantfq.my.id/socket.io/", "http://localhost:4173"],
+    origin: ["https://wildantfq.my.id,", "http://localhost:5173", "http://localhost:4173"],
     methods: ["GET", "POST", "PATCH", "PUT", "DELETE"],
     allowedHeaders: ["Authorization", "Content-Type", "Origin", "Accept", "X-Requested-With"],
     credentials: true,

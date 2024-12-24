@@ -23,23 +23,22 @@ const MessagesPage = () => {
 
   // Initialize socket connection
   useEffect(() => {
-    socketRef.current = io(SOCKET_URL, {
-      transports: ["websocket"],
-      withCredentials: true,
-      forceNew: true,
-      reconnection: true,
-      reconnectionAttempts: 5,
-      reconnectionDelay: 2000,
-    });
+    socketRef.current = io(SOCKET_URL);
 
+    // Socket event listeners
     socketRef.current.on("connect", () => {
-      console.log("Socket connected with ID:", socketRef.current.id);
+      console.log("Socket connected");
     });
 
-    socketRef.current.on("connect_error", (error) => {
-      console.error("Socket connection error:", error);
+    socketRef.current.on("disconnect", () => {
+      console.log("Socket disconnected");
     });
 
+    socketRef.current.on("error", (error) => {
+      console.error("Socket error:", error);
+    });
+
+    // Cleanup on unmount
     return () => {
       if (socketRef.current) {
         socketRef.current.disconnect();
@@ -121,36 +120,24 @@ const MessagesPage = () => {
 
     fetchRoomMessages(selectedRoom._id);
 
-    // Join room with error handling
-    socketRef.current.emit(
-      "joinRoom",
-      {
-        roomId: selectedRoom._id,
-        userId: userId,
-      },
-      (response) => {
-        if (response?.error) {
-          console.error("Error joining room:", response.error);
-        }
-      }
-    );
+    // Join room
+    socketRef.current.emit("joinRoom", {
+      roomId: selectedRoom._id,
+      userId: userId,
+    });
 
-    // Enhanced message listener with deduplication
+    // Listen for new messages
     const handleReceiveMessage = (newMsg) => {
-      if (!newMsg || !newMsg.senderId) return;
-
-      setMessages((prevMessages) => {
-        // Check for duplicates using a more reliable method
-        const isDuplicate = prevMessages.some(
-          (msg) =>
-            msg._id === newMsg._id ||
-            (msg.senderId._id === newMsg.senderId._id && msg.message === newMsg.message && msg.timestamp === newMsg.timestamp)
+      setMessages((prev) => {
+        // Cek apakah pesan sudah ada (mencegah duplikasi)
+        const isDuplicate = prev.some(
+          (msg) => msg.senderId === newMsg.senderId && msg.message === newMsg.message && msg.timestamp === newMsg.timestamp
         );
 
         if (!isDuplicate) {
-          return [...prevMessages, newMsg];
+          return [...prev, newMsg];
         }
-        return prevMessages;
+        return prev;
       });
       scrollToBottom();
     };
@@ -168,7 +155,7 @@ const MessagesPage = () => {
   };
 
   const handleSendMessage = async () => {
-    if (!newMessage.trim() || !selectedRoom || !socketRef.current?.connected) return;
+    if (!newMessage.trim() || !selectedRoom || selectedRoom.status === "inactive") return;
 
     const token = sessionStorage.getItem("accessToken");
     if (!token) {
@@ -186,35 +173,19 @@ const MessagesPage = () => {
     };
 
     try {
-      // Optimistic UI update
-      const tempMessage = { ...messageData, _id: Date.now().toString() };
-      setMessages((prev) => [...prev, tempMessage]);
-      setNewMessage("");
-
-      // Send to backend
+      // Send to backend first
       const response = await axios.post(`${SOCKET_URL}/api/chat/messages`, messageData, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
       // Emit to socket after successful API call
-      socketRef.current.emit(
-        "sendMessage",
-        {
-          ...messageData,
-          _id: response.data._id,
-        },
-        (ackResponse) => {
-          if (ackResponse?.error) {
-            console.error("Error sending message:", ackResponse.error);
-          }
-        }
-      );
+      socketRef.current.emit("sendMessage", messageData);
 
+      // Clear input
+      setNewMessage("");
       scrollToBottom();
     } catch (err) {
       console.error("Failed to send message:", err);
-      // Remove the temporary message if sending failed
-      setMessages((prev) => prev.filter((msg) => msg._id !== messageData._id));
     }
   };
 

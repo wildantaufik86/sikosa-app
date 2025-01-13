@@ -19,16 +19,27 @@ import { Server } from "socket.io";
 import chatRoutes from "./routes/chat.routes";
 import chatRoom from "./models/chatRoom";
 
+const allowedOrigins = [
+    "https://wildantfq.my.id",
+    "http://localhost:5173",
+    "http://localhost:4173",
+    "http://sikosa.my.id",
+    "https://sikosa.my.id",
+];
+
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(
-  cors({
-    origin: ["https://wildantfq.my.id", "http://localhost:5173", "http://localhost:4173"],
-    methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
+app.use(cors({
+    origin: function (origin, callback) {
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            callback(new Error("Not allowed by CORS"));
+        }
+    },
     credentials: true,
-  })
-);
+}));
 app.use(cookieParser());
 
 app.get("/api", ({ req, res }: any) => {
@@ -41,6 +52,7 @@ app.use("/api/admin", adminRoutes);
 
 // general API
 app.use("/api/articles", articleRoutes);
+
 
 // api konsul
 app.use("/api/consultation", consultationRoutes, userRoutes);
@@ -58,7 +70,7 @@ const server = createServer(app);
 
 const io = new Server(server, {
   cors: {
-    origin: ["https://wildantfq.my.id,", "http://localhost:5173", "http://localhost:4173"],
+    origin: allowedOrigins,
     methods: ["GET", "POST", "PATCH", "PUT", "DELETE"],
     allowedHeaders: ["Authorization", "Content-Type", "Origin", "Accept", "X-Requested-With"],
     credentials: true,
@@ -91,6 +103,7 @@ io.on("connection", (socket) => {
   // Handle incoming messages
   socket.on("sendMessage", async ({ roomId, senderId, message }) => {
     const timestamp = new Date();
+
 
     try {
       const chatRoomInstance = await chatRoom.findById(roomId);

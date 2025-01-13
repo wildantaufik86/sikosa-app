@@ -261,7 +261,7 @@ const ChatDokter = () => {
             authUser={authUser}
           />
         ) : statusPengajuan?.status === "rejected" ? (
-          // Tampilkan pengajuan jika status pengajuan ditolak
+          // Tampilkan pengajuan jika status pengajuan ditolak dan inactive
           <PengajuanKonsultasi
             statusPengajuan={statusPengajuan}
             psikolog={psikolog}

@@ -260,6 +260,14 @@ const ChatDokter = () => {
             handlePengajuan={handlePengajuan}
             authUser={authUser}
           />
+        ) : statusPengajuan?.status === "rejected" ? (
+          // Tampilkan pengajuan jika status pengajuan ditolak
+          <PengajuanKonsultasi
+            statusPengajuan={statusPengajuan}
+            psikolog={psikolog}
+            handlePengajuan={handlePengajuan}
+            authUser={authUser}
+          />
         ) : null}
       </div>
     </div>

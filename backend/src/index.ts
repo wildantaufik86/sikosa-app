@@ -20,11 +20,11 @@ import chatRoutes from "./routes/chat.routes";
 import chatRoom from "./models/chatRoom";
 
 const allowedOrigins = [
-    "https://wildantfq.my.id",
+    // "https://wildantfq.my.id",
     "http://localhost:5173",
-    "http://localhost:4173",
-    "http://sikosa.my.id",
-    "https://sikosa.my.id",
+    "http://localhost:4173"
+    // "http://sikosa.my.id",
+    // "https://sikosa.my.id",
 ];
 
 const app = express();

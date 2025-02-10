@@ -1,6 +1,6 @@
 const CONFIG = {
-  BASE_URL: "https://wildantfq.my.id/api",
-  SOCKET_BASE_URL: "https://wildantfq.my.id",
+  BASE_URL: "http://localhost:5000/api",
+  SOCKET_BASE_URL: "http://localhost",
 };
 
 export default CONFIG;

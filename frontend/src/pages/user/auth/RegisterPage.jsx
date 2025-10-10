@@ -3,6 +3,7 @@ import { FaUser, FaLock, FaEye, FaEyeSlash, FaEnvelope } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
 import Navbar from "../../../components/user/components/Navbar";
 import CONFIG from "../../../config/config";
+import { ToastError, ToastSuccess } from "../../../lib/toast/toastNotifications";
 
 const RegisterPage = () => {
   const [passwordVisible, setPasswordVisible] = useState(false);
@@ -14,7 +15,7 @@ const RegisterPage = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState(null);
   const [isSuccess, setIsSucess] = useState(null);
-    const navigate = useNavigate();
+  const navigate = useNavigate();
 
   const togglePasswordVisibility = () => {
     setPasswordVisible(!passwordVisible);
@@ -29,7 +30,7 @@ const RegisterPage = () => {
 
     const dataRegister = {
       email,
-      nim,
+      // nim,
       profile: {
         fullname,
       },
@@ -54,30 +55,28 @@ const RegisterPage = () => {
         const result = await response.json();
         setErrorMessage(null);
         setIsSucess(true);
-
-        // Navigasi ke /login setelah berhasil registrasi
-        navigate("/login");
-
+        ToastSuccess(result?.message || "Berhasil membuat akun");
         return result;
       } catch (error) {
         setErrorMessage(error.message);
         setIsSucess(false);
+        ToastError(error.message || "Gagal membuat akun");
         return null;
       }
     };
 
-    if (nim.length > 10) {
+    // if (nim.length > 10) {
+    //   return false;
+    // }
+
+    if (!email && !fullname && !password && !confirmPassword) {
       return false;
     }
 
-    if (!email && !nim && !fullname && !password && !confirmPassword) {
-      return false;
-    }
-
-    if (nim.length < 6) {
-      setErrorMessage("Nim must contain at least 6 characters");
-      return false;
-    }
+    // if (nim.length < 6) {
+    //   setErrorMessage("Nim must contain at least 6 characters");
+    //   return false;
+    // }
 
     if (password.length < 6 || confirmPassword.length < 6) {
       setErrorMessage("Password must contain at least 6 characters");
@@ -138,7 +137,7 @@ const RegisterPage = () => {
             </div>
 
             {/* NIM Input */}
-            <div className="w-full mb-4">
+            {/* <div className="w-full mb-4">
               <label className="block text-sm text-gray-600" htmlFor="nim">
                 Nim
               </label>
@@ -159,10 +158,8 @@ const RegisterPage = () => {
                   required
                 />
               </div>
-              {nim.length > 10 && (
-                <p className="text-[10px] text-red-600 mt-2">maximum length is 10</p>
-              )}
-            </div>
+              {nim.length > 16 && <p className="text-[10px] text-red-600 mt-2">maximum length is 16</p>}
+            </div> */}
 
             {/* Name Input */}
             <div className="w-full mb-4">
@@ -201,11 +198,7 @@ const RegisterPage = () => {
                   required
                 />
                 <button type="button" onClick={togglePasswordVisibility} className="ml-2">
-                  {passwordVisible ? (
-                    <FaEyeSlash className="text-gray-500" />
-                  ) : (
-                    <FaEye className="text-gray-500" />
-                  )}
+                  {passwordVisible ? <FaEyeSlash className="text-gray-500" /> : <FaEye className="text-gray-500" />}
                 </button>
               </div>
             </div>
@@ -227,11 +220,7 @@ const RegisterPage = () => {
                   required
                 />
                 <button type="button" onClick={toggleConfirmPasswordVisibility} className="ml-2">
-                  {confirmPasswordVisible ? (
-                    <FaEyeSlash className="text-gray-500" />
-                  ) : (
-                    <FaEye className="text-gray-500" />
-                  )}
+                  {confirmPasswordVisible ? <FaEyeSlash className="text-gray-500" /> : <FaEye className="text-gray-500" />}
                 </button>
               </div>
             </div>
@@ -256,9 +245,7 @@ const RegisterPage = () => {
             )}
 
             {/* Sign Up Button */}
-            <button className="w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600">
-              Register
-            </button>
+            <button className="w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600">Register</button>
           </form>
         </div>
       </div>

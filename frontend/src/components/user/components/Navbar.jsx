@@ -107,12 +107,18 @@ const Navbar = () => {
           {!authUser && (
             <>
               <Link to="/login" className="hover:text-blue-300">
-                <button className="bg-[#35A7FF] text-white px-4 py-2 font-semibold rounded hover:bg-[#5DB9FF] hover:text-white">
+                <button
+                  data-cy="login-button"
+                  className="bg-[#35A7FF] text-white px-4 py-2 font-semibold rounded hover:bg-[#5DB9FF] hover:text-white"
+                >
                   Log in
                 </button>
               </Link>
               <Link to="/register" className="hover:text-blue-300">
-                <button className="bg-[#35A7FF] text-white px-4 py-2 font-semibold rounded hover:bg-[#5DB9FF] hover:text-white">
+                <button
+                  data-cy="register-button"
+                  className="bg-[#35A7FF] text-white px-4 py-2 font-semibold rounded hover:bg-[#5DB9FF] hover:text-white"
+                >
                   Register
                 </button>
               </Link>
@@ -260,12 +266,18 @@ const Navbar = () => {
             ) : (
               <>
                 <Link to="/login" className="">
-                  <button className="bg-[#35A7FF] text-white px-4 py-2 font-semibold rounded hover:bg-[#5DB9FF] hover:text-white">
+                  <button
+                    data-cy="login-button"
+                    className="bg-[#35A7FF] text-white px-4 py-2 font-semibold rounded hover:bg-[#5DB9FF] hover:text-white"
+                  >
                     Log in
                   </button>
                 </Link>
                 <Link to="/register">
-                  <button className="bg-[#35A7FF] text-white px-4 py-2 font-semibold rounded hover:bg-[#5DB9FF] hover:text-white">
+                  <button
+                    data-cy="register-button"
+                    className="bg-[#35A7FF] text-white px-4 py-2 font-semibold rounded hover:bg-[#5DB9FF] hover:text-white"
+                  >
                     Register
                   </button>
                 </Link>

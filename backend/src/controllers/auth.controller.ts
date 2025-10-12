@@ -1,17 +1,8 @@
 import { z } from "zod";
 import catchErrors from "../utils/catchErrors";
-import {
-  createAccount,
-  loginUser,
-  refreshUserAccessToken,
-} from "../services/auth.service";
+import { createAccount, loginUser, refreshUserAccessToken } from "../services/auth.service";
 import { CREATED, OK, UNAUTHORIZED } from "../constants/http";
-import {
-  clearAuthCookies,
-  getAccessTokenCookieOptions,
-  getRefreshTokenCookieOptions,
-  setAuthCookies,
-} from "../utils/cookies";
+import { clearAuthCookies, getAccessTokenCookieOptions, getRefreshTokenCookieOptions, setAuthCookies } from "../utils/cookies";
 import { loginSchema, registerSchema } from "./auth.schemas";
 import { verifyToken } from "../utils/jwt";
 import SessionModel from "../models/sessionModel";
@@ -26,9 +17,7 @@ export const registerHandler = catchErrors(async (req, res) => {
 
   const { user, accessToken, refreshToken } = await createAccount(request);
 
-  return setAuthCookies({ res, accessToken, refreshToken })
-    .status(CREATED)
-    .json(user);
+  return setAuthCookies({ res, accessToken, refreshToken }).status(CREATED).json(user);
 });
 
 export const loginHandler = catchErrors(async (req, res) => {
@@ -39,8 +28,11 @@ export const loginHandler = catchErrors(async (req, res) => {
 
   const { accessToken, refreshToken, user } = await loginUser(request);
   return setAuthCookies({ res, accessToken, refreshToken }).status(OK).json({
+    status: "success",
     message: "Login Succesfull",
-    user,
+    data: {
+      user,
+    },
     accessToken,
     refreshToken,
   });
@@ -56,18 +48,14 @@ export const logoutHandler = catchErrors(async (req, res) => {
   }
 
   // clear cookies
-  return clearAuthCookies(res)
-    .status(OK)
-    .json({ message: "Logout successful" });
+  return clearAuthCookies(res).status(OK).json({ message: "Logout successful" });
 });
 
 export const refreshHandler = catchErrors(async (req, res) => {
   const refreshToken = req.cookies.refreshToken as string | undefined;
   appAssert(refreshToken, UNAUTHORIZED, "Missing refresh token");
 
-  const { accessToken, newRefreshToken } = await refreshUserAccessToken(
-    refreshToken
-  );
+  const { accessToken, newRefreshToken } = await refreshUserAccessToken(refreshToken);
   if (newRefreshToken) {
     res.cookie("refreshToken", newRefreshToken, getRefreshTokenCookieOptions());
   }

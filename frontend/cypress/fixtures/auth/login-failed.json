@@ -1,0 +1,7 @@
+{
+  "status": "error",
+  "message": "Invalid email or password",
+  "data": {
+    "user": null
+  }
+}

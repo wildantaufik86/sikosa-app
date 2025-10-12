@@ -58,7 +58,7 @@ const LoginPage = () => {
           throw new Error("Invalid email or password");
         }
         const result = await response.json();
-        handleAuthUserChange(result.user);
+        handleAuthUserChange(result.data.user);
         handleAccessToken(result.accessToken);
         setErrorMessage(null);
         return result;
@@ -118,6 +118,7 @@ const LoginPage = () => {
               <div className="flex items-center border-b border-gray-300">
                 <FaEnvelope className="text-gray-500 mr-3" />
                 <input
+                  data-cy="login-email"
                   id="email"
                   type="email"
                   placeholder="Enter your Email"
@@ -137,6 +138,7 @@ const LoginPage = () => {
               <div className="flex items-center border-b border-gray-300">
                 <FaLock className="text-gray-500 mr-3" />
                 <input
+                  data-cy="login-password"
                   id="password"
                   type={passwordVisible ? "text" : "password"}
                   placeholder="Enter your password"
@@ -163,13 +165,15 @@ const LoginPage = () => {
 
             {/* error message */}
             {errorMessage && (
-              <div className="mb-2">
+              <div data-cy="error-message" className="mb-2">
                 <p className="text-center text-xs text-red-500">{errorMessage}</p>
               </div>
             )}
 
             {/* Sign In Button */}
-            <button className="w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600">Sign In</button>
+            <button data-cy="login-button-submit" className="w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600">
+              Sign In
+            </button>
           </form>
         </div>
       </div>

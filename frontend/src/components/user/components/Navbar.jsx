@@ -137,7 +137,11 @@ const Navbar = () => {
           {/* User Profile Section */}
           {authUser && (
             <>
-              <div onClick={() => setIsUserSettingOpen(!isUserSettingOpen)} className="flex items-center pl-4 cursor-pointer">
+              <div
+                data-cy="user-setting-button"
+                onClick={() => setIsUserSettingOpen(!isUserSettingOpen)}
+                className="flex items-center pl-4 cursor-pointer"
+              >
                 {user.image ? (
                   <img
                     src={`${CONFIG.BASE_URL}${user.image}`}
@@ -165,6 +169,7 @@ const Navbar = () => {
                     </span>
                   </Link>
                   <button
+                    data-cy="logout-button"
                     onClick={handleLogout}
                     className="text-slate-700 text-sm font-semibold flex items-center gap-2 transition-all hover:text-[#35A7FF]"
                   >
@@ -266,18 +271,12 @@ const Navbar = () => {
             ) : (
               <>
                 <Link to="/login" className="">
-                  <button
-                    data-cy="login-button"
-                    className="bg-[#35A7FF] text-white px-4 py-2 font-semibold rounded hover:bg-[#5DB9FF] hover:text-white"
-                  >
+                  <button className="bg-[#35A7FF] text-white px-4 py-2 font-semibold rounded hover:bg-[#5DB9FF] hover:text-white">
                     Log in
                   </button>
                 </Link>
                 <Link to="/register">
-                  <button
-                    data-cy="register-button"
-                    className="bg-[#35A7FF] text-white px-4 py-2 font-semibold rounded hover:bg-[#5DB9FF] hover:text-white"
-                  >
+                  <button className="bg-[#35A7FF] text-white px-4 py-2 font-semibold rounded hover:bg-[#5DB9FF] hover:text-white">
                     Register
                   </button>
                 </Link>

@@ -1,0 +1,15 @@
+{
+  "message": "Consultations fetched successfully",
+  "data": [
+    {
+      "consultationId": "68ebcc22b8c3592472a982ca",
+      "psychologist": {
+        "_id": "68ebb784b8c3592472a97dd9",
+        "fullname": "Shofi Camila",
+        "email": "shofipsikolog@gmail.com"
+      },
+      "status": "pending",
+      "createdAt": "2025-10-12T15:41:22.378Z"
+    }
+  ]
+}

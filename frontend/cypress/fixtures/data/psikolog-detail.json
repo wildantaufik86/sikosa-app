@@ -1,0 +1,13 @@
+{
+  "message": "Detail Profil Psikolog",
+  "data": {
+    "profile": {
+      "picture": "/uploads/972d09bf3f2e3b3073fd86842944d8c3.jpg",
+      "fullname": "Muhammad Aidil",
+      "description": "saya seorang psikolog",
+      "specialization": "Kesehatan Mental",
+      "educationBackground": ["S1 Psikolog Universitas xyz"]
+    },
+    "_id": "68ebb77db8c3592472a97dd2"
+  }
+}

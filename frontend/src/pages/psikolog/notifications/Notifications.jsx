@@ -128,7 +128,11 @@ const NotificationCard = ({ notification, fetchNotifications }) => {
   return (
     <div className="flex flex-col bg-white shadow-md p-4">
       {/* Header */}
-      <div onClick={() => setIsOpen(!isOpen)} className="flex justify-between items-center mb-4 cursor-pointer">
+      <div
+        data-cy="notification-card"
+        onClick={() => setIsOpen(!isOpen)}
+        className="flex justify-between items-center mb-4 cursor-pointer"
+      >
         <h3 className="text-lg font-semibold text-gray-800">Consultation Request</h3>
         <div className="flex items-center gap-2">
           <span className="text-lg">{isOpen ? <IoIosArrowDown /> : <IoIosArrowUp />}</span>
@@ -158,12 +162,14 @@ const NotificationCard = ({ notification, fetchNotifications }) => {
         {/* Action Buttons */}
         <div className="flex justify-end space-x-2">
           <button
+            data-cy="notification-reject-button"
             onClick={handleRejectConsultationRequest}
             className="px-4 py-2 text-sm font-medium text-red-600 bg-red-100 rounded-lg hover:bg-red-200"
           >
             Reject
           </button>
           <button
+            data-cy="notification-accept-button"
             onClick={handleAcceptConsultationRequest}
             className="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700"
           >

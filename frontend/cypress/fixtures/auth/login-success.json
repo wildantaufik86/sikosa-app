@@ -20,6 +20,6 @@
       "__v": 0
     }
   },
-  "accessToken": "accesstoken",
-  "refreshToken": "refreshToken"
+  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OGU5YzA5ZTlhMmVmNzNmYzBmOWNjNDAiLCJzZXNzaW9uSWQiOiI2OGViZDAzOWI4YzM1OTI0NzJhOTgzMzgiLCJpYXQiOjE3NjAyODQ3MjksImV4cCI6MTc2MDI4ODMyOSwiYXVkIjpbInVzZXIiXX0.KgZ-HHeqUht0AndHO68iHNmWQHjPslH0LuIDdobzmMU",
+  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzZXNzaW9uSWQiOiI2OGViZDAzOWI4YzM1OTI0NzJhOTgzMzgiLCJpYXQiOjE3NjAyODQ3MjksImV4cCI6MTc2Mjg3NjcyOSwiYXVkIjpbInVzZXIiXX0.87T771KMPvPYllsmTFJ4HTPySLhx3pmv1sTQVpiCemI"
 }

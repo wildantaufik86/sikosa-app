@@ -1,0 +1,16 @@
+[
+  {
+    "_id": "msg1",
+    "roomId": "room1",
+    "senderId": { "_id": "68ebb77db8c3592472a97dd2" },
+    "message": "Halo Aidil, bagaimana kabarmu",
+    "timestamp": "2025-10-13T10:00:00.000Z"
+  },
+  {
+    "_id": "msg2",
+    "roomId": "room1",
+    "senderId": { "_id": "68e9c09e9a2ef73fc0f9cc40" },
+    "message": "saya merasa perlu berbicara denganmu",
+    "timestamp": "2025-10-13T10:01:00.000Z"
+  }
+]

@@ -29,9 +29,6 @@ const PesanChat = ({ messages, psikolog }) => {
           >
             {msg.message}
           </div>
-          {msg.senderId === authUser._id && (
-            <img src={CONFIG.BASE_URL + authUser.profile.picture} alt="User" className="w-8 h-8 object-cover rounded-full ml-2" />
-          )}
         </div>
       ))}
     </motion.div>

@@ -243,6 +243,7 @@ const MessagesPage = () => {
               const otherParticipant = room.participants?.find((p) => p._id !== userId);
               return (
                 <div
+                  data-cy="room-card"
                   key={room._id}
                   onClick={() => setSelectedRoom(room)}
                   className={`flex items-center space-x-4 p-2 border-b border-gray-300 hover:bg-gray-100 rounded-lg cursor-pointer ${
@@ -304,7 +305,7 @@ const MessagesPage = () => {
                       msg.senderId._id === userId ? "bg-blue-500 text-white" : "bg-gray-100 text-gray-800"
                     }`}
                   >
-                    <p>{msg.message}</p>
+                    <p data-cy="chat-message">{msg.message}</p>
                     <span className="text-xs opacity-70">
                       {new Date(msg.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                     </span>
@@ -318,6 +319,7 @@ const MessagesPage = () => {
             {selectedRoom?.status !== "inactive" && (
               <div className="flex items-center mt-4 p-4">
                 <input
+                  data-cy="chat-input"
                   type="text"
                   value={newMessage}
                   onChange={(e) => setNewMessage(e.target.value)}
@@ -326,6 +328,7 @@ const MessagesPage = () => {
                   placeholder="Type a message..."
                 />
                 <button
+                  data-cy="chat-send-button"
                   onClick={handleSendMessage}
                   className="ml-4 p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
                 >

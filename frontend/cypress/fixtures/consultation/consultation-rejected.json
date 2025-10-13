@@ -1,0 +1,13 @@
+{
+  "status": "success",
+  "message": "Consultation rejected",
+  "data": {
+    "_id": "68ed0f78d2c47fd37872ebc3",
+    "userId": "68e9c09e9a2ef73fc0f9cc40",
+    "psychologistId": "68ebb77db8c3592472a97dd2",
+    "status": "rejected",
+    "createdAt": "2025-10-13T14:40:56.945Z",
+    "updatedAt": "2025-10-13T14:41:50.371Z",
+    "__v": 0
+  }
+}

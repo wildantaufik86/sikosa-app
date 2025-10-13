@@ -1,0 +1,21 @@
+{
+  "status": "success",
+  "message": "Consultation request sent successfully.",
+  "data": {
+    "userId": "68e9c09e9a2ef73fc0f9cc40",
+    "psychologistId": "68ebb784b8c3592472a97dd9",
+    "status": "pending",
+    "_id": "68ebbddbb8c3592472a98003",
+    "createdAt": "2025-10-12T14:40:27.165Z",
+    "updatedAt": "2025-10-12T14:40:27.165Z",
+    "__v": 0
+  },
+  "room": {
+    "consultationId": "68ebbddbb8c3592472a98003",
+    "participants": ["68e9c09e9a2ef73fc0f9cc40", "68ebb784b8c3592472a97dd9"],
+    "status": "inactive",
+    "_id": "68ebbddbb8c3592472a98005",
+    "messages": [],
+    "__v": 0
+  }
+}

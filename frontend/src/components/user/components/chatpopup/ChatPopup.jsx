@@ -90,10 +90,17 @@ const ChatPopup = () => {
   };
 
   return (
-    <section className="fixed bottom-20 right-7 lg:bottom-16 lg:right-36 bg-[#C2E5FF] p-6 rounded-lg sm:w-80 md:w-full sm:max-w-sm md:max-w-lg shadow-lg z-50">
+    <section
+      data-cy="chatbot-pop-up"
+      className="fixed bottom-20 right-7 lg:bottom-16 lg:right-36 bg-[#C2E5FF] p-6 rounded-lg sm:w-80 md:w-full sm:max-w-sm md:max-w-lg shadow-lg z-50"
+    >
       <div className="flex flex-col space-y-4 overflow-y-auto max-h-80">
         {messages.map((msg, index) => (
-          <div key={index} className={`flex items-start space-x-2 ${msg.role === "user" ? "flex-row-reverse" : "flex-row"}`}>
+          <div
+            data-cy="chatbot-message"
+            key={index}
+            className={`flex items-start space-x-2 ${msg.role === "user" ? "flex-row-reverse" : "flex-row"}`}
+          >
             <img
               src={msg.role === "user" ? "/assets/anonymous.png" : "/assets/anonymous.png"}
               alt={msg.role}
@@ -120,6 +127,7 @@ const ChatPopup = () => {
 
       <footer className="flex items-center space-x-2 mt-4">
         <input
+          data-cy="chatbot-input"
           type="text"
           placeholder="Tulis pesan Anda..."
           value={input}
@@ -127,7 +135,11 @@ const ChatPopup = () => {
           onKeyPress={handleKeyPress}
           className="w-full p-3 border border-gray-300 rounded-md"
         />
-        <button onClick={sendMessage} className="bg-[#35A7FF] text-white p-3 rounded-full hover:bg-[#5DB9FF]">
+        <button
+          data-cy="chatbot-send"
+          onClick={sendMessage}
+          className="bg-[#35A7FF] text-white p-3 rounded-full hover:bg-[#5DB9FF]"
+        >
           <FaPaperPlane className="text-lg" />
         </button>
       </footer>

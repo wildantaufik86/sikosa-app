@@ -1,5 +1,5 @@
 // Import React dan pustaka yang diperlukan
-import React, { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect } from "react";
 import { FaPaperPlane } from "react-icons/fa";
 
 const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY;

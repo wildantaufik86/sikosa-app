@@ -2,7 +2,7 @@
 import { useState, useRef, useEffect } from "react";
 import { FaPaperPlane } from "react-icons/fa";
 
-const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY;
+const GROQ_API_KEY = "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";
 
 const ChatPopup = () => {
   const [messages, setMessages] = useState([{ role: "assistant", content: "Halo! Ada yang bisa saya bantu?" }]);

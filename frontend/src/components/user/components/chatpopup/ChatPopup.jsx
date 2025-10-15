@@ -2,7 +2,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { FaPaperPlane } from "react-icons/fa";
 
-const GROQ_API_KEY = "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"; // Ganti dengan API key Anda yang sebenarnya
+const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY;
 
 const ChatPopup = () => {
   const [messages, setMessages] = useState([{ role: "assistant", content: "Halo! Ada yang bisa saya bantu?" }]);
@@ -25,7 +25,9 @@ const ChatPopup = () => {
     if (!input.trim()) return;
 
     const userMessage = { role: "user", content: input };
-    setMessages([...messages, userMessage]);
+    const updatedMessages = [...messages, userMessage];
+
+    setMessages(updatedMessages);
     setInput("");
     setIsTyping(true);
 
@@ -37,21 +39,38 @@ const ChatPopup = () => {
           Authorization: `Bearer ${GROQ_API_KEY}`,
         },
         body: JSON.stringify({
-          model: "llama3-8b-8192",
-          messages: [...messages, userMessage],
+          model: "llama-3.1-8b-instant",
+          temperature: 0.7,
+          max_tokens: 500,
+          messages: [
+            {
+              role: "system",
+              content: `
+        Kamu adalah asisten virtual bernama "Sika" yang hanya boleh membahas topik terkait psikologi dan kesehatan mental.
+        Jika pengguna menanyakan hal di luar psikologi (misal politik, sejarah, teknologi, agama, dll), kamu TIDAK BOLEH menjawab pertanyaan tersebut.
+        Balas dengan kalimat:
+        "Maaf, saya hanya menjawab hal-hal yang berkaitan dengan psikologi. Ada yang bisa saya bantu?"
+        Jangan memberikan informasi lain di luar topik psikologi dalam kondisi apapun.
+        Gunakan gaya bahasa yang lembut, empatik, dan profesional.
+      `,
+            },
+            ...updatedMessages,
+          ],
         }),
       });
 
       if (!response.ok) {
+        const errText = await response.text();
+        console.error("GROQ API error:", errText);
         throw new Error("Gagal mengambil respons dari GROQ API");
       }
 
       const data = await response.json();
       const botReply = {
         role: "assistant",
-        content: data.choices[0].message.content,
+        content: data.choices?.[0]?.message?.content || "Maaf, tidak ada respons dari model.",
       };
-      setMessages([...messages, userMessage, botReply]);
+      setMessages([...updatedMessages, botReply]);
     } catch (error) {
       console.error("Error fetching chat completion:", error);
       const errorReply = {

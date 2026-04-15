@@ -1,6 +1,6 @@
 import { z } from "zod";
 import catchErrors from "../utils/catchErrors";
-import { createAccount, loginUser, refreshUserAccessToken } from "../services/auth.service";
+import { createAccount, loginUser, logoutService, refreshUserAccessToken } from "../services/auth.service";
 import { CREATED, OK, UNAUTHORIZED } from "../constants/http";
 import { clearAuthCookies, getAccessTokenCookieOptions, getRefreshTokenCookieOptions, setAuthCookies } from "../utils/cookies";
 import { loginSchema, registerSchema } from "./auth.schemas";
@@ -39,16 +39,11 @@ export const loginHandler = catchErrors(async (req, res) => {
 });
 
 export const logoutHandler = catchErrors(async (req, res) => {
-  const accessToken = req.cookies.accessToken as string | undefined;
-  const { payload } = verifyToken(accessToken || "");
+  const accessToken = req.cookies.accessToken;
 
-  if (payload) {
-    // remove session from db
-    await SessionModel.findByIdAndDelete(payload.sessionId);
-  }
+  const result = await logoutService({ accessToken });
 
-  // clear cookies
-  return clearAuthCookies(res).status(OK).json({ message: "Logout successful" });
+  return clearAuthCookies(res).status(result.statusCode).json({ message: result.message });
 });
 
 export const refreshHandler = catchErrors(async (req, res) => {

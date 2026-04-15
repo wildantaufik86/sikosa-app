@@ -1,6 +1,6 @@
 import { z } from "zod";
 import catchErrors from "../utils/catchErrors";
-import { createAccount, loginUser, refreshUserAccessToken } from "../services/auth.service";
+import { createAccount, loginUser, logoutService, refreshUserAccessToken } from "../services/auth.service";
 import { CREATED, OK, UNAUTHORIZED } from "../constants/http";
 import { clearAuthCookies, getAccessTokenCookieOptions, getRefreshTokenCookieOptions, setAuthCookies } from "../utils/cookies";
 import { loginSchema, registerSchema } from "./auth.schemas";
@@ -17,9 +17,7 @@ export const registerHandler = catchErrors(async (req, res) => {
 
   const { user, accessToken, refreshToken } = await createAccount(request);
 
-  return setAuthCookies({ res, accessToken, refreshToken })
-    .status(CREATED)
-    .json({ status: "success", message: "Berhasil membuat akun", data: user });
+  return setAuthCookies({ res, accessToken, refreshToken }).status(CREATED).json(user);
 });
 
 export const loginHandler = catchErrors(async (req, res) => {
@@ -30,24 +28,22 @@ export const loginHandler = catchErrors(async (req, res) => {
 
   const { accessToken, refreshToken, user } = await loginUser(request);
   return setAuthCookies({ res, accessToken, refreshToken }).status(OK).json({
+    status: "success",
     message: "Login Succesfull",
-    user,
+    data: {
+      user,
+    },
     accessToken,
     refreshToken,
   });
 });
 
 export const logoutHandler = catchErrors(async (req, res) => {
-  const accessToken = req.cookies.accessToken as string | undefined;
-  const { payload } = verifyToken(accessToken || "");
+  const accessToken = req.cookies.accessToken;
 
-  if (payload) {
-    // remove session from db
-    await SessionModel.findByIdAndDelete(payload.sessionId);
-  }
+  const result = await logoutService({ accessToken });
 
-  // clear cookies
-  return clearAuthCookies(res).status(OK).json({ message: "Logout successful" });
+  return clearAuthCookies(res).status(result.statusCode).json({ message: result.message });
 });
 
 export const refreshHandler = catchErrors(async (req, res) => {

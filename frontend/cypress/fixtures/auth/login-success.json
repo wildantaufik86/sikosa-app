@@ -1,0 +1,25 @@
+{
+  "status": "success",
+  "message": "Login Succesfull",
+  "data": {
+    "user": {
+      "profile": {
+        "picture": "",
+        "fullname": "muhammad aidil",
+        "description": "",
+        "specialization": "",
+        "educationBackground": []
+      },
+      "_id": "68e9c09e9a2ef73fc0f9cc40",
+      "email": "aidilsikosates@gmail.com",
+      "nim": "",
+      "verified": false,
+      "role": "mahasiswa",
+      "createdAt": "2025-10-11T02:27:42.531Z",
+      "updatedAt": "2025-10-11T02:27:42.531Z",
+      "__v": 0
+    }
+  },
+  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OGU5YzA5ZTlhMmVmNzNmYzBmOWNjNDAiLCJzZXNzaW9uSWQiOiI2OGViZDAzOWI4YzM1OTI0NzJhOTgzMzgiLCJpYXQiOjE3NjAyODQ3MjksImV4cCI6MTc2MDI4ODMyOSwiYXVkIjpbInVzZXIiXX0.KgZ-HHeqUht0AndHO68iHNmWQHjPslH0LuIDdobzmMU",
+  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzZXNzaW9uSWQiOiI2OGViZDAzOWI4YzM1OTI0NzJhOTgzMzgiLCJpYXQiOjE3NjAyODQ3MjksImV4cCI6MTc2Mjg3NjcyOSwiYXVkIjpbInVzZXIiXX0.87T771KMPvPYllsmTFJ4HTPySLhx3pmv1sTQVpiCemI"
+}

@@ -1,0 +1,16 @@
+{
+  "message": "Notifications fetched successfully",
+  "data": [
+    {
+      "consultationId": "68ed054f9f368f26885c9e65",
+      "user": {
+        "_id": "68e9c09e9a2ef73fc0f9cc40",
+        "fullname": "muhammad aidil",
+        "email": "aidilsikosates@gmail.com"
+      },
+      "message": "Consultation request from muhammad aidil is pending",
+      "status": "pending",
+      "createdAt": "2025-10-13T13:57:35.900Z"
+    }
+  ]
+}

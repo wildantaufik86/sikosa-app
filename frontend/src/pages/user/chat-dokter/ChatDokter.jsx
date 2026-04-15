@@ -139,8 +139,10 @@ const ChatDokter = () => {
         if (error) {
           throw new Error(message);
         }
-        const lastConsultation = consultations.slice(-1)[0];
-        setStatusPengajuan({ status: lastConsultation.status, createdAt: lastConsultation.createdAt });
+        if (consultations) {
+          const lastConsultation = consultations.slice(-1)[0];
+          setStatusPengajuan({ status: lastConsultation.status, createdAt: lastConsultation.createdAt });
+        }
       } catch (error) {
         console.log(error);
       }
@@ -275,12 +277,14 @@ const ChatDokter = () => {
 };
 
 const PengajuanKonsultasi = ({ handlePengajuan, psikolog, statusPengajuan, authUser }) => {
+  const date = new Date();
+
   return (
     <div className="flex-1 flex flex-col items-center justify-center overflow-x-auto">
       {/* tabel status pengajuan */}
       {statusPengajuan.status !== "not consultation" && (
         <div className="mb-4 w-full overflow-x-auto">
-          <table className="min-w-full table-auto border-collapse overflow-x-auto">
+          <table data-cy="table-consultations" className="min-w-full table-auto border-collapse overflow-x-auto">
             <thead className="bg-[#EBF6FF]">
               <tr>
                 <th className="px-4 py-2 font-medium text-left border-y border-gray-200 text-sm">No</th>
@@ -296,6 +300,7 @@ const PengajuanKonsultasi = ({ handlePengajuan, psikolog, statusPengajuan, authU
                 <td className="px-4 py-2 border-b border-gray-200 text-xs">{authUser.profile.fullname}</td>
                 <td className="px-4 py-2 border-b border-gray-200 text-xs">{psikolog.profile.fullname}</td>
                 <td
+                  data-cy="table-consultations-status"
                   className={`px-4 py-2 border-b font-semibold border-gray-200 text-xs ${
                     statusPengajuan.status === "pending"
                       ? "text-yellow-500"
@@ -306,7 +311,9 @@ const PengajuanKonsultasi = ({ handlePengajuan, psikolog, statusPengajuan, authU
                 >
                   {statusPengajuan.status}
                 </td>
-                <td className="px-4 py-2 border-b border-gray-200 text-xs">{formattedDate(statusPengajuan?.createdAt)}</td>
+                <td className="px-4 py-2 border-b border-gray-200 text-xs">
+                  {formattedDate(statusPengajuan?.createdAt || date.toLocaleDateString())}
+                </td>
               </tr>
             </tbody>
           </table>
@@ -320,6 +327,7 @@ const PengajuanKonsultasi = ({ handlePengajuan, psikolog, statusPengajuan, authU
             Ajukan konsultasi bersama <span className="text-[#35A7FF]">{psikolog.profile.fullname}</span>
           </h4>
           <button
+            data-cy="consultation-submit"
             onClick={handlePengajuan}
             className="bg-[#35A7FF] hover:bg-[#3297e5] transition-all font-semibold text-white text-xs py-2 px-4 rounded-md md:text-sm"
           >

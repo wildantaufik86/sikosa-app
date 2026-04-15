@@ -1,0 +1,13 @@
+{
+  "status": "success",
+  "message": "Consultation accepted",
+  "data": {
+    "_id": "68ed054f9f368f26885c9e65",
+    "userId": "68e9c09e9a2ef73fc0f9cc40",
+    "psychologistId": "68ebb77db8c3592472a97dd2",
+    "status": "accepted",
+    "createdAt": "2025-10-13T13:57:35.900Z",
+    "updatedAt": "2025-10-13T14:12:56.858Z",
+    "__v": 0
+  }
+}

@@ -106,6 +106,7 @@ const DetailPsikolog = () => {
         {/* Centered Chat Button */}
         <div className="flex justify-center">
           <Link
+            data-cy="chat-button"
             to={`/dokter/${psikologDetail._id}`}
             className="bg-[#35A7FF] text-white font-semibold py-2 px-6 rounded-lg hover:bg-[#5DB9FF]"
           >

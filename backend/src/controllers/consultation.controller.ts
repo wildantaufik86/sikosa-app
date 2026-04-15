@@ -70,6 +70,7 @@ export const updateConsultationStatus: RequestHandler = async (req, res) => {
   }
 
   res.status(OK).json({
+    status: "success",
     message: `Consultation ${status}`,
     data: consultation,
   });

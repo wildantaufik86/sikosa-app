@@ -1,8 +1,8 @@
 // Import React dan pustaka yang diperlukan
-import React, { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect } from "react";
 import { FaPaperPlane } from "react-icons/fa";
 
-const GROQ_API_KEY = "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"; // Ganti dengan API key Anda yang sebenarnya
+const API_KEY = import.meta.env.VITE_GROQ_API_KEY;
 
 const ChatPopup = () => {
   const [messages, setMessages] = useState([{ role: "assistant", content: "Halo! Ada yang bisa saya bantu?" }]);
@@ -25,7 +25,9 @@ const ChatPopup = () => {
     if (!input.trim()) return;
 
     const userMessage = { role: "user", content: input };
-    setMessages([...messages, userMessage]);
+    const updatedMessages = [...messages, userMessage];
+
+    setMessages(updatedMessages);
     setInput("");
     setIsTyping(true);
 
@@ -34,24 +36,41 @@ const ChatPopup = () => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${GROQ_API_KEY}`,
+          Authorization: `Bearer ${API_KEY}`,
         },
         body: JSON.stringify({
-          model: "llama3-8b-8192",
-          messages: [...messages, userMessage],
+          model: "llama-3.1-8b-instant",
+          temperature: 0.7,
+          max_tokens: 500,
+          messages: [
+            {
+              role: "system",
+              content: `
+        Kamu adalah asisten virtual bernama "Sika" yang hanya boleh membahas topik terkait psikologi dan kesehatan mental.
+        Jika pengguna menanyakan hal di luar psikologi (misal politik, sejarah, teknologi, agama, dll), kamu TIDAK BOLEH menjawab pertanyaan tersebut.
+        Balas dengan kalimat:
+        "Maaf, saya hanya menjawab hal-hal yang berkaitan dengan psikologi. Ada yang bisa saya bantu?"
+        Jangan memberikan informasi lain di luar topik psikologi dalam kondisi apapun.
+        Gunakan gaya bahasa yang lembut, empatik, dan profesional.
+      `,
+            },
+            ...updatedMessages,
+          ],
         }),
       });
 
       if (!response.ok) {
+        const errText = await response.text();
+        console.error("GROQ API error:", errText);
         throw new Error("Gagal mengambil respons dari GROQ API");
       }
 
       const data = await response.json();
       const botReply = {
         role: "assistant",
-        content: data.choices[0].message.content,
+        content: data.choices?.[0]?.message?.content || "Maaf, tidak ada respons dari model.",
       };
-      setMessages([...messages, userMessage, botReply]);
+      setMessages([...updatedMessages, botReply]);
     } catch (error) {
       console.error("Error fetching chat completion:", error);
       const errorReply = {
@@ -71,10 +90,17 @@ const ChatPopup = () => {
   };
 
   return (
-    <section className="fixed bottom-20 right-7 lg:bottom-16 lg:right-36 bg-[#C2E5FF] p-6 rounded-lg sm:w-80 md:w-full sm:max-w-sm md:max-w-lg shadow-lg z-50">
+    <section
+      data-cy="chatbot-pop-up"
+      className="fixed bottom-20 right-7 lg:bottom-16 lg:right-36 bg-[#C2E5FF] p-6 rounded-lg sm:w-80 md:w-full sm:max-w-sm md:max-w-lg shadow-lg z-50"
+    >
       <div className="flex flex-col space-y-4 overflow-y-auto max-h-80">
         {messages.map((msg, index) => (
-          <div key={index} className={`flex items-start space-x-2 ${msg.role === "user" ? "flex-row-reverse" : "flex-row"}`}>
+          <div
+            data-cy="chatbot-message"
+            key={index}
+            className={`flex items-start space-x-2 ${msg.role === "user" ? "flex-row-reverse" : "flex-row"}`}
+          >
             <img
               src={msg.role === "user" ? "/assets/anonymous.png" : "/assets/anonymous.png"}
               alt={msg.role}
@@ -101,6 +127,7 @@ const ChatPopup = () => {
 
       <footer className="flex items-center space-x-2 mt-4">
         <input
+          data-cy="chatbot-input"
           type="text"
           placeholder="Tulis pesan Anda..."
           value={input}
@@ -108,7 +135,11 @@ const ChatPopup = () => {
           onKeyPress={handleKeyPress}
           className="w-full p-3 border border-gray-300 rounded-md"
         />
-        <button onClick={sendMessage} className="bg-[#35A7FF] text-white p-3 rounded-full hover:bg-[#5DB9FF]">
+        <button
+          data-cy="chatbot-send"
+          onClick={sendMessage}
+          className="bg-[#35A7FF] text-white p-3 rounded-full hover:bg-[#5DB9FF]"
+        >
           <FaPaperPlane className="text-lg" />
         </button>
       </footer>

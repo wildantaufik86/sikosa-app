@@ -1,0 +1,8 @@
+{
+  "status": "success",
+  "message": "Berhasil membuat akun",
+  "data": {
+    "email": "aidiltes@gmail.com",
+    "name": "muhammad aidil"
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "status": "success",
+  "message": "Login Succesfull",
+  "data": {
+    "user": {
+      "profile": {
+        "picture": "/uploads/972d09bf3f2e3b3073fd86842944d8c3.jpg",
+        "fullname": "Muhammad Aidil",
+        "description": "saya seorang psikolog",
+        "specialization": "Kesehatan Mental",
+        "educationBackground": ["S1 Psikolog Universitas xyz"]
+      },
+      "_id": "68ebb77db8c3592472a97dd2",
+      "email": "aidilpsikolog@gmail.com",
+      "nim": "",
+      "verified": false,
+      "role": "psikolog",
+      "createdAt": "2025-10-12T14:13:17.527Z",
+      "updatedAt": "2025-10-12T14:14:42.505Z",
+      "__v": 1
+    }
+  },
+  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OGViYjc3ZGI4YzM1OTI0NzJhOTdkZDIiLCJzZXNzaW9uSWQiOiI2OGVkMDJmYjlmMzY4ZjI2ODg1YzlkZDgiLCJpYXQiOjE3NjAzNjMyNTksImV4cCI6MTc2MDM2Njg1OSwiYXVkIjpbInVzZXIiXX0.Gri1uzzGGHQ0vI5VxoFAQLFYYhOXzP8T0fn41X9cYsU",
+  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzZXNzaW9uSWQiOiI2OGVkMDJmYjlmMzY4ZjI2ODg1YzlkZDgiLCJpYXQiOjE3NjAzNjMyNTksImV4cCI6MTc2Mjk1NTI1OSwiYXVkIjpbInVzZXIiXX0.RhuaDN3-BQWyuOwi4HbPW5qRMiWD59eOqB6pm6rYw20"
+}

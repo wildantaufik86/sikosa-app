@@ -14,4 +14,9 @@
 // ***********************************************************
 
 // Import commands.js using ES2015 syntax:
-import './commands'
+import "./commands";
+
+beforeEach(() => {
+  // Pastikan dokumen sudah siap
+  cy.window().its("document.readyState").should("eq", "complete");
+});

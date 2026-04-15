@@ -125,6 +125,7 @@ const RegisterPage = () => {
               <div className="flex items-center border-b border-gray-300">
                 <FaEnvelope className="text-gray-500 mr-3" />
                 <input
+                  data-cy="register-email"
                   id="email"
                   type="email"
                   placeholder="Enter your Email"
@@ -169,6 +170,7 @@ const RegisterPage = () => {
               <div className="flex items-center border-b border-gray-300">
                 <FaUser className="text-gray-500 mr-3" />
                 <input
+                  data-cy="register-fullname"
                   id="fullname"
                   type="text"
                   placeholder="Enter your fullname"
@@ -189,6 +191,7 @@ const RegisterPage = () => {
               <div className="flex items-center border-b border-gray-300">
                 <FaLock className="text-gray-500 mr-3" />
                 <input
+                  data-cy="register-password"
                   id="password"
                   type={passwordVisible ? "text" : "password"}
                   placeholder="Enter your password"
@@ -211,6 +214,7 @@ const RegisterPage = () => {
               <div className="flex items-center border-b border-gray-300">
                 <FaLock className="text-gray-500 mr-3" />
                 <input
+                  data-cy="register-confirm-password"
                   id="confirmPassword"
                   type={confirmPasswordVisible ? "text" : "password"}
                   placeholder="Confirm your password"
@@ -227,7 +231,7 @@ const RegisterPage = () => {
 
             {/* error message */}
             {errorMessage && (
-              <div className="mb-2">
+              <div data-cy="error-message" className="mb-2">
                 <p className="text-xs text-center text-red-500">{errorMessage}</p>
               </div>
             )}
@@ -245,7 +249,9 @@ const RegisterPage = () => {
             )}
 
             {/* Sign Up Button */}
-            <button className="w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600">Register</button>
+            <button data-cy="register-button-submit" className="w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600">
+              Register
+            </button>
           </form>
         </div>
       </div>

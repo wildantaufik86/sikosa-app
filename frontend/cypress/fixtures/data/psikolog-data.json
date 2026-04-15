@@ -1,0 +1,25 @@
+{
+  "message": "Doctors retrieved successfully",
+  "data": [
+    {
+      "id": "68ebb77db8c3592472a97dd2",
+      "profile": {
+        "fullname": "Muhammad Aidil",
+        "description": "saya seorang psikolog",
+        "educationBackground": ["S1 Psikolog Universitas xyz"],
+        "specialization": "Kesehatan Mental",
+        "picture": "/uploads/972d09bf3f2e3b3073fd86842944d8c3.jpg"
+      }
+    },
+    {
+      "id": "68ebb784b8c3592472a97dd9",
+      "profile": {
+        "fullname": "Shofi Camila",
+        "description": "Saya seorang psikolog",
+        "educationBackground": ["S1 Psikolog Universitas xyz"],
+        "specialization": "Kesehatan Mental",
+        "picture": "/uploads/f4fbb8ea8933144337c5b623b20797c8.jpg"
+      }
+    }
+  ]
+}

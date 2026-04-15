@@ -1,0 +1,10 @@
+[
+  {
+    "_id": "room1",
+    "participants": [
+      { "_id": "68ebb77db8c3592472a97dd2", "email": "aidilpsikolog@gmail.com" },
+      { "_id": "68e9c09e9a2ef73fc0f9cc40", "email": "aidilsikosates@gmail.com" }
+    ],
+    "status": "active"
+  }
+]

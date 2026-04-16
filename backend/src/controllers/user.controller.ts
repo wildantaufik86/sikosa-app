@@ -1,11 +1,11 @@
 import { RequestHandler, Request, Response } from "express";
-import UserModel from "../models/userModel";
-import appAssert from "../utils/appAssert";
 import { BAD_REQUEST, INTERNAL_SERVER_ERROR, NOT_FOUND, OK } from "../constants/http";
-import AppErrorCode from "../constants/appErrorCode";
-import path from "path";
-import { ConsultationModel } from "../models/consultationModel";
-import mongoose from "mongoose";
+import {
+  getAllPsychologistProfiles,
+  getPsychologistProfile,
+  getUserConsultationHistory,
+  updateUserProfile,
+} from "../services/user.service";
 
 export const updateUserProfileHandler: RequestHandler = async (req, res) => {
   const userId = req.userId;
@@ -16,52 +16,22 @@ export const updateUserProfileHandler: RequestHandler = async (req, res) => {
     ? `/uploads/${req.file.filename}` // relative path untuk akses gambar
     : undefined;
 
-  appAssert(userId, BAD_REQUEST, "Invalid user", AppErrorCode.InvalidUser);
-
-  // Validasi input: Pastikan ada data yang diupdate
   if (!fullname && !picture) {
     return res.status(BAD_REQUEST).json({
       message: "No valid fields to update",
     });
   }
 
-  // Cari user berdasarkan userId
-  const user = await UserModel.findById(userId);
-  appAssert(user, BAD_REQUEST, "User not found", AppErrorCode.UserNotFound);
+  const profile = await updateUserProfile({
+    userId,
+    nim,
+    fullname,
+    picture,
+  });
 
-  // Simpan path foto profil lama sebelum update
-  const oldProfilePicture = user.profile.picture;
-
-  // Update fullname dan picture jika tersedia
-  if (nim) user.nim = nim;
-  if (fullname) user.profile.fullname = fullname;
-  if (picture) {
-    user.profile.picture = picture;
-
-    // Hapus file lama jika ada
-    if (oldProfilePicture && oldProfilePicture !== picture) {
-      try {
-        const oldFilePath = path.join(__dirname, `../public${oldProfilePicture}`);
-        // await fs.unlink(oldFilePath);
-      } catch (error) {
-        console.error("Gagal menghapus file lama:", error);
-        // Lanjutkan proses meskipun gagal menghapus file
-      }
-    }
-  }
-
-  await user.save();
-
-  // Kirim response
   res.status(OK).json({
     message: "Profile updated successfully",
-    data: {
-      nim: user.nim,
-      profile: {
-        fullname: user.profile.fullname,
-        picture: user.profile.picture,
-      },
-    },
+    data: profile,
   });
 };
 
@@ -70,11 +40,7 @@ export const getDoctorProfile = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
 
-    // Ambil data user dengan id tertentu dan hanya return id & fullname
-    const doctorProfile = await UserModel.findById(
-      id,
-      "id profile.fullname profile.description profile.educationBackground profile.specialization profile.picture"
-    );
+    const doctorProfile = await getPsychologistProfile(id);
 
     if (!doctorProfile) {
       return res.status(NOT_FOUND).json({ message: "Dokter/Psikolog tidak ditemukan" });
@@ -91,23 +57,7 @@ export const getDoctorProfile = async (req: Request, res: Response) => {
 
 export const getAllPsychologist = async (req: Request, res: Response) => {
   try {
-    // Query untuk mendapatkan semua user dengan role "psikolog"
-    const doctors = await UserModel.find(
-      { role: "psikolog" }, // Filter hanya untuk role "psikolog"
-      "_id profile.fullname profile.description profile.educationBackground profile.specialization profile.picture" // Field yang dipilih
-    );
-
-    // Format data untuk respons
-    const formattedDoctors = doctors.map((doctor) => ({
-      id: doctor._id,
-      profile: {
-        fullname: doctor.profile.fullname,
-        description: doctor.profile.description,
-        educationBackground: doctor.profile.educationBackground,
-        specialization: doctor.profile.specialization,
-        picture: doctor.profile.picture,
-      },
-    }));
+    const formattedDoctors = await getAllPsychologistProfiles();
 
     // Kirim respons ke klien
     return res.status(OK).json({
@@ -115,7 +65,6 @@ export const getAllPsychologist = async (req: Request, res: Response) => {
       data: formattedDoctors,
     });
   } catch (error) {
-    // Jika terjadi error, tangkap dan kirim respons error
     console.error("Error fetching doctors:", error);
     return res.status(INTERNAL_SERVER_ERROR).json({
       message: "Failed to retrieve doctors",
@@ -143,35 +92,8 @@ export const getConsultationsForUser: RequestHandler = async (req, res) => {
   const userId = req.userId; // Mengambil userId dari middleware authentication
 
   try {
-    // Ambil semua konsultasi yang terkait dengan user
-    const consultations = await ConsultationModel.find({ userId })
-      .populate({
-        path: "psychologistId",
-        select: "profile fullname email", // Pastikan field yang dibutuhkan diambil
-      })
-      .exec();
+    const formattedConsultations = await getUserConsultationHistory(userId);
 
-    const formattedConsultations = consultations.map((consultation) => {
-      const typedConsultation = consultation as unknown as {
-        _id: mongoose.Types.ObjectId;
-        psychologistId: { _id: mongoose.Types.ObjectId; profile?: { fullname: string }; email: string };
-        status: "pending" | "accepted" | "rejected";
-        createdAt: Date;
-      };
-
-      return {
-        consultationId: typedConsultation._id.toString(),
-        psychologist: {
-          _id: typedConsultation.psychologistId?._id?.toString() || "",
-          fullname: typedConsultation.psychologistId?.profile?.fullname || "Unknown",
-          email: typedConsultation.psychologistId?.email || "Unknown",
-        },
-        status: typedConsultation.status,
-        createdAt: typedConsultation.createdAt,
-      };
-    });
-
-    // Kirimkan data dalam respons
     res.status(OK).json({
       message: "Consultations fetched successfully",
       data: formattedConsultations,

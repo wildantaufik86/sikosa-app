@@ -1,7 +1,8 @@
 import { ConsultationModel } from "../models/consultationModel";
 import chatRoom from "../models/chatRoom";
 import appAssert from "../utils/appAssert";
-import { BAD_REQUEST, CONFLICT, FORBIDDEN, NOT_FOUND, UNAUTHORIZED } from "../constants/http";
+import AppError from "../utils/appError";
+import { BAD_REQUEST, CONFLICT, FORBIDDEN, INTERNAL_SERVER_ERROR, NOT_FOUND, OK, UNAUTHORIZED } from "../constants/http";
 import mongoose from "mongoose";
 
 type ConsultationStatus = "pending" | "accepted" | "rejected";
@@ -26,12 +27,96 @@ interface SendMessageParams {
   message: string;
 }
 
-export const applyConsultation = async ({
+type ChatActorRole = "mahasiswa" | "psikolog";
+
+interface ChatContextParams {
+  userId?: string;
+  consultationId?: string;
+  actorRole?: ChatActorRole;
+  consultationErrorMessage?: string;
+  chatRoomErrorMessage?: string;
+  validateConsultationIdFormat?: boolean;
+}
+
+interface GetChatParams extends ChatContextParams {
+  limit?: number;
+}
+
+const MAX_MESSAGE_LENGTH = 1000;
+const INVALID_MESSAGE_CONTENT_REGEX = /<script\b|[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/i;
+
+const ensureConsultationId = (consultationId?: string, validateFormat = true) => {
+  appAssert(consultationId, BAD_REQUEST, "Consultation ID required");
+  appAssert(!validateFormat || mongoose.Types.ObjectId.isValid(consultationId), BAD_REQUEST, "Invalid consultation ID");
+};
+
+const ensureMessageContent = (message: string) => {
+  appAssert(message !== undefined && message !== null && message !== "", BAD_REQUEST, "Message is required");
+  appAssert(message.trim() !== "", BAD_REQUEST, "Message cannot be empty");
+  appAssert(message.length <= MAX_MESSAGE_LENGTH, BAD_REQUEST, "Message exceeds maximum length");
+  appAssert(!INVALID_MESSAGE_CONTENT_REGEX.test(message), BAD_REQUEST, "Invalid message content");
+};
+
+const buildInternalError = (message: string) => new AppError(INTERNAL_SERVER_ERROR, message);
+
+const getConsultationById = async (consultationId: string, errorMessage: string) => {
+  try {
+    return await ConsultationModel.findById(consultationId);
+  } catch (error) {
+    throw buildInternalError(errorMessage);
+  }
+};
+
+const getChatRoomByConsultationId = async (consultationId: string, errorMessage: string) => {
+  try {
+    return await chatRoom.findOne({ consultationId });
+  } catch (error) {
+    throw buildInternalError(errorMessage);
+  }
+};
+
+const resolveChatAccess = async ({
   userId,
-  psychologistId,
-  message,
-  role,
-}: ApplyConsultationParams) => {
+  consultationId,
+  actorRole,
+  consultationErrorMessage = "Internal server error",
+  chatRoomErrorMessage = "Internal server error",
+  validateConsultationIdFormat = actorRole !== undefined,
+}: ChatContextParams) => {
+  appAssert(userId, UNAUTHORIZED, "Unauthorized access");
+
+  ensureConsultationId(consultationId, validateConsultationIdFormat);
+
+  const consultation = await getConsultationById(consultationId!, consultationErrorMessage);
+
+  appAssert(consultation, NOT_FOUND, "Consultation not found");
+
+  if (actorRole === "psikolog") {
+    appAssert(consultation.psychologistId.toString() === userId, FORBIDDEN, "Not authorized for this consultation");
+  }
+
+  const room = await getChatRoomByConsultationId(consultationId!, chatRoomErrorMessage);
+
+  appAssert(room, NOT_FOUND, "Chat room not found");
+
+  const participants = room.participants?.map((participant) => participant.toString()) ?? [];
+  const isParticipant =
+    participants.length > 0
+      ? participants.includes(userId)
+      : consultation.userId.toString() === userId || consultation.psychologistId.toString() === userId;
+
+  if (actorRole === "mahasiswa") {
+    appAssert(isParticipant, FORBIDDEN, "User not part of chat room");
+  } else if (actorRole === "psikolog") {
+    appAssert(isParticipant, FORBIDDEN, "Access denied");
+  } else {
+    appAssert(isParticipant, FORBIDDEN, "Access denied");
+  }
+
+  return { consultation, room };
+};
+
+export const applyConsultation = async ({ userId, psychologistId, message, role }: ApplyConsultationParams) => {
   // CONS-MHS-01
   appAssert(userId, UNAUTHORIZED, "Unauthorized access");
 
@@ -87,11 +172,7 @@ export const applyConsultation = async ({
   };
 };
 
-export const updateConsultation = async ({
-  psychologistId,
-  consultationId,
-  status,
-}: UpdateConsultationParams) => {
+export const updateConsultation = async ({ psychologistId, consultationId, status }: UpdateConsultationParams) => {
   appAssert(psychologistId, UNAUTHORIZED, "Unauthorized access");
 
   appAssert(["accepted", "rejected"].includes(status), BAD_REQUEST, "Invalid status");
@@ -173,52 +254,117 @@ export const getConsultationDetail = async ({ userId, consultationId }: { userId
   return consultation;
 };
 
-export const sendMessage = async ({
-  userId,
-  consultationId,
-  message,
-}: SendMessageParams) => {
-  // CONS-MHS-10
-  appAssert(userId, UNAUTHORIZED, "Unauthorized access");
+export const sendMessage = async ({ userId, consultationId, message }: SendMessageParams) => {
+  const { consultation, room } = await resolveChatAccess({ userId, consultationId });
 
-  // CONS-MHS-08
-  appAssert(mongoose.Types.ObjectId.isValid(consultationId), BAD_REQUEST, "Invalid consultationId");
+  appAssert(consultation.status === "accepted", BAD_REQUEST, "Consultation not active");
+  ensureMessageContent(message);
 
-  const consultation = await ConsultationModel.findById(consultationId);
+  appAssert(room.status === "active", BAD_REQUEST, "Chat room is not active");
 
-  // CONS-MHS-09
-  appAssert(consultation, NOT_FOUND, "Consultation not found");
-
-  // CONS-MHS-07 + PSI-14
-  appAssert(
-    consultation.userId.toString() === userId || consultation.psychologistId.toString() === userId,
-    FORBIDDEN,
-    "Access denied"
-  );
-
-  // CONS-MHS-11 & 12
-  appAssert(consultation.status === "accepted", FORBIDDEN, "Consultation not active");
-
-  // CONS-MHS-13
-  appAssert(message && message.trim() !== "", BAD_REQUEST, "Message cannot be empty");
-
-  // CONS-MHS-14
-  appAssert(message.length <= 1000, 413, "Message too long");
-
-  const room = await chatRoom.findOne({ consultationId });
-
-  appAssert(room, NOT_FOUND, "Chat room not found");
-
-  room.messages.push({
+  const newMessage = {
     senderId: new mongoose.Types.ObjectId(userId),
     message,
     timestamp: new Date(),
-  });
+  };
 
-  await room.save();
+  room.messages.push(newMessage);
 
-  // CONS-MHS-18
+  try {
+    await room.save();
+  } catch (error) {
+    throw buildInternalError("Failed to send message");
+  }
+
   return {
+    statusCode: OK,
     message: "Message sent",
+    data: newMessage,
   };
 };
+
+export const sendMessageAsMahasiswa = async ({ userId, consultationId, message }: SendMessageParams) => {
+  const { consultation, room } = await resolveChatAccess({ userId, consultationId, actorRole: "mahasiswa" });
+
+  appAssert(consultation.status === "accepted", BAD_REQUEST, "Consultation not active");
+  ensureMessageContent(message);
+  appAssert(room.status === "active", BAD_REQUEST, "Chat room is not active");
+
+  const newMessage = {
+    senderId: new mongoose.Types.ObjectId(userId),
+    message,
+    timestamp: new Date(),
+  };
+
+  room.messages.push(newMessage);
+
+  try {
+    await room.save();
+  } catch (error) {
+    throw buildInternalError("Failed to send message");
+  }
+
+  return {
+    statusCode: OK,
+    message: "Message sent",
+    data: newMessage,
+  };
+};
+
+export const sendMessageAsPsychologist = async ({ userId, consultationId, message }: SendMessageParams) => {
+  const { consultation, room } = await resolveChatAccess({ userId, consultationId, actorRole: "psikolog" });
+
+  appAssert(consultation.status === "accepted", BAD_REQUEST, "Consultation not active");
+  ensureMessageContent(message);
+  appAssert(room.status === "active", BAD_REQUEST, "Chat room closed");
+
+  const newMessage = {
+    senderId: new mongoose.Types.ObjectId(userId),
+    message,
+    timestamp: new Date(),
+  };
+
+  room.messages.push(newMessage);
+
+  try {
+    await room.save();
+  } catch (error) {
+    throw buildInternalError("Failed to send message");
+  }
+
+  return {
+    statusCode: OK,
+    message: "Message sent",
+    data: newMessage,
+  };
+};
+
+export const getChat = async ({ userId, consultationId, actorRole, limit }: GetChatParams) => {
+  appAssert(userId, UNAUTHORIZED, "Unauthorized access");
+  ensureConsultationId(consultationId, false);
+
+  const room = await getChatRoomByConsultationId(consultationId!, "Failed to fetch messages");
+
+  appAssert(room, NOT_FOUND, "Chat room not found");
+
+  const participants = room.participants?.map((participant) => participant.toString()) ?? [];
+  appAssert(participants.includes(userId), FORBIDDEN, "Access denied");
+
+  const sortedMessages = [...room.messages].sort((left, right) => {
+    const leftTimestamp = new Date(left.timestamp ?? 0).getTime();
+    const rightTimestamp = new Date(right.timestamp ?? 0).getTime();
+
+    return leftTimestamp - rightTimestamp;
+  });
+
+  return {
+    statusCode: OK,
+    data: typeof limit === "number" && limit > 0 ? sortedMessages.slice(0, limit) : sortedMessages,
+  };
+};
+
+export const getChatAsMahasiswa = async ({ userId, consultationId, limit }: Omit<GetChatParams, "actorRole">) =>
+  getChat({ userId, consultationId, actorRole: "mahasiswa", limit });
+
+export const getChatAsPsychologist = async ({ userId, consultationId, limit }: Omit<GetChatParams, "actorRole">) =>
+  getChat({ userId, consultationId, actorRole: "psikolog", limit });

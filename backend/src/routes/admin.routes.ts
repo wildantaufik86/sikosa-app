@@ -4,19 +4,15 @@ import LogModel from "../models/logModel";
 import authenticate from "../middleware/authenticate";
 import validateRole from "../middleware/validateRole";
 import {
-  ArticleEdit,
-  createArticle,
-  createUser,
-  deleteArticle,
-  deleteProfileUser,
-  getAllConsultations,
-  getArticleAll,
-  getArticleDetail,
   getUserProfile,
   getUserProfileAll,
+  createUser,
+  deleteProfileUser,
+  getAllConsultations,
   userProfileEdit,
 } from "../controllers/admin.controller";
 import { OK } from "../constants/http";
+import { ArticleEdit, createArticle, deleteArticle, getArticleAll, getArticleDetail } from "../controllers/article.controller";
 
 const adminRoutes = Router();
 

@@ -5,7 +5,7 @@ import { verifyToken } from "../../../src/utils/jwt";
 jest.mock("../../../src/models/sessionModel");
 jest.mock("../../../src/utils/jwt");
 
-describe("Logout Service", () => {
+describe("Auth service - Logout", () => {
   afterEach(() => {
     jest.clearAllMocks();
   });

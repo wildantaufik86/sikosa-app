@@ -10,7 +10,7 @@ jest.mock("../../../src/models/verificationCodeModel");
 jest.mock("../../../src/models/sessionModel");
 jest.mock("../../../src/utils/jwt");
 
-describe("LOGIN - loginUser", () => {
+describe("Auth service - Login", () => {
   const basePayload = {
     email: "user@gmail.com",
     password: "password123",

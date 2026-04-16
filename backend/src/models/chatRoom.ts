@@ -3,7 +3,7 @@ import mongoose, { Schema, Document, Types } from "mongoose";
 export interface ChatRoomMessage {
   senderId: Types.ObjectId;
   message: string;
-  timestamp: Date;
+  timestamp?: Date;
 }
 
 export interface ChatRoomDocument extends Document {

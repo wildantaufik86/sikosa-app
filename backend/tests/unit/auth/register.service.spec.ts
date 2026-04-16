@@ -12,7 +12,7 @@ jest.mock("../../../src/models/verificationCodeModel");
 jest.mock("../../../src/models/sessionModel");
 jest.mock("../../../src/utils/jwt");
 
-describe("REGISTER - createAccount", () => {
+describe("Auth service - Register", () => {
   const validData = {
     email: "user@gmail.com",
     password: "Password123!",

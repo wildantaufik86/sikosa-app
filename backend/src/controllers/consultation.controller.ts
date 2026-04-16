@@ -1,73 +1,39 @@
 import { RequestHandler } from "express";
-import { ConsultationModel } from "../models/consultationModel";
+import { applyConsultation, updateConsultation, getPsychologistNotifications } from "../services/consultation.service";
+import { CREATED, OK, BAD_REQUEST, UNAUTHORIZED } from "../constants/http";
 import appAssert from "../utils/appAssert";
-import { OK, BAD_REQUEST, CREATED } from "../constants/http";
-import AppErrorCode from "../constants/appErrorCode";
-import chatRoom from "../models/chatRoom";
-import mongoose from "mongoose";
 
-// Handler for user sending consultation request
 export const applyConsultationHandler: RequestHandler = async (req, res) => {
   const { psychologistId, message } = req.body;
-  const userId = req.userId; // From authentication middleware
+  const userId = req.userId?.toString();
 
-  // Validate input
-  appAssert(psychologistId && message, BAD_REQUEST, "Psychologist ID and message are required.");
+  appAssert(userId, UNAUTHORIZED, "Unauthorized");
 
-  // Create consultation with "inactive" room status
-  const consultation = await ConsultationModel.create({
+  const result = await applyConsultation({
     userId,
     psychologistId,
     message,
-    status: "pending", // Set initial consultation status as "pending"
-  });
-
-  // Create a room with "inactive" status
-  const room = await chatRoom.create({
-    consultationId: consultation._id,
-    participants: [userId, psychologistId],
-    status: "inactive", // Set room status as "inactive" initially
   });
 
   res.status(CREATED).json({
     message: "Consultation request sent successfully.",
-    data: consultation,
-    room: room,
+    data: result.consultation,
+    room: result.room,
   });
 };
 
-// Handler for psychologist accepting or rejecting the consultation
 export const updateConsultationStatus: RequestHandler = async (req, res) => {
-  const psychologistId = req.userId;
+  const psychologistId = req.userId?.toString();
   const { id } = req.params;
   const { status } = req.body;
 
-  appAssert(["accepted", "rejected"].includes(status), BAD_REQUEST, "Invalid status", AppErrorCode.InvalidPayload);
+  appAssert(psychologistId, UNAUTHORIZED, "Unauthorized");
 
-  const consultation = await ConsultationModel.findById(id);
-  appAssert(consultation, BAD_REQUEST, "Consultation not found", AppErrorCode.UserNotFound);
-
-  appAssert(
-    consultation.psychologistId.equals(psychologistId),
-    BAD_REQUEST,
-    "Unauthorized to update this consultation",
-    AppErrorCode.InvalidUser
-  );
-
-  consultation.status = status;
-  await consultation.save();
-
-  // If the psychologist accepts the consultation, update room to "active"
-  if (status === "accepted") {
-    const room = await chatRoom.findOne({
-      consultationId: consultation._id,
-    });
-
-    if (room && room.status === "inactive") {
-      room.status = "active"; // Change room status to "active"
-      await room.save();
-    }
-  }
+  const consultation = await updateConsultation({
+    psychologistId,
+    consultationId: id,
+    status,
+  });
 
   res.status(OK).json({
     status: "success",
@@ -77,36 +43,12 @@ export const updateConsultationStatus: RequestHandler = async (req, res) => {
 };
 
 export const getNotificationsForPsychologist: RequestHandler = async (req, res) => {
-  const psychologistId = req.userId;
+  const psychologistId = req.userId?.toString();
+
+  appAssert(psychologistId, UNAUTHORIZED, "Unauthorized");
 
   try {
-    const consultations = await ConsultationModel.find({
-      psychologistId,
-      status: { $in: ["pending", "accepted", "rejected"] },
-    })
-      .populate("userId", "profile fullname email")
-      .exec();
-
-    const notifications = consultations.map((consultation) => {
-      const typedConsultation = consultation as {
-        _id: mongoose.Types.ObjectId;
-        userId: { _id: mongoose.Types.ObjectId; profile?: { fullname: string }; email: string };
-        status: "pending" | "accepted" | "rejected";
-        createdAt: Date;
-      };
-
-      return {
-        consultationId: typedConsultation._id.toString(),
-        user: {
-          _id: typedConsultation.userId._id.toString(),
-          fullname: typedConsultation.userId.profile?.fullname || "",
-          email: typedConsultation.userId.email,
-        },
-        message: `Consultation request from ${typedConsultation.userId.profile?.fullname} is ${typedConsultation.status}`,
-        status: typedConsultation.status,
-        createdAt: typedConsultation.createdAt,
-      };
-    });
+    const notifications = await getPsychologistNotifications(psychologistId);
 
     res.status(OK).json({
       message: "Notifications fetched successfully",

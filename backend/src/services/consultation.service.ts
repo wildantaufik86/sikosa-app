@@ -4,6 +4,7 @@ import appAssert from "../utils/appAssert";
 import AppError from "../utils/appError";
 import { BAD_REQUEST, CONFLICT, FORBIDDEN, INTERNAL_SERVER_ERROR, NOT_FOUND, OK, UNAUTHORIZED } from "../constants/http";
 import mongoose from "mongoose";
+import { ERROR_MSG } from "../constants/errorMessage";
 
 type ConsultationStatus = "pending" | "accepted" | "rejected";
 type ConsultationDecision = "accepted" | "rejected";
@@ -51,9 +52,9 @@ const ensureConsultationId = (consultationId?: string, validateFormat = true) =>
 };
 
 const ensureMessageContent = (message: string) => {
-  appAssert(message !== undefined && message !== null && message !== "", BAD_REQUEST, "Message is required");
-  appAssert(message.trim() !== "", BAD_REQUEST, "Message cannot be empty");
-  appAssert(message.length <= MAX_MESSAGE_LENGTH, BAD_REQUEST, "Message exceeds maximum length");
+  appAssert(message !== undefined && message !== null, BAD_REQUEST, ERROR_MSG.EMPTY_MESSAGE);
+  appAssert(message.trim() !== "", BAD_REQUEST, ERROR_MSG.EMPTY_MESSAGE);
+  appAssert(message.length <= MAX_MESSAGE_LENGTH, 413, ERROR_MSG.MESSAGE_TOO_LONG);
   appAssert(!INVALID_MESSAGE_CONTENT_REGEX.test(message), BAD_REQUEST, "Invalid message content");
 };
 

@@ -13,12 +13,12 @@ export const applyConsultationHandler: RequestHandler = async (req, res) => {
     userId,
     psychologistId,
     message,
+    role: "mahasiswa",
   });
 
   res.status(CREATED).json({
-    message: "Consultation request sent successfully.",
-    data: result.consultation,
-    room: result.room,
+    message: result.message,
+    data: result.data,
   });
 };
 

@@ -2,22 +2,36 @@ import { ConsultationModel } from "../models/consultationModel";
 import chatRoom from "../models/chatRoom";
 import appAssert from "../utils/appAssert";
 import { BAD_REQUEST, CONFLICT, FORBIDDEN, NOT_FOUND, UNAUTHORIZED } from "../constants/http";
-import AppErrorCode from "../constants/appErrorCode";
 import mongoose from "mongoose";
 
-const isValidObjectId = (id: string) => mongoose.Types.ObjectId.isValid(id);
+type ConsultationStatus = "pending" | "accepted" | "rejected";
+type ConsultationDecision = "accepted" | "rejected";
+
+interface ApplyConsultationParams {
+  userId?: string;
+  psychologistId: string;
+  message: string;
+  role?: string;
+}
+
+interface UpdateConsultationParams {
+  psychologistId: string;
+  consultationId: string;
+  status: ConsultationDecision;
+}
+
+interface SendMessageParams {
+  userId?: string;
+  consultationId: string;
+  message: string;
+}
 
 export const applyConsultation = async ({
   userId,
   psychologistId,
   message,
   role,
-}: {
-  userId?: string;
-  psychologistId: string;
-  message: string;
-  role?: string;
-}) => {
+}: ApplyConsultationParams) => {
   // CONS-MHS-01
   appAssert(userId, UNAUTHORIZED, "Unauthorized access");
 
@@ -77,11 +91,7 @@ export const updateConsultation = async ({
   psychologistId,
   consultationId,
   status,
-}: {
-  psychologistId: string;
-  consultationId: string;
-  status: "accepted" | "rejected";
-}) => {
+}: UpdateConsultationParams) => {
   appAssert(psychologistId, UNAUTHORIZED, "Unauthorized access");
 
   appAssert(["accepted", "rejected"].includes(status), BAD_REQUEST, "Invalid status");
@@ -118,7 +128,7 @@ export const updateConsultation = async ({
 export const getPsychologistNotifications = async (psychologistId: string) => {
   const consultations = await ConsultationModel.find({
     psychologistId,
-    status: { $in: ["pending", "accepted", "rejected"] },
+    status: { $in: ["pending", "accepted", "rejected"] as ConsultationStatus[] },
   })
     .populate("userId", "profile fullname email")
     .exec();
@@ -167,11 +177,7 @@ export const sendMessage = async ({
   userId,
   consultationId,
   message,
-}: {
-  userId?: string;
-  consultationId: string;
-  message: string;
-}) => {
+}: SendMessageParams) => {
   // CONS-MHS-10
   appAssert(userId, UNAUTHORIZED, "Unauthorized access");
 

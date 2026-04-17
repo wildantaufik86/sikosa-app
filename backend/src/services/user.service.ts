@@ -4,6 +4,7 @@ import appAssert from "../utils/appAssert";
 import AppErrorCode from "../constants/appErrorCode";
 import { BAD_REQUEST } from "../constants/http";
 import { ConsultationModel } from "../models/consultationModel";
+import { ERROR_MSG } from "../constants/errorMessage";
 
 type PopulatedUserConsultation = {
   _id: mongoose.Types.ObjectId;
@@ -23,16 +24,14 @@ export const updateUserProfile = async ({
   fullname?: string;
   picture?: string;
 }) => {
-  appAssert(userId, BAD_REQUEST, "Invalid user", AppErrorCode.InvalidUser);
+  appAssert(userId, BAD_REQUEST, ERROR_MSG.INVALID_USER, AppErrorCode.InvalidUser);
 
   const user = await UserModel.findById(userId);
-  appAssert(user, BAD_REQUEST, "User not found", AppErrorCode.UserNotFound);
+  appAssert(user, BAD_REQUEST, ERROR_MSG.USER_NOT_FOUND, AppErrorCode.UserNotFound);
 
   if (nim) user.nim = nim;
   if (fullname) user.profile.fullname = fullname;
-  if (picture) {
-    user.profile.picture = picture;
-  }
+  if (picture) user.profile.picture = picture;
 
   await user.save();
 

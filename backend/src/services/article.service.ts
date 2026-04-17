@@ -1,8 +1,11 @@
 import mongoose from "mongoose";
 import ArticleModel from "../models/articleModel";
 import appAssert from "../utils/appAssert";
-import { NOT_FOUND, UNAUTHORIZED } from "../constants/http";
+import { BAD_REQUEST, NOT_FOUND, UNAUTHORIZED, CONFLICT } from "../constants/http";
 
+// =========================
+// TYPES
+// =========================
 type ArticleWriter = {
   _id: mongoose.Types.ObjectId | string;
   profile?: {
@@ -21,8 +24,27 @@ type FormattableArticle = {
   updatedAt: Date;
 };
 
-const buildSlug = (title: string) => title.toLowerCase().replace(/ /g, "-");
+// =========================
+// HELPERS
+// =========================
+const isValidObjectId = (id: string) => mongoose.Types.ObjectId.isValid(id);
 
+// slug production-grade
+const buildSlug = (title: string) =>
+  title
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, "") // remove special char
+    .replace(/\s+/g, "-") // normalize space
+    .replace(/-+/g, "-"); // normalize dash
+
+const validateRequired = (value: any, message: string) => {
+  appAssert(value !== undefined && value !== null, BAD_REQUEST, message);
+};
+
+// =========================
+// FORMAT
+// =========================
 export const formatArticle = (article: FormattableArticle | null) => {
   if (!article) return null;
 
@@ -33,18 +55,34 @@ export const formatArticle = (article: FormattableArticle | null) => {
     thumbnail: article.thumbnail,
     slug: article.slug,
     writer: {
-      id: article.writer._id,
-      fullname: article.writer.profile?.fullname || "Unknown",
+      id: article.writer?._id,
+      fullname: article.writer?.profile?.fullname || "Unknown",
     },
     createdAt: article.createdAt,
     updatedAt: article.updatedAt,
   };
 };
 
-export const getAllArticles = () => ArticleModel.find().populate("writer", "profile.fullname");
+// =========================
+// GET
+// =========================
+export const getAllArticles = async () => {
+  const data = await ArticleModel.find().populate("writer", "_id profile.fullname");
+  return data;
+};
 
-export const getArticleById = (id: string) => ArticleModel.findById(id);
+export const getArticleById = async (id: string) => {
+  appAssert(isValidObjectId(id), BAD_REQUEST, "ID tidak valid");
 
+  const article = await ArticleModel.findById(id);
+  appAssert(article, NOT_FOUND, "Artikel tidak ditemukan");
+
+  return article;
+};
+
+// =========================
+// CREATE
+// =========================
 export const createArticleRecord = async ({
   writer,
   title,
@@ -54,14 +92,27 @@ export const createArticleRecord = async ({
   writer: mongoose.Types.ObjectId | string | undefined;
   title: string;
   content: string;
-  thumbnail: string;
+  thumbnail?: string;
 }) => {
+  validateRequired(writer, "Writer wajib diisi");
+  validateRequired(title, "Title wajib diisi");
+  validateRequired(content, "Content wajib diisi");
+
+  const cleanTitle = title.trim();
+  appAssert(cleanTitle.length > 0, BAD_REQUEST, "Title tidak boleh kosong");
+
+  const slug = buildSlug(cleanTitle);
+
+  // optional: prevent duplicate slug
+  const existing = await ArticleModel.findOne({ slug });
+  appAssert(!existing, CONFLICT, "Slug sudah digunakan");
+
   const article = new ArticleModel({
     writer,
-    thumbnail,
-    title,
+    thumbnail: thumbnail || "",
+    title: cleanTitle,
     content,
-    slug: buildSlug(title),
+    slug,
   });
 
   await article.save();
@@ -72,6 +123,9 @@ export const createArticleRecord = async ({
   });
 };
 
+// =========================
+// UPDATE
+// =========================
 export const updateArticleRecord = async ({
   articleId,
   title,
@@ -83,20 +137,34 @@ export const updateArticleRecord = async ({
   content?: string;
   thumbnail?: string;
 }) => {
+  appAssert(isValidObjectId(articleId), BAD_REQUEST, "ID tidak valid");
+
   const article = await ArticleModel.findById(articleId);
   appAssert(article, NOT_FOUND, "Artikel tidak ditemukan");
 
-  if (title) {
-    article.title = title;
-    article.slug = buildSlug(title);
+  if (title !== undefined) {
+    const cleanTitle = title.trim();
+    appAssert(cleanTitle.length > 0, BAD_REQUEST, "Title tidak boleh kosong");
+
+    article.title = cleanTitle;
+    article.slug = buildSlug(cleanTitle);
   }
-  if (content) article.content = content;
-  if (thumbnail) article.thumbnail = thumbnail;
+
+  if (content !== undefined) {
+    article.content = content;
+  }
+
+  if (thumbnail !== undefined) {
+    article.thumbnail = thumbnail;
+  }
 
   await article.save();
   return article;
 };
 
+// =========================
+// UPDATE OWNED
+// =========================
 export const updateOwnedArticleRecord = async ({
   articleId,
   writerId,
@@ -110,6 +178,8 @@ export const updateOwnedArticleRecord = async ({
   content?: string;
   thumbnail?: string;
 }) => {
+  appAssert(isValidObjectId(articleId), BAD_REQUEST, "ID tidak valid");
+
   const article = await ArticleModel.findOne({
     _id: articleId,
     writer: writerId,
@@ -117,12 +187,16 @@ export const updateOwnedArticleRecord = async ({
 
   appAssert(article, UNAUTHORIZED, "Unauthorized to edit this article");
 
-  if (title) {
-    article.title = title;
-    article.slug = buildSlug(title);
+  if (title !== undefined) {
+    const cleanTitle = title.trim();
+    appAssert(cleanTitle.length > 0, BAD_REQUEST, "Title tidak boleh kosong");
+
+    article.title = cleanTitle;
+    article.slug = buildSlug(cleanTitle);
   }
-  if (content) article.content = content;
-  if (thumbnail) article.thumbnail = thumbnail;
+
+  if (content !== undefined) article.content = content;
+  if (thumbnail !== undefined) article.thumbnail = thumbnail;
 
   await article.save();
 
@@ -132,16 +206,33 @@ export const updateOwnedArticleRecord = async ({
   });
 };
 
-export const deleteArticleRecord = (articleId: string) => ArticleModel.findByIdAndDelete(articleId);
+// =========================
+// DELETE
+// =========================
+export const deleteArticleRecord = async (articleId: string) => {
+  appAssert(isValidObjectId(articleId), BAD_REQUEST, "ID tidak valid");
 
-export const deleteOwnedArticleRecord = ({
+  const deleted = await ArticleModel.findByIdAndDelete(articleId);
+  appAssert(deleted, NOT_FOUND, "Artikel tidak ditemukan");
+
+  return deleted;
+};
+
+export const deleteOwnedArticleRecord = async ({
   articleId,
   writerId,
 }: {
   articleId: string;
   writerId: mongoose.Types.ObjectId | string | undefined;
-}) =>
-  ArticleModel.findOneAndDelete({
+}) => {
+  appAssert(isValidObjectId(articleId), BAD_REQUEST, "ID tidak valid");
+
+  const deleted = await ArticleModel.findOneAndDelete({
     _id: articleId,
     writer: writerId,
   });
+
+  appAssert(deleted, UNAUTHORIZED, "Unauthorized to delete this article");
+
+  return deleted;
+};

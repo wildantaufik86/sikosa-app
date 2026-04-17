@@ -2,7 +2,16 @@ import { ConsultationModel } from "../models/consultationModel";
 import chatRoom from "../models/chatRoom";
 import appAssert from "../utils/appAssert";
 import AppError from "../utils/appError";
-import { BAD_REQUEST, CONFLICT, FORBIDDEN, INTERNAL_SERVER_ERROR, NOT_FOUND, OK, UNAUTHORIZED } from "../constants/http";
+import {
+  BAD_REQUEST,
+  CONFLICT,
+  FORBIDDEN,
+  INTERNAL_SERVER_ERROR,
+  NOT_FOUND,
+  OK,
+  TO_LARGE,
+  UNAUTHORIZED,
+} from "../constants/http";
 import mongoose from "mongoose";
 import { ERROR_MSG } from "../constants/errorMessage";
 
@@ -47,15 +56,16 @@ const MAX_MESSAGE_LENGTH = 1000;
 const INVALID_MESSAGE_CONTENT_REGEX = /<script\b|[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/i;
 
 const ensureConsultationId = (consultationId?: string, validateFormat = true) => {
-  appAssert(consultationId, BAD_REQUEST, "Consultation ID required");
-  appAssert(!validateFormat || mongoose.Types.ObjectId.isValid(consultationId), BAD_REQUEST, "Invalid consultation ID");
+  appAssert(consultationId, BAD_REQUEST, ERROR_MSG.REQUIRED_CONSULTATION_ID);
+
+  appAssert(!validateFormat || mongoose.Types.ObjectId.isValid(consultationId), BAD_REQUEST, ERROR_MSG.INVALID_ID);
 };
 
 const ensureMessageContent = (message: string) => {
-  appAssert(message !== undefined && message !== null, BAD_REQUEST, ERROR_MSG.EMPTY_MESSAGE);
-  appAssert(message.trim() !== "", BAD_REQUEST, ERROR_MSG.EMPTY_MESSAGE);
-  appAssert(message.length <= MAX_MESSAGE_LENGTH, 413, ERROR_MSG.MESSAGE_TOO_LONG);
-  appAssert(!INVALID_MESSAGE_CONTENT_REGEX.test(message), BAD_REQUEST, "Invalid message content");
+  appAssert(message !== undefined && message !== null, BAD_REQUEST, ERROR_MSG.MESSAGE_REQUIRED);
+  appAssert(message.trim() !== "", BAD_REQUEST, ERROR_MSG.MESSAGE_REQUIRED);
+  appAssert(message.length <= MAX_MESSAGE_LENGTH, TO_LARGE, ERROR_MSG.MESSAGE_TOO_LONG);
+  appAssert(!INVALID_MESSAGE_CONTENT_REGEX.test(message), BAD_REQUEST, ERROR_MSG.INVALID_MESSAGE_CONTENT);
 };
 
 const buildInternalError = (message: string) => new AppError(INTERNAL_SERVER_ERROR, message);
@@ -84,13 +94,13 @@ const resolveChatAccess = async ({
   chatRoomErrorMessage = "Internal server error",
   validateConsultationIdFormat = actorRole !== undefined,
 }: ChatContextParams) => {
-  appAssert(userId, UNAUTHORIZED, "Unauthorized access");
+  appAssert(userId, UNAUTHORIZED, ERROR_MSG.UNAUTHORIZED);
 
   ensureConsultationId(consultationId, validateConsultationIdFormat);
 
   const consultation = await getConsultationById(consultationId!, consultationErrorMessage);
 
-  appAssert(consultation, NOT_FOUND, "Consultation not found");
+  appAssert(consultation, NOT_FOUND, ERROR_MSG.CONSULTATION_NOT_FOUND);
 
   if (actorRole === "psikolog") {
     appAssert(consultation.psychologistId.toString() === userId, FORBIDDEN, "Not authorized for this consultation");
@@ -98,7 +108,7 @@ const resolveChatAccess = async ({
 
   const room = await getChatRoomByConsultationId(consultationId!, chatRoomErrorMessage);
 
-  appAssert(room, NOT_FOUND, "Chat room not found");
+  appAssert(room, NOT_FOUND, ERROR_MSG.CHAT_ROOM_NOT_FOUND);
 
   const participants = room.participants?.map((participant) => participant.toString()) ?? [];
   const isParticipant =
@@ -315,9 +325,9 @@ export const sendMessageAsMahasiswa = async ({ userId, consultationId, message }
 export const sendMessageAsPsychologist = async ({ userId, consultationId, message }: SendMessageParams) => {
   const { consultation, room } = await resolveChatAccess({ userId, consultationId, actorRole: "psikolog" });
 
-  appAssert(consultation.status === "accepted", BAD_REQUEST, "Consultation not active");
+  appAssert(consultation.status === "accepted", BAD_REQUEST, ERROR_MSG.CONSULTATION_NOT_ACTIVE);
   ensureMessageContent(message);
-  appAssert(room.status === "active", BAD_REQUEST, "Chat room closed");
+  appAssert(room.status === "active", BAD_REQUEST, ERROR_MSG.CHAT_ROOM_INACTIVE);
 
   const newMessage = {
     senderId: new mongoose.Types.ObjectId(userId),

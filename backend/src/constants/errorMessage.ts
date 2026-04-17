@@ -1,9 +1,28 @@
 export const ERROR_MSG = {
+  // AUTH
   UNAUTHORIZED: "Unauthorized access",
   FORBIDDEN: "Access denied",
-  NOT_PARTICIPANT: "User not part of chat room",
+
+  // CONSULTATION
+  CONSULTATION_NOT_FOUND: "Consultation not found",
   CONSULTATION_NOT_ACTIVE: "Consultation not active",
-  EMPTY_MESSAGE: "Message cannot be empty",
+
+  // CHAT ROOM
+  CHAT_ROOM_NOT_FOUND: "Chat room not found",
+  CHAT_ROOM_INACTIVE: "Chat room is not active",
+  NOT_PARTICIPANT: "User not part of chat room",
+
+  // VALIDATION
+  REQUIRED_CONSULTATION_ID: "Consultation ID required",
+  INVALID_ID: "Invalid consultation ID",
+
+  MESSAGE_REQUIRED: "Message is required",
+  EMPTY_MESSAGE: "Message is required", // alias untuk backward compatibility
   MESSAGE_TOO_LONG: "Message too long",
-  INVALID_ID: "Invalid consultationId",
+  INVALID_MESSAGE_CONTENT: "Invalid message content",
+
+  // SYSTEM
+  INTERNAL_SERVER_ERROR: "Internal server error",
+  FAILED_SEND_MESSAGE: "Failed to send message",
+  FAILED_FETCH_MESSAGES: "Failed to fetch messages",
 };

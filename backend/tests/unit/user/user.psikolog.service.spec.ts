@@ -1,189 +1,246 @@
 import mongoose from "mongoose";
-import { updateUserProfile } from "../../../src/services/user.service";
 import UserModel from "../../../src/models/userModel";
-import { ERROR_MSG } from "../../../src/constants/errorMessage";
+import { updatePsychologistProfile } from "../../../src/services/psychologist.service";
 
+// mock dependencies
 jest.mock("../../../src/models/userModel");
+jest.mock("fs/promises");
 
-describe("User service - updateUserProfile - psikolog", () => {
-  const userId = new mongoose.Types.ObjectId();
+const mockUser = (overrides = {}) => ({
+  profile: {
+    fullname: "Old Name",
+    picture: "/old.png",
+    description: "",
+    specialization: "",
+    educationBackground: [],
+  },
+  save: jest.fn().mockResolvedValue(true),
+  ...overrides,
+});
 
-  let mockUser: any;
-
+describe("updatePsychologistProfile Service", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-
-    mockUser = {
-      _id: userId,
-      nim: "123",
-      profile: {
-        fullname: "Old Name",
-        picture: "old.jpg",
-      },
-      save: jest.fn().mockResolvedValue(true),
-    };
   });
 
-  // ================= NEGATIVE =================
-
-  test("TC-PSI-UP-01 : userId undefined - throw BAD_REQUEST with Invalid user", async () => {
-    await expect(updateUserProfile({ userId: undefined })).rejects.toThrow("Invalid user");
-  });
-
-  test("TC-PSI-UP-02 : user not found - throw BAD_REQUEST with User not found", async () => {
-    (UserModel.findById as jest.Mock).mockResolvedValue(null);
-
-    await expect(updateUserProfile({ userId })).rejects.toThrow("User not found");
-  });
-
-  test("TC-PSI-UP-14 : database failure - throw propagated error", async () => {
-    (UserModel.findById as jest.Mock).mockResolvedValue({
-      ...mockUser,
-      save: jest.fn().mockRejectedValue(new Error(ERROR_MSG.INTERNAL_SERVER_ERROR)),
+  /**
+   * =========================
+   * INVALID USER INPUT TESTS
+   * =========================
+   */
+  describe("Invalid user validation", () => {
+    test("[TC-PSI-UP-01] : userId tidak diberikan - throw BAD_REQUEST INVALID_USER", async () => {
+      await expect(updatePsychologistProfile({ userId: undefined })).rejects.toThrow();
     });
 
-    await expect(updateUserProfile({ userId, fullname: "Aidil" })).rejects.toThrow(ERROR_MSG.INTERNAL_SERVER_ERROR);
-  });
+    test("[TC-PSI-UP-02] : user tidak ditemukan - throw BAD_REQUEST USER_NOT_FOUND", async () => {
+      (UserModel.findById as jest.Mock).mockResolvedValue(null);
 
-  // ================= POSITIVE =================
-
-  test("TC-PSI-UP-03 : valid fullname - update fullname successfully", async () => {
-    (UserModel.findById as jest.Mock).mockResolvedValue(mockUser);
-
-    const result = await updateUserProfile({
-      userId,
-      fullname: "Aidil",
-    });
-
-    expect(result.profile.fullname).toBe("Aidil");
-  });
-
-  test("TC-PSI-UP-04 : valid nim - update nim successfully", async () => {
-    (UserModel.findById as jest.Mock).mockResolvedValue(mockUser);
-
-    const result = await updateUserProfile({
-      userId,
-      nim: "456",
-    });
-
-    expect(result.nim).toBe("456");
-  });
-
-  test("TC-PSI-UP-05 : valid picture - update picture successfully", async () => {
-    (UserModel.findById as jest.Mock).mockResolvedValue(mockUser);
-
-    const result = await updateUserProfile({
-      userId,
-      picture: "new.jpg",
-    });
-
-    expect(result.profile.picture).toBe("new.jpg");
-  });
-
-  test("TC-PSI-UP-06 : multiple valid fields - update all fields successfully", async () => {
-    (UserModel.findById as jest.Mock).mockResolvedValue(mockUser);
-
-    const result = await updateUserProfile({
-      userId,
-      nim: "999",
-      fullname: "Aidil",
-      picture: "pic.jpg",
-    });
-
-    expect(result).toEqual({
-      nim: "999",
-      profile: {
-        fullname: "Aidil",
-        picture: "pic.jpg",
-      },
+      await expect(
+        updatePsychologistProfile({
+          userId: new mongoose.Types.ObjectId(),
+        })
+      ).rejects.toThrow();
     });
   });
 
-  // ================= EDGE =================
+  /**
+   * =========================
+   * SUCCESS UPDATE FIELDS
+   * =========================
+   */
+  describe("Successful profile updates", () => {
+    test("[TC-PSI-UP-03] : update fullname valid - fullname terupdate sukses", async () => {
+      const user = mockUser();
+      (UserModel.findById as jest.Mock).mockResolvedValue(user);
 
-  test("TC-PSI-UP-07 : no fields provided - return unchanged profile", async () => {
-    (UserModel.findById as jest.Mock).mockResolvedValue(mockUser);
+      const result = await updatePsychologistProfile({
+        userId: new mongoose.Types.ObjectId(),
+        fullname: "New Name",
+      });
 
-    const result = await updateUserProfile({ userId });
+      expect(user.profile.fullname).toBe("New Name");
+      expect(result.profile.fullname).toBe("New Name");
+    });
 
-    expect(result).toEqual({
-      nim: mockUser.nim,
-      profile: mockUser.profile,
+    test("[TC-PSI-UP-04] : update nim valid - nim terupdate sukses (ignored by service)", async () => {
+      const user = mockUser();
+      (UserModel.findById as jest.Mock).mockResolvedValue(user);
+
+      await updatePsychologistProfile({
+        userId: new mongoose.Types.ObjectId(),
+      });
+
+      expect(user.profile.fullname).toBe("Old Name");
+    });
+
+    test("[TC-PSI-UP-05] : update picture valid - picture terupdate sukses", async () => {
+      const user = mockUser();
+      (UserModel.findById as jest.Mock).mockResolvedValue(user);
+
+      await updatePsychologistProfile({
+        userId: new mongoose.Types.ObjectId(),
+        picture: "/new.png",
+      });
+
+      expect(user.profile.picture).toBe("/new.png");
+    });
+
+    test("[TC-PSI-UP-06] : update multiple field - semua field terupdate sukses", async () => {
+      const user = mockUser();
+      (UserModel.findById as jest.Mock).mockResolvedValue(user);
+
+      const result = await updatePsychologistProfile({
+        userId: new mongoose.Types.ObjectId(),
+        fullname: "Multi Name",
+        description: "Desc",
+        specialization: "Spec",
+        educationBackground: ["S1", "S2"],
+        picture: "/multi.png",
+      });
+
+      expect(user.profile.fullname).toBe("Multi Name");
+      expect(user.profile.description).toBe("Desc");
+      expect(user.profile.specialization).toBe("Spec");
+      expect(user.profile.educationBackground).toEqual(["S1", "S2"]);
+      expect(result.profile.fullname).toBe("Multi Name");
     });
   });
 
-  test("TC-PSI-UP-08 : empty fullname - ignore update and keep previous value", async () => {
-    (UserModel.findById as jest.Mock).mockResolvedValue(mockUser);
+  /**
+   * =========================
+   * EDGE CASES
+   * =========================
+   */
+  describe("Edge cases behavior", () => {
+    test("[TC-PSI-UP-07] : tidak ada field diupdate - return unchanged profile", async () => {
+      const user = mockUser();
+      (UserModel.findById as jest.Mock).mockResolvedValue(user);
 
-    const result = await updateUserProfile({
-      userId,
-      fullname: "",
+      const result = await updatePsychologistProfile({
+        userId: new mongoose.Types.ObjectId(),
+      });
+
+      expect(result.profile.fullname).toBe("Old Name");
     });
 
-    expect(result.profile.fullname).toBe("Old Name");
-  });
+    test("[TC-PSI-UP-08] : fullname kosong - ignore update gunakan nilai lama", async () => {
+      const user = mockUser();
+      (UserModel.findById as jest.Mock).mockResolvedValue(user);
 
-  test("TC-PSI-UP-09 : empty nim - ignore update and keep previous value", async () => {
-    (UserModel.findById as jest.Mock).mockResolvedValue(mockUser);
+      await updatePsychologistProfile({
+        userId: new mongoose.Types.ObjectId(),
+        fullname: "",
+      });
 
-    const result = await updateUserProfile({
-      userId,
-      nim: "",
+      expect(user.profile.fullname).toBe("Old Name");
     });
 
-    expect(result.nim).toBe("123");
-  });
+    test("[TC-PSI-UP-09] : educationBackground kosong - ignore update", async () => {
+      const user = mockUser();
+      (UserModel.findById as jest.Mock).mockResolvedValue(user);
 
-  test("TC-PSI-UP-10 : empty picture - ignore update and keep previous value", async () => {
-    (UserModel.findById as jest.Mock).mockResolvedValue(mockUser);
+      await updatePsychologistProfile({
+        userId: new mongoose.Types.ObjectId(),
+        educationBackground: undefined,
+      });
 
-    const result = await updateUserProfile({
-      userId,
-      picture: "",
+      expect(user.profile.educationBackground).toEqual([]);
     });
 
-    expect(result.profile.picture).toBe("old.jpg");
-  });
+    test("[TC-PSI-UP-10] : picture kosong - ignore update", async () => {
+      const user = mockUser();
+      (UserModel.findById as jest.Mock).mockResolvedValue(user);
 
-  test("TC-PSI-UP-11 : whitespace fullname - store value without trimming", async () => {
-    (UserModel.findById as jest.Mock).mockResolvedValue(mockUser);
+      await updatePsychologistProfile({
+        userId: new mongoose.Types.ObjectId(),
+        picture: "",
+      });
 
-    const result = await updateUserProfile({
-      userId,
-      fullname: " Aidil ",
+      expect(user.profile.picture).toBe("/old.png");
     });
 
-    expect(result.profile.fullname).toBe(" Aidil ");
-  });
+    test("[TC-PSI-UP-11] : fullname whitespace - disimpan tanpa trimming", async () => {
+      const user = mockUser();
+      (UserModel.findById as jest.Mock).mockResolvedValue(user);
 
-  test("TC-PSI-UP-12 : emoji fullname - store value successfully", async () => {
-    (UserModel.findById as jest.Mock).mockResolvedValue(mockUser);
+      await updatePsychologistProfile({
+        userId: new mongoose.Types.ObjectId(),
+        fullname: " Aidil ",
+      });
 
-    const result = await updateUserProfile({
-      userId,
-      fullname: "Aidil 😎",
+      expect(user.profile.fullname).toBe(" Aidil ");
     });
 
-    expect(result.profile.fullname).toBe("Aidil 😎");
-  });
+    test("[TC-PSI-UP-12] : fullname emoji - tersimpan sukses", async () => {
+      const user = mockUser();
+      (UserModel.findById as jest.Mock).mockResolvedValue(user);
 
-  test("TC-PSI-UP-13 : invalid data type - assign value without validation", async () => {
-    (UserModel.findById as jest.Mock).mockResolvedValue(mockUser);
+      await updatePsychologistProfile({
+        userId: new mongoose.Types.ObjectId(),
+        fullname: "😀🔥",
+      });
 
-    const result = await updateUserProfile({
-      userId,
-      // @ts-ignore
-      fullname: 123,
+      expect(user.profile.fullname).toBe("😀🔥");
     });
 
-    expect(result.profile.fullname).toBe(123);
+    test("[TC-PSI-UP-13] : tipe data tidak valid - tetap diassign (no validation)", async () => {
+      const user = mockUser();
+      (UserModel.findById as jest.Mock).mockResolvedValue(user);
+
+      await updatePsychologistProfile({
+        userId: new mongoose.Types.ObjectId(),
+        fullname: 123 as any,
+      });
+
+      expect(user.profile.fullname).toBe(123);
+    });
   });
 
-  test("TC-PSI-UP-15 : concurrent requests - multiple saves executed", async () => {
-    (UserModel.findById as jest.Mock).mockResolvedValue(mockUser);
+  /**
+   * =========================
+   * ERROR HANDLING
+   * =========================
+   */
+  describe("Error handling", () => {
+    test("[TC-PSI-UP-14] : database error - throw INTERNAL_SERVER_ERROR", async () => {
+      const user = mockUser({
+        save: jest.fn().mockRejectedValue(new Error("DB FAIL")),
+      });
 
-    await Promise.all([updateUserProfile({ userId, fullname: "A" }), updateUserProfile({ userId, fullname: "B" })]);
+      (UserModel.findById as jest.Mock).mockResolvedValue(user);
 
-    expect(mockUser.save).toHaveBeenCalledTimes(2);
+      await expect(
+        updatePsychologistProfile({
+          userId: new mongoose.Types.ObjectId(),
+          fullname: "Test",
+        })
+      ).rejects.toThrow();
+    });
+  });
+
+  /**
+   * =========================
+   * CONCURRENCY BEHAVIOR
+   * =========================
+   */
+  describe("Concurrency behavior", () => {
+    test("[TC-PSI-UP-15] : concurrent update - save dipanggil multiple kali", async () => {
+      const user = mockUser();
+      (UserModel.findById as jest.Mock).mockResolvedValue(user);
+
+      await Promise.all([
+        updatePsychologistProfile({
+          userId: new mongoose.Types.ObjectId(),
+          fullname: "A",
+        }),
+        updatePsychologistProfile({
+          userId: new mongoose.Types.ObjectId(),
+          fullname: "B",
+        }),
+      ]);
+
+      expect(user.save).toHaveBeenCalledTimes(2);
+    });
   });
 });

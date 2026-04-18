@@ -8,9 +8,7 @@ import { toast } from "react-toastify";
 
 const EditProfile = () => {
   const { authUser, handleAuthUserChange } = useAuth();
-  const [fullname, setFullname] = useState(
-    authUser?.profile?.fullname || "User"
-  );
+  const [fullname, setFullname] = useState(authUser?.profile?.fullname || "User");
   const [previewImage, setPreviewImage] = useState(null);
   const [selectedImage, setSelectedImage] = useState(null);
 
@@ -65,15 +63,8 @@ const EditProfile = () => {
       transition={{ duration: 1 }}
     >
       {/* Title */}
-      <motion.div
-        className="mb-6"
-        initial={{ y: -50, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.8 }}
-      >
-        <h1 className="text-xl font-bold w-full text-left max-w-4xl">
-          Edit Profil
-        </h1>
+      <motion.div className="mb-6" initial={{ y: -50, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ duration: 0.8 }}>
+        <h1 className="text-xl font-bold w-full text-left max-w-4xl">Edit Profil</h1>
       </motion.div>
 
       {/* Profile Card */}
@@ -87,18 +78,10 @@ const EditProfile = () => {
             transition={{ duration: 0.8, ease: "easeOut" }}
           >
             {previewImage ? (
-              <img
-                src={previewImage}
-                alt="Profile"
-                className="w-[400px] h-80 object-cover rounded-lg"
-              />
+              <img src={previewImage} alt="Profile" className="w-[400px] h-80 object-cover rounded-lg" />
             ) : (
               <img
-                src={
-                  authUser.profile.picture
-                    ? CONFIG.BASE_URL + authUser.profile.picture
-                    : "https://via.placeholder.com/150"
-                }
+                src={authUser.profile.picture ? CONFIG.BASE_URL + authUser.profile.picture : "https://via.placeholder.com/150"}
                 alt="Profile"
                 className="w-[400px] h-80 object-cover rounded-lg"
               />
@@ -119,10 +102,7 @@ const EditProfile = () => {
                   animate={{ y: 0, opacity: 1 }}
                   transition={{ duration: 0.5, delay: 0.1 }}
                 >
-                  <label
-                    htmlFor="name"
-                    className="text-black text-md font-semibold mb-1"
-                  >
+                  <label htmlFor="name" className="text-black text-md font-semibold mb-1">
                     Nama
                   </label>
                   <input
@@ -139,10 +119,7 @@ const EditProfile = () => {
                   animate={{ y: 0, opacity: 1 }}
                   transition={{ duration: 0.5, delay: 0.2 }}
                 >
-                  <label
-                    htmlFor="image"
-                    className="text-black text-md font-semibold mb-1"
-                  >
+                  <label htmlFor="image" className="text-black text-md font-semibold mb-1">
                     Add Image
                   </label>
                   <input

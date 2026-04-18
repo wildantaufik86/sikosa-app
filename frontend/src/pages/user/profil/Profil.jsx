@@ -19,9 +19,7 @@ const Profile = () => {
   return (
     <div className="flex flex-col justify-center py-8 lg:py-10 px-6 lg:px-20 font-jakarta bg-white">
       {/* Title */}
-      <h1 className="text-xl font-bold mb-4 w-full text-left max-w-4xl">
-        Profil
-      </h1>
+      <h1 className="text-xl font-bold mb-4 w-full text-left max-w-4xl">Profil</h1>
 
       {/* Profile Card */}
       <motion.div
@@ -50,11 +48,7 @@ const Profile = () => {
                 className="w-[400px] h-80 object-cover rounded-lg"
               />
             ) : (
-              <img
-                src="https://via.placeholder.com/150"
-                alt="Profile"
-                className="w-[400px] h-80 object-cover rounded-lg"
-              />
+              <img src="https://via.placeholder.com/150" alt="Profile" className="w-[400px] h-80 object-cover rounded-lg" />
             )}
           </motion.div>
 
@@ -66,7 +60,7 @@ const Profile = () => {
             transition={{ duration: 1, delay: 0.3 }}
           >
             <div className="space-y-4">
-              <motion.div
+              {/* <motion.div
                 initial={{ y: 20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ duration: 0.5 }}
@@ -75,7 +69,7 @@ const Profile = () => {
                 <p className="text-gray-700 text-md bg-gray-100 p-1 rounded-sm">
                   {authUser.nim}
                 </p>
-              </motion.div>
+              </motion.div> */}
 
               <motion.div
                 initial={{ y: 20, opacity: 0 }}
@@ -94,18 +88,12 @@ const Profile = () => {
                 transition={{ duration: 0.5, delay: 0.2 }}
               >
                 <p className="text-black text-md font-semibold mb-1">Email</p>
-                <p className="text-gray-700 text-md bg-gray-100 p-1 rounded-sm">
-                  {authUser.email}
-                </p>
+                <p className="text-gray-700 text-md bg-gray-100 p-1 rounded-sm">{authUser.email}</p>
               </motion.div>
             </div>
 
             {/* Edit Profile Button */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.6, delay: 0.4 }}
-            >
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.6, delay: 0.4 }}>
               <Link
                 to={`/edit-profile/${authUser._id}`}
                 className="mt-4 bg-[#35A7FF] text-white text-sm font-semibold py-2 px-6 rounded-lg hover:bg-blue-600 self-start"

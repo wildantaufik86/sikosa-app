@@ -22,7 +22,7 @@ const AdminSidebar = () => {
           <FiMenu />
         </button>
 
-        <Link to="/admin/dashboard" className="flex items-center space-x-2">
+        <Link to="/admin/user" className="flex items-center space-x-2">
           <img src="/assets/nav-logo.png" alt="Logo" className="w-5 h-5 object-cover" />
           <h2 className="text-xl font-bold text-[#35A7FF]">Sikosa</h2>
         </Link>
@@ -41,7 +41,7 @@ const AdminSidebar = () => {
           </button>
 
           {/* Sidebar Header with Logo and Title */}
-          <Link to="/admin/dashboard" className="flex items-center p-3 space-x-1">
+          <Link to="/admin/user" className="flex items-center p-3 space-x-1">
             <img src="/assets/nav-logo.png" alt="Logo" className="w-5 h-5 object-cover" />
             <h2 className="text-xl font-bold text-[#35A7FF]">Sikosa</h2>
           </Link>

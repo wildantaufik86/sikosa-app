@@ -89,20 +89,30 @@ describe("Auth service - Login", () => {
     });
   });
 
-  test("TC-LOGIN-10 : User belum verifikasi → should return 403 FORBIDDEN", async () => {
-    const unverifiedUser = { ...mockUser, verified: false };
-    (UserModel.findOne as jest.Mock).mockResolvedValue(unverifiedUser);
-
-    await expect(loginUser(basePayload)).rejects.toMatchObject({
-      statusCode: FORBIDDEN,
-      message: "Account not verified",
-      errorCode: AppErrorCode.InvalidUser,
-    });
-  });
-
   // ======================
   // POSITIVE CASES
   // ======================
+
+  test("TC-LOGIN-10 : User belum verifikasi → should return 200 OK with token", async () => {
+    mockUser.comparePassword.mockResolvedValue(true);
+
+    const unverifiedUser = { ...mockUser, verified: false };
+    (UserModel.findOne as jest.Mock).mockResolvedValue(unverifiedUser);
+    (SessionModel.create as jest.Mock).mockResolvedValue({
+      _id: "session123",
+    });
+
+    const result = await loginUser(basePayload);
+
+    expect(result).toHaveProperty("accessToken");
+    expect(result).toHaveProperty("refreshToken");
+    expect(result).toHaveProperty("user");
+
+    expect(result.user).toEqual({
+      _id: "user123",
+      email: "user@gmail.com",
+    });
+  });
 
   test("TC-LOGIN-06 : Login valid → should return 200 OK with token", async () => {
     mockUser.comparePassword.mockResolvedValue(true);

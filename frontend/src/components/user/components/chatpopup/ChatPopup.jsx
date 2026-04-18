@@ -1,6 +1,7 @@
 // Import React dan pustaka yang diperlukan
 import { useState, useRef, useEffect } from "react";
 import { FaPaperPlane } from "react-icons/fa";
+import CONFIG from "../../../../config/config";
 
 const API_KEY = import.meta.env.VITE_GROQ_API_KEY;
 
@@ -32,52 +33,32 @@ const ChatPopup = () => {
     setIsTyping(true);
 
     try {
-      const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+      const response = await fetch(`${CONFIG.BASE_URL}/chatbot/chat`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${API_KEY}`,
         },
-        body: JSON.stringify({
-          model: "llama-3.1-8b-instant",
-          temperature: 0.7,
-          max_tokens: 500,
-          messages: [
-            {
-              role: "system",
-              content: `
-        Kamu adalah asisten virtual bernama "Sika" yang hanya boleh membahas topik terkait psikologi dan kesehatan mental.
-        Jika pengguna menanyakan hal di luar psikologi (misal politik, sejarah, teknologi, agama, dll), kamu TIDAK BOLEH menjawab pertanyaan tersebut.
-        Balas dengan kalimat:
-        "Maaf, saya hanya menjawab hal-hal yang berkaitan dengan psikologi. Ada yang bisa saya bantu?"
-        Jangan memberikan informasi lain di luar topik psikologi dalam kondisi apapun.
-        Gunakan gaya bahasa yang lembut, empatik, dan profesional.
-      `,
-            },
-            ...updatedMessages,
-          ],
-        }),
+        body: JSON.stringify({ messages: updatedMessages }),
       });
 
       if (!response.ok) {
-        const errText = await response.text();
-        console.error("GROQ API error:", errText);
-        throw new Error("Gagal mengambil respons dari GROQ API");
+        throw new Error("API Error");
       }
 
-      const data = await response.json();
-      const botReply = {
-        role: "assistant",
-        content: data.choices?.[0]?.message?.content || "Maaf, tidak ada respons dari model.",
-      };
+      const result = await response.json();
+
+      const botReply = result.data;
+
       setMessages([...updatedMessages, botReply]);
     } catch (error) {
-      console.error("Error fetching chat completion:", error);
+      console.error(error);
+
       const errorReply = {
         role: "assistant",
         content: "Maaf, terjadi kesalahan. Coba lagi nanti.",
       };
-      setMessages([...messages, userMessage, errorReply]);
+
+      setMessages([...updatedMessages, errorReply]);
     } finally {
       setIsTyping(false);
     }

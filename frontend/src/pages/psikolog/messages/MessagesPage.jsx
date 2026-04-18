@@ -16,7 +16,7 @@ const MessagesPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const userData = JSON.parse(sessionStorage.getItem("authUser"));
+  const userData = JSON.parse(localStorage.getItem("authUser"));
   const userId = userData?._id;
   const socketRef = useRef();
   const messagesEndRef = useRef(null);
@@ -49,7 +49,7 @@ const MessagesPage = () => {
   // Fetch chat rooms
   const fetchChatRooms = useCallback(async () => {
     try {
-      const token = sessionStorage.getItem("accessToken");
+      const token = localStorage.getItem("accessToken");
       if (!token) throw new Error("No token found");
 
       const response = await axios.get(`${SOCKET_URL}/api/chat/rooms`, {
@@ -103,7 +103,7 @@ const MessagesPage = () => {
 
     const fetchRoomMessages = async (roomId) => {
       try {
-        const token = sessionStorage.getItem("accessToken");
+        const token = localStorage.getItem("accessToken");
         if (!token) throw new Error("No token found");
 
         const response = await axios.get(`${SOCKET_URL}/api/chat/messages/${roomId}`, {
@@ -157,7 +157,7 @@ const MessagesPage = () => {
   const handleSendMessage = async () => {
     if (!newMessage.trim() || !selectedRoom || selectedRoom.status === "inactive") return;
 
-    const token = sessionStorage.getItem("accessToken");
+    const token = localStorage.getItem("accessToken");
     if (!token) {
       console.error("No token found");
       return;
@@ -193,7 +193,7 @@ const MessagesPage = () => {
     if (!selectedRoom) return;
 
     try {
-      const token = sessionStorage.getItem("accessToken");
+      const token = localStorage.getItem("accessToken");
       if (!token) throw new Error("No token found");
 
       await axios.patch(`${SOCKET_URL}/api/chat/finish/${selectedRoom._id}`, null, {

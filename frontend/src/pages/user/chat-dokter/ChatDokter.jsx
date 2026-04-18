@@ -30,6 +30,11 @@ const ChatDokter = () => {
   const socketRef = useRef();
   const [roomChat, setRoomChat] = useState(null);
 
+  console.log("pengajuan : ", statusPengajuan);
+  console.log("room : ", statusRoom);
+
+  console.log(id_psikolog);
+
   // Initiate Socket COnnection
   useEffect(() => {
     socketRef.current = io(SOCKET_URL);
@@ -101,7 +106,7 @@ const ChatDokter = () => {
   useEffect(() => {
     const fetchChatRooms = async () => {
       try {
-        const token = sessionStorage.getItem("accessToken");
+        const token = localStorage.getItem("accessToken");
         if (!token) {
           throw new Error("No token found");
         }
@@ -140,7 +145,10 @@ const ChatDokter = () => {
           throw new Error(message);
         }
         if (consultations) {
-          const lastConsultation = consultations.slice(-1)[0];
+          const lastConsultation = consultations.filter((data) => data.psychologist._id === id_psikolog).slice(-1)[0];
+
+          console.log("lastConsultation", consultations);
+
           setStatusPengajuan({ status: lastConsultation.status, createdAt: lastConsultation.createdAt });
         }
       } catch (error) {
@@ -158,7 +166,7 @@ const ChatDokter = () => {
     e.preventDefault();
     if (!message.trim()) return;
 
-    const token = sessionStorage.getItem("accessToken");
+    const token = localStorage.getItem("accessToken");
     if (!token) {
       toast.error("No token found. Please log in.");
       return;
@@ -305,8 +313,8 @@ const PengajuanKonsultasi = ({ handlePengajuan, psikolog, statusPengajuan, authU
                     statusPengajuan.status === "pending"
                       ? "text-yellow-500"
                       : statusPengajuan.status === "accepted"
-                      ? "text-green-500"
-                      : "text-red-500"
+                        ? "text-green-500"
+                        : "text-red-500"
                   }`}
                 >
                   {statusPengajuan.status}

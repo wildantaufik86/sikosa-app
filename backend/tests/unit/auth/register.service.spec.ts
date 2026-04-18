@@ -193,11 +193,20 @@ describe("Auth service - Register", () => {
   });
 
   test("TC-AUTH-22 Picture kosong", async () => {
-    await expect(createAccount({ ...validData, profile: { ...validData.profile, picture: "" } })).rejects.toMatchObject({
-      statusCode: BAD_REQUEST,
-      message: "Profile picture is required",
-      errorCode: AppErrorCode.InvalidPayload,
+    const res = await createAccount({
+      ...validData,
+      profile: { ...validData.profile, picture: "" },
     });
+
+    expect(res).toBeDefined();
+
+    expect(UserModel.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        profile: expect.objectContaining({
+          picture: null,
+        }),
+      })
+    );
   });
 
   test("TC-AUTH-23 URL tidak valid", async () => {

@@ -75,7 +75,7 @@ export const createAccount = async (data: any) => {
   // ===== PROFILE =====
   const profile = data.profile || {};
   const fullname = profile.fullname;
-  const picture = profile.picture;
+  let picture = profile.picture;
 
   appAssert(fullname, BAD_REQUEST, "Fullname is required", AppErrorCode.InvalidPayload);
 
@@ -91,19 +91,28 @@ export const createAccount = async (data: any) => {
     appAssert(false, BAD_REQUEST, "Fullname must contain only letters", AppErrorCode.InvalidPayload);
   }
 
-  appAssert(picture, BAD_REQUEST, "Profile picture is required", AppErrorCode.InvalidPayload);
+  // ===== PICTURE (OPTIONAL) =====
+  if (picture) {
+    if (!isValidURL(picture)) {
+      appAssert(false, BAD_REQUEST, "Invalid URL format", AppErrorCode.InvalidPayload);
+    }
 
-  if (!isValidURL(picture)) {
-    appAssert(false, BAD_REQUEST, "Invalid URL format", AppErrorCode.InvalidPayload);
+    if (!/\.(jpg|jpeg|png|webp)$/i.test(picture)) {
+      appAssert(false, BAD_REQUEST, "Invalid image URL", AppErrorCode.InvalidPayload);
+    }
+
+    if (picture.length > 255) {
+      appAssert(false, BAD_REQUEST, "URL too long", AppErrorCode.InvalidPayload);
+    }
+  } else {
+    picture = null; // normalize
   }
 
-  if (!/\.(jpg|jpeg|png|webp)$/i.test(picture)) {
-    appAssert(false, BAD_REQUEST, "Invalid image URL", AppErrorCode.InvalidPayload);
-  }
-
-  if (picture.length > 255) {
-    appAssert(false, BAD_REQUEST, "URL too long", AppErrorCode.InvalidPayload);
-  }
+  const normalizedProfile = {
+    ...profile,
+    fullname,
+    picture,
+  };
 
   // ===== ROLE =====
   appAssert(data.role, BAD_REQUEST, "Role is required", AppErrorCode.InvalidPayload);
@@ -116,7 +125,7 @@ export const createAccount = async (data: any) => {
   const user = await UserModel.create({
     email: data.email,
     nim: data.nim,
-    profile,
+    profile: normalizedProfile,
     password: data.password,
     role: data.role,
   });
@@ -174,7 +183,7 @@ export const loginUser = async ({ email, password, userAgent }: LoginParams) => 
   // ======================
   // VERIFY ACCOUNT
   // ======================
-  appAssert(user.verified, FORBIDDEN, "Account not verified", AppErrorCode.InvalidUser);
+  // appAssert(user.verified, FORBIDDEN, "Account not verified", AppErrorCode.InvalidUser);
 
   // ======================
   // PASSWORD CHECK

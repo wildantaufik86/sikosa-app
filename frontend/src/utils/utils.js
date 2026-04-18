@@ -1,6 +1,6 @@
 const putAuthUserSession = (authUser) => {
   if (authUser) {
-    sessionStorage.setItem("authUser", JSON.stringify(authUser));
+    localStorage.setItem("authUser", JSON.stringify(authUser));
     return true;
   }
 
@@ -8,20 +8,20 @@ const putAuthUserSession = (authUser) => {
 };
 
 const getAuthUserSession = () => {
-  const authUser = sessionStorage.getItem("authUser");
+  const authUser = localStorage.getItem("authUser");
   return authUser ? JSON.parse(authUser) : null;
 };
 
 const putAccessTokenSession = (accessToken) => {
   if (accessToken) {
-    sessionStorage.setItem("accessToken", accessToken);
+    localStorage.setItem("accessToken", accessToken);
     return true; // Berhasil disimpan
   }
   return false; // Gagal menyimpan
 };
 
 const getAccessToken = () => {
-  return sessionStorage.getItem("accessToken") || null;
+  return localStorage.getItem("accessToken") || null;
 };
 
 const formattedDate = (date) => {

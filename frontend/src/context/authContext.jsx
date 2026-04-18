@@ -21,6 +21,9 @@ export const AuthProvider = ({ children }) => {
     try {
       const response = await fetch(`${CONFIG.BASE_URL}/auth/logout`, {
         method: "POST",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
       });
       if (!response.ok) {
         throw new Error("Error internal server");
@@ -28,8 +31,8 @@ export const AuthProvider = ({ children }) => {
 
       setAuthUser(null);
       setAccessToken(null);
-      sessionStorage.removeItem("authUser");
-      sessionStorage.removeItem("accessToken");
+      localStorage.removeItem("authUser");
+      localStorage.removeItem("accessToken");
       window.location.href = "/login";
     } catch (error) {
       alert(error.message);

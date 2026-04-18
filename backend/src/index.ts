@@ -18,28 +18,31 @@ import { createServer } from "http";
 import { Server } from "socket.io";
 import chatRoutes from "./routes/chat.routes";
 import chatRoom from "./models/chatRoom";
+import chatbotRouter from "./routes/chatbot.routes";
 
 const allowedOrigins = [
-    // "https://wildantfq.my.id",
-    "http://localhost:5173",
-    "http://localhost:4173"
-    // "http://sikosa.my.id",
-    // "https://sikosa.my.id",
+  // "https://wildantfq.my.id",
+  "http://localhost:5173",
+  "http://localhost:4173",
+  "http://sikosa.my.id",
+  "https://sikosa.my.id",
 ];
 
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(cors({
+app.use(
+  cors({
     origin: function (origin, callback) {
-        if (!origin || allowedOrigins.includes(origin)) {
-            callback(null, true);
-        } else {
-            callback(new Error("Not allowed by CORS"));
-        }
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
     },
     credentials: true,
-}));
+  })
+);
 app.use(cookieParser());
 
 app.get("/api", ({ req, res }: any) => {
@@ -47,12 +50,15 @@ app.get("/api", ({ req, res }: any) => {
     status: "Connected!!!",
   });
 });
+
+// chatbot
+app.use("/api/chatbot", chatbotRouter);
+
 app.use("/api/chat", authenticate, chatRoutes);
 app.use("/api/admin", adminRoutes);
 
 // general API
 app.use("/api/articles", articleRoutes);
-
 
 // api konsul
 app.use("/api/consultation", consultationRoutes, userRoutes);
@@ -103,7 +109,6 @@ io.on("connection", (socket) => {
   // Handle incoming messages
   socket.on("sendMessage", async ({ roomId, senderId, message }) => {
     const timestamp = new Date();
-
 
     try {
       const chatRoomInstance = await chatRoom.findById(roomId);

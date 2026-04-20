@@ -21,8 +21,14 @@ export const registerHandler = catchErrors(async (req, res) => {
 });
 
 export const loginHandler = catchErrors(async (req, res) => {
-  const request = loginSchema.parse({
+  const sanitizedBody = {
     ...req.body,
+    email: req.body.email?.trim(),
+    password: req.body.password?.trim(),
+  };
+
+  const request = loginSchema.parse({
+    ...sanitizedBody,
     userAgent: req.headers["user-agent"],
   });
 

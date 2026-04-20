@@ -1,9 +1,12 @@
 import AppErrorCode from "../constants/appErrorCode";
 import { ChatMessage } from "../constants/chatbot.type";
+import { NODE_ENV } from "../constants/env";
 import { BAD_REQUEST } from "../constants/http";
 import appAssert from "../utils/appAssert";
 
 const GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
+
+const isTest = NODE_ENV === "test";
 
 export const sendChatToGroq = async (messages: ChatMessage[]) => {
   // ===== VALIDATION =====//
@@ -38,7 +41,9 @@ Gunakan gaya bahasa lembut, empatik, dan profesional.
 
     if (!response.ok) {
       const errText = await response.text();
-      console.error("GROQ ERROR:", errText);
+      if (!isTest) {
+        console.error("GROQ ERROR:", errText);
+      }
 
       throw new Error("Failed to fetch GROQ");
     }
@@ -50,7 +55,9 @@ Gunakan gaya bahasa lembut, empatik, dan profesional.
       content: data.choices?.[0]?.message?.content || "Maaf, tidak ada respons dari model.",
     };
   } catch (error) {
-    console.error(error);
+    if (!isTest) {
+      console.error(error);
+    }
 
     throw new Error("Chatbot service failed");
   }

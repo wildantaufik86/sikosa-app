@@ -74,7 +74,7 @@ export const createAccount = async (data: any) => {
 
   // ===== PROFILE =====
   const profile = data.profile || {};
-  const fullname = profile.fullname;
+  const fullname = profile.fullname?.trim();
   let picture = profile.picture;
 
   appAssert(fullname, BAD_REQUEST, "Fullname is required", AppErrorCode.InvalidPayload);
@@ -119,6 +119,11 @@ export const createAccount = async (data: any) => {
 
   if (!["mahasiswa", "psikolog", "admin"].includes(data.role)) {
     appAssert(false, BAD_REQUEST, "Invalid role", AppErrorCode.InvalidRole);
+  }
+
+  // setelah validasi role
+  if (data.role !== "mahasiswa") {
+    appAssert(false, FORBIDDEN, "Forbidden register role");
   }
 
   // ===== CREATE USER =====

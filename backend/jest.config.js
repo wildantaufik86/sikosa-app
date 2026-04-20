@@ -26,4 +26,5 @@ module.exports = {
   collectCoverage: true,
   coverageProvider: "v8",
   setupFiles: ["<rootDir>/tests/setup/env.ts"],
+  setupFilesAfterEnv: ["<rootDir>/tests/setup/setupTest.ts"],
 };

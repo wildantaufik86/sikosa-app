@@ -16,7 +16,7 @@ export const updateUserProfileHandler: RequestHandler = async (req, res) => {
     ? `/uploads/${req.file.filename}` // relative path untuk akses gambar
     : undefined;
 
-  if (!fullname && !picture) {
+  if (!fullname && !picture && nim === undefined) {
     return res.status(BAD_REQUEST).json({
       message: "No valid fields to update",
     });

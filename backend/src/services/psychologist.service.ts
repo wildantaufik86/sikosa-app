@@ -32,12 +32,19 @@ export const updatePsychologistProfile = async ({
   if (picture) {
     user.profile.picture = picture;
 
+    // Hapus file lama jika ada dan berbeda
     if (oldProfilePicture && oldProfilePicture !== picture) {
       try {
         const oldFilePath = path.join(__dirname, `../public${oldProfilePicture}`);
+        // Cek file existence terlebih dahulu
+        await fs.access(oldFilePath);
         await fs.unlink(oldFilePath);
-      } catch (error) {
-        console.error("Gagal menghapus file lama:", error);
+      } catch (error: any) {
+        // Hanya log jika error bukan karena file tidak ada
+        if (error.code !== "ENOENT") {
+          console.error("Gagal menghapus file lama:", error);
+        }
+        // Jika ENOENT (file not found), silent fail - tidak perlu di-log
       }
     }
   }

@@ -3,6 +3,9 @@ import UserModel from "../models/userModel";
 import appAssert from "../utils/appAssert";
 import { UNAUTHORIZED } from "../constants/http";
 import AppErrorCode from "../constants/appErrorCode";
+import { NODE_ENV } from "../constants/env";
+
+const isTest = NODE_ENV === "test";
 
 const validateRole = (requiredRole: string): RequestHandler => {
   return async (req, res, next) => {
@@ -28,7 +31,9 @@ const validateRole = (requiredRole: string): RequestHandler => {
 
       next();
     } catch (error) {
-      console.error("Error validating role:", error);
+      if (!isTest) {
+        console.error("Error validating role:", error);
+      }
       return res.status(UNAUTHORIZED).json({
         message: "Access denied: Unable to validate role",
         code: AppErrorCode.InvalidRole,

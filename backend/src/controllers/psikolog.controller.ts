@@ -2,36 +2,41 @@ import { RequestHandler } from "express";
 import { BAD_REQUEST, OK } from "../constants/http";
 import { updatePsychologistProfile } from "../services/psychologist.service";
 
-export const updatePsychologistProfileHandler: RequestHandler = async (
-  req,
-  res
-) => {
-  const userId = req.userId; // Middleware authenticate
-  const { fullname, description, specialization, educationBackground } =
-    req.body;
+export const updatePsychologistProfileHandler: RequestHandler = async (req, res) => {
+  try {
+    const userId = req.userId;
+    const { fullname, description, specialization, educationBackground } = req.body;
 
-  // Handle upload file picture
-  const picture = req.file
-    ? `/uploads/${req.file.filename}` // Relative path untuk akses gambar
-    : undefined;
+    const picture = req.file ? `/uploads/${req.file.filename}` : undefined;
 
-  if (!fullname && !picture && !description && !educationBackground) {
-    return res.status(BAD_REQUEST).json({
-      message: "No valid fields to update",
+    if (
+      fullname === undefined &&
+      picture === undefined &&
+      description === undefined &&
+      specialization === undefined &&
+      educationBackground === undefined
+    ) {
+      return res.status(400).json({
+        message: "No valid fields to update",
+      });
+    }
+
+    const profile = await updatePsychologistProfile({
+      userId,
+      fullname,
+      description,
+      specialization,
+      educationBackground,
+      picture,
+    });
+
+    res.status(200).json({
+      message: "Psychologist profile updated successfully",
+      data: profile,
+    });
+  } catch (error: any) {
+    return res.status(error.statusCode || 500).json({
+      message: error.message,
     });
   }
-
-  const profile = await updatePsychologistProfile({
-    userId,
-    fullname,
-    description,
-    specialization,
-    educationBackground,
-    picture,
-  });
-
-  res.status(OK).json({
-    message: "Psychologist profile updated successfully",
-    data: profile,
-  });
 };

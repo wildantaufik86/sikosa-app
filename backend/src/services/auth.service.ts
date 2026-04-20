@@ -9,6 +9,7 @@ import { ONE_DAY_MS, oneYearFromNow, thirtyDaysFromNow } from "../utils/date";
 import jwt from "jsonwebtoken";
 import { RefreshTokenPayload, refreshTokenSignOptions, signToken, verifyToken } from "../utils/jwt";
 import AppErrorCode from "../constants/appErrorCode";
+import { ERROR_MSG } from "../constants/errorMessage";
 
 export type CreateAccountParams = {
   email: string;
@@ -123,7 +124,7 @@ export const createAccount = async (data: any) => {
 
   // setelah validasi role
   if (data.role !== "mahasiswa") {
-    appAssert(false, FORBIDDEN, "Forbidden register role");
+    appAssert(false, FORBIDDEN, ERROR_MSG.REGISTER_ROLE_FORBIDDEN);
   }
 
   // ===== CREATE USER =====

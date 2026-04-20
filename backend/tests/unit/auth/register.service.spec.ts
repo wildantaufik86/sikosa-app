@@ -1,5 +1,6 @@
 import AppErrorCode from "../../../src/constants/appErrorCode";
-import { BAD_REQUEST, CONFLICT } from "../../../src/constants/http";
+import { ERROR_MSG } from "../../../src/constants/errorMessage";
+import { BAD_REQUEST, CONFLICT, FORBIDDEN } from "../../../src/constants/http";
 import SessionModel from "../../../src/models/sessionModel";
 import UserModel from "../../../src/models/userModel";
 import VerificationCodeModel from "../../../src/models/verificationCodeModel";
@@ -246,13 +247,17 @@ describe("Auth service - Register", () => {
   });
 
   test("TC-AUTH-27 Role psikolog", async () => {
-    const res = await createAccount({ ...validData, role: "psikolog" });
-    expect(res).toBeDefined();
+    await expect(createAccount({ ...validData, role: "psikolog" })).rejects.toMatchObject({
+      statusCode: FORBIDDEN,
+      message: ERROR_MSG.REGISTER_ROLE_FORBIDDEN,
+    });
   });
 
   test("TC-AUTH-28 Role admin", async () => {
-    const res = await createAccount({ ...validData, role: "admin" });
-    expect(res).toBeDefined();
+    await expect(createAccount({ ...validData, role: "admin" })).rejects.toMatchObject({
+      statusCode: FORBIDDEN,
+      message: ERROR_MSG.REGISTER_ROLE_FORBIDDEN,
+    });
   });
 
   test("TC-AUTH-29 Role tidak valid", async () => {

@@ -17,6 +17,7 @@ export const ERROR_MSG = {
   INVALID_ID: "Invalid consultation ID",
   INVALID_USER: "Invalid user",
   USER_NOT_FOUND: "User not found",
+  REGISTER_ROLE_FORBIDDEN: "Forbidden register role",
 
   MESSAGE_REQUIRED: "Message is required",
   EMPTY_MESSAGE: "Message is required", // alias untuk backward compatibility

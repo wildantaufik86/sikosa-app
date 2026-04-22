@@ -20,7 +20,7 @@ beforeAll(async () => {
 
   // create mahasiswa
   const mahasiswa = await UserModel.create({
-    email: "mhs@test.com",
+    email: `mahasiswa_${Date.now()}@test.com`,
     password: "password",
     role: "mahasiswa",
     verified: true,
@@ -39,7 +39,7 @@ beforeAll(async () => {
 
   // create psikolog
   const psikolog = await UserModel.create({
-    email: "psikolog@test.com",
+    email: `psikolog_cons_${Date.now()}@test.com`,
     password: "password",
     role: "psikolog",
     verified: true,

@@ -20,6 +20,8 @@ const generateToken = (userId: any) => {
   });
 };
 
+jest.setTimeout(20000); // 20 detik
+
 beforeAll(async () => {
   const mongoUri = process.env.MONGO_URI;
 

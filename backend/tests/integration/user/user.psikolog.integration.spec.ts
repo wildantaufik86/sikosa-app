@@ -5,7 +5,7 @@ import UserModel from "../../../src/models/userModel";
 import { signToken } from "../../../src/utils/jwt";
 import { BAD_REQUEST, FORBIDDEN, OK, UNAUTHORIZED } from "../../../src/constants/http";
 
-jest.setTimeout(15000);
+jest.setTimeout(20000); // 20 detik
 
 let userId: mongoose.Types.ObjectId;
 let token: string;

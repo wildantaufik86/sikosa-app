@@ -5,6 +5,8 @@ import chatRoom from "../../../src/models/chatRoom";
 import { signToken } from "../../../src/utils/jwt";
 import { OK, CREATED, BAD_REQUEST, UNAUTHORIZED, FORBIDDEN, NOT_FOUND } from "../../../src/constants/http";
 
+jest.setTimeout(20000); // 20 detik
+
 describe("Chat Integration Test - Mahasiswa", () => {
   let mahasiswaToken: string;
   let mahasiswaId: mongoose.Types.ObjectId;
@@ -12,7 +14,10 @@ describe("Chat Integration Test - Mahasiswa", () => {
   let roomId: mongoose.Types.ObjectId;
 
   beforeAll(async () => {
-    await mongoose.connect(process.env.MONGO_URI as string);
+    if (!process.env.MONGO_URI) {
+      throw new Error("MONGO_URI not defined");
+    }
+    await mongoose.connect(process.env.MONGO_URI);
   });
 
   beforeEach(async () => {

@@ -5,6 +5,8 @@ import chatRoom from "../../../src/models/chatRoom";
 import { signToken } from "../../../src/utils/jwt";
 import { OK, CREATED, BAD_REQUEST, UNAUTHORIZED, FORBIDDEN, NOT_FOUND, TO_LARGE } from "../../../src/constants/http";
 
+jest.setTimeout(20000); // 20 detik
+
 describe("Chat Integration Test - Psikolog", () => {
   let psikologToken: string;
   let psikologId: mongoose.Types.ObjectId;

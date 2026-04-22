@@ -1,29 +1,43 @@
 import { RequestHandler } from "express";
+import mongoose from "mongoose";
 import UserModel from "../models/userModel";
-import { BAD_REQUEST } from "../constants/http";
+import { BAD_REQUEST, NOT_FOUND } from "../constants/http";
 import AppErrorCode from "../constants/appErrorCode";
 
 const validatePsychologistId: RequestHandler = async (req, res, next) => {
-  const { psychologistId } = req.body;
+  try {
+    const { psychologistId } = req.body;
 
-  // Pastikan psychologistId ada
-  if (!psychologistId) {
-    return res.status(BAD_REQUEST).json({
-      message: "Psychologist ID is required",
-      code: AppErrorCode.InvalidPayload,
-    });
+    // 1. required
+    if (!psychologistId) {
+      return res.status(BAD_REQUEST).json({
+        message: "Psychologist ID is required",
+        code: AppErrorCode.InvalidPayload,
+      });
+    }
+
+    // 2. format validation (🔥 FIX UTAMA)
+    if (!mongoose.Types.ObjectId.isValid(psychologistId)) {
+      return res.status(BAD_REQUEST).json({
+        message: "Invalid psychologistId format",
+        code: AppErrorCode.InvalidPayload,
+      });
+    }
+
+    // 3. existence + role
+    const user = await UserModel.findById(psychologistId);
+
+    if (!user || user.role !== "psikolog") {
+      return res.status(NOT_FOUND).json({
+        message: "Psychologist not found",
+        code: AppErrorCode.InvalidRole,
+      });
+    }
+
+    next();
+  } catch (error) {
+    next(error); // 🔥 penting biar tidak timeout
   }
-
-  // Validasi apakah psychologistId adalah psikolog
-  const user = await UserModel.findById(psychologistId);
-  if (!user || user.role !== "psikolog") {
-    return res.status(BAD_REQUEST).json({
-      message: "The selected user is not a psychologist",
-      code: AppErrorCode.InvalidRole,
-    });
-  }
-
-  next();
 };
 
 export default validatePsychologistId;

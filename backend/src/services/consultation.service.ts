@@ -184,34 +184,56 @@ export const applyConsultation = async ({ userId, psychologistId, message, role 
 };
 
 export const updateConsultation = async ({ psychologistId, consultationId, status }: UpdateConsultationParams) => {
+  // VALIDATION
   appAssert(psychologistId, UNAUTHORIZED, "Unauthorized access");
 
   appAssert(["accepted", "rejected"].includes(status), BAD_REQUEST, "Invalid status");
 
   appAssert(mongoose.Types.ObjectId.isValid(consultationId), BAD_REQUEST, "Invalid consultationId");
 
-  const consultation = await ConsultationModel.findById(consultationId);
-
-  appAssert(consultation, NOT_FOUND, "Consultation not found");
-
-  // 🔥 FIX: harus 403, bukan 401
-  appAssert(consultation.psychologistId.toString() === psychologistId, FORBIDDEN, "Access denied");
-
-  // 🔥 FIX: validasi status pending
-  appAssert(consultation.status === "pending", BAD_REQUEST, "Invalid consultation status");
-
-  consultation.status = status;
-  await consultation.save();
-
-  if (status === "accepted") {
-    const room = await chatRoom.findOne({
-      consultationId: consultation._id,
-    });
-
-    if (room && room.status === "inactive") {
-      room.status = "active";
-      await room.save();
+  // 🔥 ATOMIC UPDATE (CORE FIX)
+  const consultation = await ConsultationModel.findOneAndUpdate(
+    {
+      _id: consultationId,
+      psychologistId, // pastikan owner
+      status: "pending", // hanya bisa update dari pending
+    },
+    {
+      status,
+    },
+    {
+      new: true,
     }
+  );
+
+  // 🔥 HANDLE RESULT
+  if (!consultation) {
+    // perlu bedakan error biar tetap meaningful
+    const exists = await ConsultationModel.findById(consultationId);
+
+    if (!exists) {
+      throw new AppError(NOT_FOUND, "Consultation not found");
+    }
+
+    if (exists.psychologistId.toString() !== psychologistId) {
+      throw new AppError(FORBIDDEN, "Access denied");
+    }
+
+    // berarti status sudah bukan pending (race condition kena sini)
+    throw new AppError(BAD_REQUEST, "Invalid consultation status");
+  }
+
+  // 🔥 UPDATE CHAT ROOM (ATOMIC)
+  if (status === "accepted") {
+    await chatRoom.findOneAndUpdate(
+      {
+        consultationId: consultation._id,
+        status: "inactive",
+      },
+      {
+        status: "active",
+      }
+    );
   }
 
   return consultation;

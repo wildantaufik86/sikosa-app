@@ -1,7 +1,7 @@
 import { RequestHandler } from "express";
 import UserModel from "../models/userModel";
 import appAssert from "../utils/appAssert";
-import { UNAUTHORIZED } from "../constants/http";
+import { FORBIDDEN, UNAUTHORIZED } from "../constants/http";
 import AppErrorCode from "../constants/appErrorCode";
 import { NODE_ENV } from "../constants/env";
 
@@ -10,32 +10,21 @@ const isTest = NODE_ENV === "test";
 const validateRole = (requiredRole: string): RequestHandler => {
   return async (req, res, next) => {
     try {
-      // console.log("Validating role for userId:", req.userId);
-
-      // Ambil user berdasarkan req.userId
       const user = await UserModel.findById(req.userId);
 
-      appAssert(
-        user, // Pastikan user ditemukan
-        UNAUTHORIZED,
-        "Access denied: User not found",
-        AppErrorCode.InvalidRole
-      );
+      appAssert(user, UNAUTHORIZED, "Access denied: User not found", AppErrorCode.InvalidRole);
 
       appAssert(
-        user.role === requiredRole, // Validasi role
-        UNAUTHORIZED,
+        user.role === requiredRole,
+        FORBIDDEN,
         `Access denied: User role is '${user.role}', required role is '${requiredRole}'`,
         AppErrorCode.InvalidRole
       );
 
       next();
     } catch (error) {
-      if (!isTest) {
-        console.error("Error validating role:", error);
-      }
-      return res.status(UNAUTHORIZED).json({
-        message: "Access denied: Unable to validate role",
+      return res.status(FORBIDDEN).json({
+        message: "Access denied",
         code: AppErrorCode.InvalidRole,
       });
     }

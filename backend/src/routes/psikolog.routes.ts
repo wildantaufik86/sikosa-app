@@ -5,6 +5,7 @@ import validateRole from "../middleware/validateRole";
 import upload from "../middleware/upload";
 import { updatePsychologistProfileHandler } from "../controllers/psikolog.controller";
 import { createArticle, deleteOwnArticle, updateOwnArticle } from "../controllers/article.controller";
+import { asyncHandler } from "../utils/asyncHandler";
 
 const multer = require("multer");
 const psikologRoutes = Router();
@@ -12,7 +13,7 @@ const psikologRoutes = Router();
 psikologRoutes.get("/notifications", authenticate, validateRole("psikolog"), getNotificationsForPsychologist);
 
 // accept pengajuan konsultasi
-psikologRoutes.put("/:id/status", authenticate, validateRole("psikolog"), updateConsultationStatus);
+psikologRoutes.put("/:id/status", authenticate, validateRole("psikolog"), asyncHandler(updateConsultationStatus));
 
 // edit profile
 psikologRoutes.put(

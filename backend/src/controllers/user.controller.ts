@@ -1,11 +1,13 @@
 import { RequestHandler, Request, Response } from "express";
-import { BAD_REQUEST, INTERNAL_SERVER_ERROR, NOT_FOUND, OK } from "../constants/http";
+import { BAD_REQUEST, INTERNAL_SERVER_ERROR, NOT_FOUND, OK, UNAUTHORIZED } from "../constants/http";
 import {
   getAllPsychologistProfiles,
   getPsychologistProfile,
   getUserConsultationHistory,
   updateUserProfile,
 } from "../services/user.service";
+import appAssert from "../utils/appAssert";
+import { getConsultationDetail } from "../services/consultation.service";
 
 export const updateUserProfileHandler: RequestHandler = async (req, res) => {
   const userId = req.userId;
@@ -107,16 +109,24 @@ export const getConsultationsForUser: RequestHandler = async (req, res) => {
 };
 
 // GET /user/consultation/history/:id
-export const getUserConsultationDetail = async ({ req, res }: any) => {
+export const getUserConsultationDetail: RequestHandler = async (req, res, next) => {
   try {
     const { id } = req.params;
+    const userId = req.userId?.toString();
+
+    // auth validation
+    appAssert(userId, UNAUTHORIZED, "Unauthorized access");
+
+    const consultation = await getConsultationDetail({
+      userId,
+      consultationId: id,
+    });
+
     return res.status(OK).json({
       message: "Detail konsultasi",
-      data: {
-        /* Tambahkan data */
-      },
+      data: consultation,
     });
   } catch (error) {
-    return res.status(INTERNAL_SERVER_ERROR).json({ message: "Error fetching consultation detail" });
+    next(error); // 🔥 WAJIB biar tidak 500 & tidak timeout
   }
 };

@@ -14,6 +14,7 @@ import { applyConsultationHandler } from "../controllers/consultation.controller
 
 const multer = require("multer");
 import upload from "../middleware/upload";
+import { asyncHandler } from "../utils/asyncHandler";
 
 const userRoutes = Router();
 
@@ -29,7 +30,13 @@ userRoutes.get("/consultation/history", authenticate, validateRole("mahasiswa"),
 userRoutes.get("/consultation/history/:id", authenticate, validateRole("mahasiswa"), getUserConsultationDetail);
 
 // Apply Consultation
-userRoutes.post("/apply", authenticate, validateRole("mahasiswa"), validatePsychologistId, applyConsultationHandler);
+userRoutes.post(
+  "/apply",
+  authenticate,
+  validateRole("mahasiswa"),
+  validatePsychologistId,
+  asyncHandler(applyConsultationHandler)
+);
 
 // Update profile
 userRoutes.put("/profile", authenticate, upload.single("picture"), validateRole("mahasiswa"), updateUserProfileHandler);

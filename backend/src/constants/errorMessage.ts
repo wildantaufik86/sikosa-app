@@ -32,4 +32,7 @@ export const ERROR_MSG = {
   // JWT TOKEN
   INVALID_TOKEN: "Invalid Token",
   TOKEN_EXPIRED: "Token Expired",
+
+  // article
+  ARTICLE_NOT_FOUND: "Article not found",
 };

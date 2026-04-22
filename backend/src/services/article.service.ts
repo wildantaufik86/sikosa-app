@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose, { Types } from "mongoose";
 import ArticleModel from "../models/articleModel";
 import appAssert from "../utils/appAssert";
 import { BAD_REQUEST, NOT_FOUND, UNAUTHORIZED, CONFLICT } from "../constants/http";

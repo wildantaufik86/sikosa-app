@@ -59,7 +59,7 @@ afterAll(async () => {
   await mongoose.connection.close();
 });
 
-describe.skip("ADMIN ARTICLE - CREATE", () => {
+describe("ADMIN ARTICLE - CREATE", () => {
   test("[TC-INT-ADM-05] : create artikel tanpa token - should return 401", async () => {
     const res = await request(app).post("/api/admin/articles").send({ title: "A", content: "B" });
 

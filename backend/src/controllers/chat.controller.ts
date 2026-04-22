@@ -1,11 +1,9 @@
 import { RequestHandler, Request, Response } from "express";
-import { BAD_REQUEST, CREATED, INTERNAL_SERVER_ERROR, NOT_FOUND, OK } from "../constants/http";
-import {
-  buildOutgoingMessage,
-  finishChatRoom,
-  getChatRoomMessages,
-  getChatRoomsForUser,
-} from "../services/chat.service";
+import { BAD_REQUEST, CREATED, FORBIDDEN, INTERNAL_SERVER_ERROR, NOT_FOUND, OK } from "../constants/http";
+import { buildOutgoingMessage, finishChatRoom, getChatRoomMessages, getChatRoomsForUser } from "../services/chat.service";
+import { NODE_ENV } from "../constants/env";
+
+const isTest = NODE_ENV === "test";
 
 // Ambil semua room chat user
 export const getUserChatRooms: RequestHandler = async (req, res) => {
@@ -25,6 +23,7 @@ export const getUserChatRooms: RequestHandler = async (req, res) => {
 export const getRoomMessages: RequestHandler = async (req, res) => {
   try {
     const { roomId } = req.params;
+    const userId = req.userId;
 
     const room = await getChatRoomMessages(roomId);
 
@@ -32,7 +31,13 @@ export const getRoomMessages: RequestHandler = async (req, res) => {
       return res.status(NOT_FOUND).json({ error: "Chat room not found" });
     }
 
-    res.json(room.messages); // Kirim pesan ke client
+    const isParticipant = room.participants.some((p: any) => p.toString() === userId?.toString());
+
+    if (!isParticipant) {
+      return res.status(FORBIDDEN).json({ error: "Access denied" });
+    }
+
+    res.json(room.messages);
   } catch (err) {
     console.error(err);
     res.status(INTERNAL_SERVER_ERROR).json({ error: "Failed to fetch messages" });
@@ -40,27 +45,70 @@ export const getRoomMessages: RequestHandler = async (req, res) => {
 };
 
 export const sendMessage = async (req: Request, res: Response) => {
+  const MAX_MESSAGE_LENGTH = 1000;
+  const INVALID_MESSAGE_REGEX = /<script\b|[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/i;
+
   try {
     const { roomId, senderId, message } = req.body;
 
+    // =========================
+    // 1. REQUIRED FIELD VALIDATION
+    // =========================
     if (!roomId || !senderId || !message) {
-      return res.status(BAD_REQUEST).json({ error: "Missing required fields" });
+      return res.status(BAD_REQUEST).json({
+        error: "Missing required fields",
+      });
     }
 
+    // =========================
+    // 2. EMPTY MESSAGE VALIDATION
+    // =========================
+    if (message.trim() === "") {
+      return res.status(BAD_REQUEST).json({
+        error: "Message cannot be empty",
+      });
+    }
+
+    // =========================
+    // 3. LENGTH VALIDATION (TC-015)
+    // =========================
+    if (message.length > MAX_MESSAGE_LENGTH) {
+      return res.status(413).json({
+        error: "Message too long",
+      });
+    }
+
+    // =========================
+    // 4. SCRIPT / INVALID CHAR VALIDATION (TC-016)
+    // =========================
+    if (INVALID_MESSAGE_REGEX.test(message)) {
+      return res.status(BAD_REQUEST).json({
+        error: "Invalid message content",
+      });
+    }
+
+    // =========================
+    // 5. BUILD MESSAGE
+    // =========================
     const newMessage = buildOutgoingMessage({
       roomId,
       senderId,
       message,
     });
 
-    // Assuming Message.create is your database logic
-    // Replace this with your actual implementation
-    console.log("New Message:", newMessage); // Debugging
+    // =========================
+    // 6. DEBUG ONLY
+    // =========================
+    if (!isTest) {
+      console.log("New Message:", newMessage);
+    }
 
-    res.status(CREATED).json(newMessage);
+    return res.status(CREATED).json(newMessage);
   } catch (error) {
     console.error("Error creating message:", error);
-    res.status(INTERNAL_SERVER_ERROR).json({ error: "Internal Server Error" });
+    return res.status(INTERNAL_SERVER_ERROR).json({
+      error: "Internal Server Error",
+    });
   }
 };
 

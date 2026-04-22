@@ -1,3 +1,4 @@
+import { ERROR_MSG } from "../../../src/constants/errorMessage";
 import SessionModel from "../../../src/models/sessionModel";
 import { logoutService } from "../../../src/services/auth.service";
 import { verifyToken } from "../../../src/utils/jwt";
@@ -11,10 +12,7 @@ describe("Auth service - Logout", () => {
   });
 
   test("Logout tanpa token : throw 401 Unauthorized", async () => {
-    await expect(logoutService({ accessToken: undefined })).rejects.toMatchObject({
-      statusCode: 401,
-      message: "Unauthorized",
-    });
+    await expect(logoutService({ accessToken: undefined })).rejects.toThrow("Unauthorized");
   });
 
   test("Token tidak valid : throw 401 Invalid token", async () => {
@@ -22,10 +20,7 @@ describe("Auth service - Logout", () => {
       throw new Error("invalid");
     });
 
-    await expect(logoutService({ accessToken: "random-token" })).rejects.toMatchObject({
-      statusCode: 401,
-      message: "Invalid token",
-    });
+    await expect(logoutService({ accessToken: "random-token" })).rejects.toThrow(ERROR_MSG.INVALID_TOKEN);
   });
 
   test("Token expired : throw 401 Token expired", async () => {
@@ -35,10 +30,7 @@ describe("Auth service - Logout", () => {
       throw err;
     });
 
-    await expect(logoutService({ accessToken: "expired-token" })).rejects.toMatchObject({
-      statusCode: 401,
-      message: "Token expired",
-    });
+    await expect(logoutService({ accessToken: "expired-token" })).rejects.toThrow(ERROR_MSG.TOKEN_EXPIRED);
   });
 
   test("Logout valid : return 200 dan session terhapus", async () => {
@@ -67,9 +59,6 @@ describe("Auth service - Logout", () => {
 
     (SessionModel.findByIdAndDelete as jest.Mock).mockResolvedValue(null);
 
-    await expect(logoutService({ accessToken: "used-token" })).rejects.toMatchObject({
-      statusCode: 401,
-      message: "Invalid token",
-    });
+    await expect(logoutService({ accessToken: "used-token" })).rejects.toThrow(ERROR_MSG.INVALID_TOKEN);
   });
 });

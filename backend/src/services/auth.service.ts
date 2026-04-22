@@ -271,24 +271,24 @@ export const logoutService = async ({ accessToken }: LogoutParams) => {
   let payload: any;
 
   try {
-    const result = verifyToken(accessToken);
+    const result = verifyToken(accessToken, { throwOnError: true });
     payload = result.payload;
   } catch (error: any) {
     // TC-LOGOUT-03: expired
     if (error.name === "TokenExpiredError") {
-      appAssert(false, UNAUTHORIZED, "Token expired");
+      appAssert(false, UNAUTHORIZED, ERROR_MSG.TOKEN_EXPIRED);
+    } else {
+      appAssert(false, UNAUTHORIZED, ERROR_MSG.INVALID_TOKEN);
     }
-    // TC-LOGOUT-02: invalid
-    appAssert(false, UNAUTHORIZED, "Invalid token");
   }
   // TC-LOGOUT-02 (fallback kalau payload null)
-  appAssert(payload, UNAUTHORIZED, "Invalid token");
+  appAssert(payload, UNAUTHORIZED, ERROR_MSG.INVALID_TOKEN);
 
   // hapus session (TC-LOGOUT-04 & 05)
   const deleted = await SessionModel.findByIdAndDelete(payload.sessionId);
 
   // TC-LOGOUT-05: token sudah tidak valid (session tidak ada)
-  appAssert(deleted, UNAUTHORIZED, "Invalid token");
+  appAssert(deleted, UNAUTHORIZED, ERROR_MSG.INVALID_TOKEN);
   return {
     statusCode: OK,
     message: "Logout successful",

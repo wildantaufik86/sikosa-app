@@ -28,4 +28,8 @@ export const ERROR_MSG = {
   INTERNAL_SERVER_ERROR: "Internal server error",
   FAILED_SEND_MESSAGE: "Failed to send message",
   FAILED_FETCH_MESSAGES: "Failed to fetch messages",
+
+  // JWT TOKEN
+  INVALID_TOKEN: "Invalid Token",
+  TOKEN_EXPIRED: "Token Expired",
 };

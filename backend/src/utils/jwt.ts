@@ -30,10 +30,7 @@ export const refreshTokenSignOptions: SignOptionsAndSecret = {
   secret: JWT_REFRESH_SECRET,
 };
 
-export const signToken = (
-  payload: AccessTokenPayload | RefreshTokenPayload,
-  option?: SignOptionsAndSecret
-) => {
+export const signToken = (payload: AccessTokenPayload | RefreshTokenPayload, option?: SignOptionsAndSecret) => {
   const { secret, ...signOpts } = option || accessTokenSignOptions;
   return jwt.sign(payload, secret, {
     ...defaults,
@@ -45,18 +42,23 @@ export const verifyToken = <TPayload extends object = AccessTokenPayload>(
   token: string,
   options?: VerifyOptions & {
     secret?: string;
+    throwOnError?: boolean;
   }
 ) => {
-  const { secret = JWT_SECRET, ...verifyOpts } = options || {};
+  const { secret = JWT_SECRET, throwOnError = false, ...verifyOpts } = options || {};
+
   try {
     const payload = jwt.verify(token, secret, {
       ...defaults,
       ...verifyOpts,
     }) as TPayload;
-    return {
-      payload,
-    };
+
+    return { payload };
   } catch (error: any) {
+    if (throwOnError) {
+      throw error; // 🔥 penting
+    }
+
     return {
       error: error.message,
     };

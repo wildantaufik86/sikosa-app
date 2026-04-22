@@ -4,7 +4,7 @@ import app from "../../../src/app";
 import UserModel from "../../../src/models/userModel";
 import { ConsultationModel } from "../../../src/models/consultationModel";
 import { signToken } from "../../../src/utils/jwt";
-import { BAD_REQUEST, NOT_FOUND, OK, UNAUTHORIZED } from "../../../src/constants/http";
+import { BAD_REQUEST, FORBIDDEN, NOT_FOUND, OK, UNAUTHORIZED } from "../../../src/constants/http";
 
 jest.setTimeout(15000);
 
@@ -207,20 +207,20 @@ describe("User Profile Integration Test", () => {
       expect(user?.profile.fullname).toBe("First");
     });
 
-    test("[TC-INT-UP-016] : role psikolog - UNAUTHORIZED", async () => {
+    test("[TC-INT-UP-016] : role psikolog - FORBIDDEN", async () => {
       const { token } = await createUserWithRole("psikolog");
 
       const res = await request(app).put("/api/user/profile").set("Authorization", `Bearer ${token}`).send({ fullname: "Test" });
 
-      expect(res.status).toBe(UNAUTHORIZED);
+      expect(res.status).toBe(FORBIDDEN);
     });
 
-    test("[TC-INT-UP-017] : role admin - UNAUTHORIZED", async () => {
+    test("[TC-INT-UP-017] : role admin - FORBIDDEN", async () => {
       const { token } = await createUserWithRole("admin");
 
       const res = await request(app).put("/api/user/profile").set("Authorization", `Bearer ${token}`).send({ fullname: "Test" });
 
-      expect(res.status).toBe(UNAUTHORIZED);
+      expect(res.status).toBe(FORBIDDEN);
     });
 
     test("[TC-INT-UP-018] : user not found (RBAC layer) - UNAUTHORIZED", async () => {

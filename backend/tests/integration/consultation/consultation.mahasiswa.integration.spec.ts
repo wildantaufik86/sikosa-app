@@ -81,13 +81,13 @@ describe("Consultation Integration - Mahasiswa", () => {
       expect(rooms.length).toBe(0);
     });
 
-    test("TC-INT-CONS-MHS-002 : role bukan mahasiswa - should 401", async () => {
+    test("TC-INT-CONS-MHS-002 : role bukan mahasiswa - should 403", async () => {
       const res = await request(app).post("/api/consultation/apply").set("Authorization", `Bearer ${psikologToken}`).send({
         psychologistId: psikologId,
         message: "Halo",
       });
 
-      expect(res.status).toBe(UNAUTHORIZED);
+      expect(res.status).toBe(FORBIDDEN);
 
       expect(await ConsultationModel.countDocuments()).toBe(0);
     });

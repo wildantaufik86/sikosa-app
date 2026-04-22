@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 import app from "../../../src/app";
 import UserModel from "../../../src/models/userModel";
 import { signToken } from "../../../src/utils/jwt";
-import { BAD_REQUEST, OK, UNAUTHORIZED } from "../../../src/constants/http";
+import { BAD_REQUEST, FORBIDDEN, OK, UNAUTHORIZED } from "../../../src/constants/http";
 
 jest.setTimeout(15000);
 
@@ -110,7 +110,7 @@ describe("Psychologist Profile Integration Test", () => {
       expect(after?.profile).toEqual(before?.profile);
     });
 
-    test("[TC-INT-PSI-UP-003] : role mahasiswa - UNAUTHORIZED", async () => {
+    test("[TC-INT-PSI-UP-003] : role mahasiswa - FORBIDDEN", async () => {
       const { token } = await createUserWithRole("mahasiswa");
 
       const before = await UserModel.findById(userId);
@@ -120,13 +120,13 @@ describe("Psychologist Profile Integration Test", () => {
         .set("Authorization", `Bearer ${token}`)
         .send({ fullname: "Test" });
 
-      expect(res.status).toBe(UNAUTHORIZED);
+      expect(res.status).toBe(FORBIDDEN);
 
       const after = await UserModel.findById(userId);
       expect(after?.profile).toEqual(before?.profile);
     });
 
-    test("[TC-INT-PSI-UP-004] : role admin - UNAUTHORIZED", async () => {
+    test("[TC-INT-PSI-UP-004] : role admin - FORBIDDEN", async () => {
       const { token } = await createUserWithRole("admin");
 
       const before = await UserModel.findById(userId);
@@ -136,7 +136,7 @@ describe("Psychologist Profile Integration Test", () => {
         .set("Authorization", `Bearer ${token}`)
         .send({ fullname: "Test" });
 
-      expect(res.status).toBe(UNAUTHORIZED);
+      expect(res.status).toBe(FORBIDDEN);
 
       const after = await UserModel.findById(userId);
       expect(after?.profile).toEqual(before?.profile);

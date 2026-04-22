@@ -3,17 +3,17 @@ import UserModel from "../models/userModel";
 import appAssert from "../utils/appAssert";
 import { FORBIDDEN, UNAUTHORIZED } from "../constants/http";
 import AppErrorCode from "../constants/appErrorCode";
-import { NODE_ENV } from "../constants/env";
-
-const isTest = NODE_ENV === "test";
+import AppError from "../utils/appError";
 
 const validateRole = (requiredRole: string): RequestHandler => {
   return async (req, res, next) => {
     try {
       const user = await UserModel.findById(req.userId);
 
+      // ✅ user tidak ditemukan → 401
       appAssert(user, UNAUTHORIZED, "Access denied: User not found", AppErrorCode.InvalidRole);
 
+      // ✅ role salah → 403
       appAssert(
         user.role === requiredRole,
         FORBIDDEN,
@@ -23,7 +23,13 @@ const validateRole = (requiredRole: string): RequestHandler => {
 
       next();
     } catch (error) {
-      return res.status(FORBIDDEN).json({
+      // ✅ kalau AppError → teruskan ke global error handler
+      if (error instanceof AppError) {
+        return next(error);
+      }
+
+      // fallback (unexpected error)
+      return res.status(UNAUTHORIZED).json({
         message: "Access denied",
         code: AppErrorCode.InvalidRole,
       });

@@ -234,41 +234,59 @@ describe("CONSULTATION PSIKOLOG SERVICE TEST", () => {
   });
 
   test("CONS-PSI-16 accept consultation - should update status", async () => {
-    const save = jest.fn();
+    const consultationId = id();
 
-    (ConsultationModel.findById as jest.Mock).mockResolvedValue({
+    (ConsultationModel.findOneAndUpdate as jest.Mock).mockResolvedValue({
+      _id: consultationId,
       psychologistId: mockPsychologistId,
-      status: "pending",
-      save,
-    });
-
-    const res = await updateConsultation({
-      psychologistId: mockPsychologistId,
-      consultationId: id(),
       status: "accepted",
     });
 
+    const res = await updateConsultation({
+      psychologistId: mockPsychologistId,
+      consultationId,
+      status: "accepted",
+    });
+
+    expect(ConsultationModel.findOneAndUpdate).toHaveBeenCalledWith(
+      {
+        _id: consultationId,
+        psychologistId: mockPsychologistId,
+        status: "pending",
+      },
+      { status: "accepted" },
+      { new: true }
+    );
+
     expect(res.status).toBe("accepted");
-    expect(save).toHaveBeenCalled();
   });
 
   test("CONS-PSI-17 reject consultation - should update status", async () => {
-    const save = jest.fn();
+    const consultationId = id();
 
-    (ConsultationModel.findById as jest.Mock).mockResolvedValue({
+    (ConsultationModel.findOneAndUpdate as jest.Mock).mockResolvedValue({
+      _id: consultationId,
       psychologistId: mockPsychologistId,
-      status: "pending",
-      save,
+      status: "rejected",
     });
 
     const res = await updateConsultation({
       psychologistId: mockPsychologistId,
-      consultationId: id(),
+      consultationId,
       status: "rejected",
     });
 
+    expect(ConsultationModel.findOneAndUpdate).toHaveBeenCalledWith(
+      {
+        _id: consultationId,
+        psychologistId: mockPsychologistId,
+        status: "pending",
+      },
+      { status: "rejected" },
+      { new: true }
+    );
+
     expect(res.status).toBe("rejected");
-    expect(save).toHaveBeenCalled();
   });
 
   test("CONS-PSI-18 send message accepted - should return 200", async () => {

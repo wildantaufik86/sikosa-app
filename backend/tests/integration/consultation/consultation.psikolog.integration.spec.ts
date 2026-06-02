@@ -1,6 +1,4 @@
-import request from "supertest";
 import mongoose from "mongoose";
-import app from "../../../src/app";
 
 import UserModel from "../../../src/models/userModel";
 import { ConsultationModel } from "../../../src/models/consultationModel";
@@ -9,12 +7,16 @@ import chatRoom from "../../../src/models/chatRoom";
 import { signToken } from "../../../src/utils/jwt";
 import { OK, BAD_REQUEST, UNAUTHORIZED, FORBIDDEN, NOT_FOUND } from "../../../src/constants/http";
 
+import { apiTest } from "../../setup/apiTest";
+
 jest.setTimeout(20000);
 
 let psikologId: mongoose.Types.ObjectId;
 let mahasiswaId: mongoose.Types.ObjectId;
 let psikologToken: string;
 let mahasiswaToken: string;
+
+const authHeader = (token: string) => ({ Authorization: `Bearer ${token}` });
 
 describe("Consultation Integration - Psikolog", () => {
   beforeAll(async () => {
@@ -64,19 +66,36 @@ describe("Consultation Integration - Psikolog", () => {
   // ======================
   describe("Get Notifications", () => {
     test("TC-INT-CONS-PSI-001 : tanpa token - should 401 Unauthorized", async () => {
-      const res = await request(app).get("/api/psikolog/notifications");
+      const res = await apiTest({
+        id: "TC-INT-CONS-PSI-001",
+        method: "GET",
+        url: "/api/psikolog/notifications",
+        expectedStatus: UNAUTHORIZED,
+      });
 
       expect(res.status).toBe(UNAUTHORIZED);
     });
 
     test("TC-INT-CONS-PSI-002 : role bukan psikolog - should 403 Forbidden", async () => {
-      const res = await request(app).get("/api/psikolog/notifications").set("Authorization", `Bearer ${mahasiswaToken}`);
+      const res = await apiTest({
+        id: "TC-INT-CONS-PSI-002",
+        method: "GET",
+        url: "/api/psikolog/notifications",
+        headers: authHeader(mahasiswaToken),
+        expectedStatus: FORBIDDEN,
+      });
 
       expect(res.status).toBe(FORBIDDEN);
     });
 
     test("TC-INT-CONS-PSI-003 : tidak ada consultation - should return []", async () => {
-      const res = await request(app).get("/api/psikolog/notifications").set("Authorization", `Bearer ${psikologToken}`);
+      const res = await apiTest({
+        id: "TC-INT-CONS-PSI-003",
+        method: "GET",
+        url: "/api/psikolog/notifications",
+        headers: authHeader(psikologToken),
+        expectedStatus: OK,
+      });
 
       expect(res.status).toBe(OK);
       expect(res.body.data).toEqual([]);
@@ -89,7 +108,13 @@ describe("Consultation Integration - Psikolog", () => {
         { userId: mahasiswaId, psychologistId: psikologId, status: "rejected" },
       ]);
 
-      const res = await request(app).get("/api/psikolog/notifications").set("Authorization", `Bearer ${psikologToken}`);
+      const res = await apiTest({
+        id: "TC-INT-CONS-PSI-004",
+        method: "GET",
+        url: "/api/psikolog/notifications",
+        headers: authHeader(psikologToken),
+        expectedStatus: OK,
+      });
 
       expect(res.status).toBe(OK);
       expect(res.body.data.length).toBe(3);
@@ -112,7 +137,13 @@ describe("Consultation Integration - Psikolog", () => {
         { userId: mahasiswaId, psychologistId: other._id, status: "pending" },
       ]);
 
-      const res = await request(app).get("/api/psikolog/notifications").set("Authorization", `Bearer ${psikologToken}`);
+      const res = await apiTest({
+        id: "TC-INT-CONS-PSI-005",
+        method: "GET",
+        url: "/api/psikolog/notifications",
+        headers: authHeader(psikologToken),
+        expectedStatus: OK,
+      });
 
       expect(res.status).toBe(OK);
       expect(res.body.data.length).toBe(1);
@@ -125,7 +156,13 @@ describe("Consultation Integration - Psikolog", () => {
         status: "pending",
       });
 
-      const res = await request(app).get("/api/psikolog/notifications").set("Authorization", `Bearer ${psikologToken}`);
+      const res = await apiTest({
+        id: "TC-INT-CONS-PSI-006",
+        method: "GET",
+        url: "/api/psikolog/notifications",
+        headers: authHeader(psikologToken),
+        expectedStatus: OK,
+      });
 
       const item = res.body.data[0];
 
@@ -142,25 +179,38 @@ describe("Consultation Integration - Psikolog", () => {
   // ======================
   describe("Update Consultation Status", () => {
     test("TC-INT-CONS-PSI-007 : tanpa token - should 401 Unauthorized", async () => {
-      const res = await request(app).put(`/api/psikolog/123/status`);
+      const res = await apiTest({
+        id: "TC-INT-CONS-PSI-007",
+        method: "PUT",
+        url: "/api/psikolog/123/status",
+        expectedStatus: UNAUTHORIZED,
+      });
 
       expect(res.status).toBe(UNAUTHORIZED);
     });
 
     test("TC-INT-CONS-PSI-008 : role bukan psikolog - should 403 Forbidden", async () => {
-      const res = await request(app)
-        .put(`/api/psikolog/${new mongoose.Types.ObjectId()}/status`)
-        .set("Authorization", `Bearer ${mahasiswaToken}`)
-        .send({ status: "accepted" });
+      const res = await apiTest({
+        id: "TC-INT-CONS-PSI-008",
+        method: "PUT",
+        url: `/api/psikolog/${new mongoose.Types.ObjectId()}/status`,
+        headers: authHeader(mahasiswaToken),
+        payload: { status: "accepted" },
+        expectedStatus: FORBIDDEN,
+      });
 
       expect(res.status).toBe(FORBIDDEN);
     });
 
     test("TC-INT-CONS-PSI-009 : id invalid - should 400", async () => {
-      const res = await request(app)
-        .put("/api/psikolog/123/status")
-        .set("Authorization", `Bearer ${psikologToken}`)
-        .send({ status: "accepted" });
+      const res = await apiTest({
+        id: "TC-INT-CONS-PSI-009",
+        method: "PUT",
+        url: "/api/psikolog/123/status",
+        headers: authHeader(psikologToken),
+        payload: { status: "accepted" },
+        expectedStatus: BAD_REQUEST,
+      });
 
       expect(res.status).toBe(BAD_REQUEST);
     });
@@ -168,10 +218,14 @@ describe("Consultation Integration - Psikolog", () => {
     test("TC-INT-CONS-PSI-010 : consultation tidak ada - should 404", async () => {
       const id = new mongoose.Types.ObjectId();
 
-      const res = await request(app)
-        .put(`/api/psikolog/${id}/status`)
-        .set("Authorization", `Bearer ${psikologToken}`)
-        .send({ status: "accepted" });
+      const res = await apiTest({
+        id: "TC-INT-CONS-PSI-010",
+        method: "PUT",
+        url: `/api/psikolog/${id}/status`,
+        headers: authHeader(psikologToken),
+        payload: { status: "accepted" },
+        expectedStatus: NOT_FOUND,
+      });
 
       expect(res.status).toBe(NOT_FOUND);
     });
@@ -189,10 +243,14 @@ describe("Consultation Integration - Psikolog", () => {
         status: "pending",
       });
 
-      const res = await request(app)
-        .put(`/api/psikolog/${cons._id}/status`)
-        .set("Authorization", `Bearer ${psikologToken}`)
-        .send({ status: "accepted" });
+      const res = await apiTest({
+        id: "TC-INT-CONS-PSI-011",
+        method: "PUT",
+        url: `/api/psikolog/${cons._id}/status`,
+        headers: authHeader(psikologToken),
+        payload: { status: "accepted" },
+        expectedStatus: FORBIDDEN,
+      });
 
       expect(res.status).toBe(FORBIDDEN);
     });
@@ -204,10 +262,14 @@ describe("Consultation Integration - Psikolog", () => {
         status: "pending",
       });
 
-      const res = await request(app)
-        .put(`/api/psikolog/${cons._id}/status`)
-        .set("Authorization", `Bearer ${psikologToken}`)
-        .send({ status: "pending" });
+      const res = await apiTest({
+        id: "TC-INT-CONS-PSI-012",
+        method: "PUT",
+        url: `/api/psikolog/${cons._id}/status`,
+        headers: authHeader(psikologToken),
+        payload: { status: "pending" },
+        expectedStatus: BAD_REQUEST,
+      });
 
       expect(res.status).toBe(BAD_REQUEST);
     });
@@ -219,10 +281,14 @@ describe("Consultation Integration - Psikolog", () => {
         status: "accepted",
       });
 
-      const res = await request(app)
-        .put(`/api/psikolog/${cons._id}/status`)
-        .set("Authorization", `Bearer ${psikologToken}`)
-        .send({ status: "rejected" });
+      const res = await apiTest({
+        id: "TC-INT-CONS-PSI-013",
+        method: "PUT",
+        url: `/api/psikolog/${cons._id}/status`,
+        headers: authHeader(psikologToken),
+        payload: { status: "rejected" },
+        expectedStatus: BAD_REQUEST,
+      });
 
       expect(res.status).toBe(BAD_REQUEST);
     });
@@ -240,10 +306,14 @@ describe("Consultation Integration - Psikolog", () => {
         status: "inactive",
       });
 
-      const res = await request(app)
-        .put(`/api/psikolog/${cons._id}/status`)
-        .set("Authorization", `Bearer ${psikologToken}`)
-        .send({ status: "accepted" });
+      const res = await apiTest({
+        id: "TC-INT-CONS-PSI-014",
+        method: "PUT",
+        url: `/api/psikolog/${cons._id}/status`,
+        headers: authHeader(psikologToken),
+        payload: { status: "accepted" },
+        expectedStatus: OK,
+      });
 
       expect(res.status).toBe(OK);
 
@@ -267,10 +337,14 @@ describe("Consultation Integration - Psikolog", () => {
         status: "inactive",
       });
 
-      const res = await request(app)
-        .put(`/api/psikolog/${cons._id}/status`)
-        .set("Authorization", `Bearer ${psikologToken}`)
-        .send({ status: "rejected" });
+      const res = await apiTest({
+        id: "TC-INT-CONS-PSI-015",
+        method: "PUT",
+        url: `/api/psikolog/${cons._id}/status`,
+        headers: authHeader(psikologToken),
+        payload: { status: "rejected" },
+        expectedStatus: OK,
+      });
 
       expect(res.status).toBe(OK);
 
@@ -288,10 +362,14 @@ describe("Consultation Integration - Psikolog", () => {
         status: "pending",
       });
 
-      const res = await request(app)
-        .put(`/api/psikolog/${cons._id}/status`)
-        .set("Authorization", `Bearer ${psikologToken}`)
-        .send({ status: "accepted" });
+      const res = await apiTest({
+        id: "TC-INT-CONS-PSI-016",
+        method: "PUT",
+        url: `/api/psikolog/${cons._id}/status`,
+        headers: authHeader(psikologToken),
+        payload: { status: "accepted" },
+        expectedStatus: OK,
+      });
 
       expect(res.status).toBe(OK);
 
@@ -306,10 +384,14 @@ describe("Consultation Integration - Psikolog", () => {
         status: "pending",
       });
 
-      const res = await request(app)
-        .put(`/api/psikolog/${cons._id}/status`)
-        .set("Authorization", `Bearer ${psikologToken}`)
-        .send({ status: "accepted" });
+      const res = await apiTest({
+        id: "TC-INT-CONS-PSI-017",
+        method: "PUT",
+        url: `/api/psikolog/${cons._id}/status`,
+        headers: authHeader(psikologToken),
+        payload: { status: "accepted" },
+        expectedStatus: OK,
+      });
 
       expect(res.status).toBe(OK);
       expect(res.body).toHaveProperty("message");
@@ -329,17 +411,25 @@ describe("Consultation Integration - Psikolog", () => {
         status: "inactive",
       });
 
-      const req1 = request(app)
-        .put(`/api/psikolog/${cons._id}/status`)
-        .set("Authorization", `Bearer ${psikologToken}`)
-        .send({ status: "accepted" });
-
-      const req2 = request(app)
-        .put(`/api/psikolog/${cons._id}/status`)
-        .set("Authorization", `Bearer ${psikologToken}`)
-        .send({ status: "accepted" });
-
-      const [res1, res2] = await Promise.all([req1, req2]);
+      // Kedua request dikirim bersamaan untuk mensimulasikan race condition
+      const [res1, res2] = await Promise.all([
+        apiTest({
+          id: "TC-INT-CONS-PSI-018-r1",
+          method: "PUT",
+          url: `/api/psikolog/${cons._id}/status`,
+          headers: authHeader(psikologToken),
+          payload: { status: "accepted" },
+          expectedStatus: OK,
+        }),
+        apiTest({
+          id: "TC-INT-CONS-PSI-018-r2",
+          method: "PUT",
+          url: `/api/psikolog/${cons._id}/status`,
+          headers: authHeader(psikologToken),
+          payload: { status: "accepted" },
+          expectedStatus: BAD_REQUEST,
+        }),
+      ]);
 
       const successCount = [res1.status, res2.status].filter((s) => s === 200).length;
       const failCount = [res1.status, res2.status].filter((s) => s === 400).length;

@@ -12,7 +12,34 @@ module.exports = {
   },
   rootDir: ".",
   moduleFileExtensions: ["ts", "js", "json"],
-  reporters: ["default"],
+  // reporters: ["default"],
+  reporters: [
+    "default",
+
+    [
+      "jest-html-reporters",
+      {
+        publicPath: "./reports",
+        filename: "integration-report.html",
+        expand: true,
+      },
+    ],
+    [
+      "jest-stare",
+      {
+        resultDir: "./reports/jest-stare",
+        reportTitle: "SIKOSA Integration Test Report",
+        coverageLink: "../../coverage/lcov-report/index.html",
+      },
+    ],
+    [
+      "jest-junit",
+      {
+        outputDirectory: "./reports",
+        outputName: "junit.xml",
+      },
+    ],
+  ],
   testMatch: ["**/*.spec.ts", "**/*.integration.spec.ts"],
   collectCoverageFrom: ["src/**/*.ts", "!src/**/*.spec.ts", "!src/**/*.integration.spec.ts", "!src/**/*.d.ts"],
   coverageDirectory: "coverage",

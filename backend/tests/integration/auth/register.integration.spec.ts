@@ -7,6 +7,8 @@ import SessionModel from "../../../src/models/sessionModel";
 import VerificationCodeModel from "../../../src/models/verificationCodeModel";
 
 import { BAD_REQUEST, CREATED, CONFLICT, FORBIDDEN } from "../../../src/constants/http";
+import { reportApiTest } from "../../setup/report";
+import { apiTest } from "../../setup/apiTest";
 
 jest.setTimeout(30000);
 
@@ -119,7 +121,13 @@ describe("Auth Integration - Register", () => {
   });
 
   test("TC-INT-REG-008 : register mahasiswa valid - success", async () => {
-    const res = await request(app).post(BASE_URL).send(basePayload);
+    const res = await apiTest({
+      id: "TC-INT-REG-008",
+      method: "POST",
+      url: BASE_URL,
+      payload: basePayload,
+      expectedStatus: CREATED,
+    });
 
     expect(res.status).toBe(CREATED);
 

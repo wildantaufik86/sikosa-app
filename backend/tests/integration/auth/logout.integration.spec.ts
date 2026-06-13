@@ -1,8 +1,5 @@
-import request from "supertest";
 import mongoose, { Types } from "mongoose";
 import jwt from "jsonwebtoken";
-
-import app from "../../../src/app";
 
 import UserModel from "../../../src/models/userModel";
 import SessionModel from "../../../src/models/sessionModel";
@@ -11,6 +8,8 @@ import { OK, UNAUTHORIZED } from "../../../src/constants/http";
 import { JWT_SECRET } from "../../../src/constants/env";
 import { verifyToken } from "../../../src/utils/jwt";
 import { ERROR_MSG } from "../../../src/constants/errorMessage";
+
+import { apiTest } from "../../setup/apiTest";
 
 jest.setTimeout(20000);
 
@@ -49,11 +48,20 @@ describe("Auth Integration - Logout", () => {
     await UserModel.deleteMany({});
     await SessionModel.deleteMany({});
 
-    await request(app).post(REGISTER_URL).send(userPayload);
+    await apiTest({
+      id: "TC-INT-LOGOUT-beforeEach-register",
+      method: "POST",
+      url: REGISTER_URL,
+      payload: userPayload,
+      expectedStatus: 201,
+    });
 
-    const loginRes = await request(app).post(LOGIN_URL).send({
-      email: userPayload.email,
-      password: userPayload.password,
+    const loginRes = await apiTest({
+      id: "TC-INT-LOGOUT-setup",
+      method: "POST",
+      url: LOGIN_URL,
+      payload: { email: userPayload.email, password: userPayload.password },
+      expectedStatus: OK,
     });
 
     accessToken = loginRes.body.accessToken;
@@ -75,14 +83,25 @@ describe("Auth Integration - Logout", () => {
   // ======================
 
   test("TC-INT-LOGOUT-001 : tanpa token - Unauthorized", async () => {
-    const res = await request(app).post(LOGOUT_URL);
+    const res = await apiTest({
+      id: "TC-INT-LOGOUT-001",
+      method: "POST",
+      url: LOGOUT_URL,
+      expectedStatus: UNAUTHORIZED,
+    });
 
     expect(res.status).toBe(UNAUTHORIZED);
     expect(res.body.message).toBe("Unauthorized");
   });
 
   test("TC-INT-LOGOUT-002 : token invalid format - Invalid token", async () => {
-    const res = await request(app).post(LOGOUT_URL).set("Authorization", "Bearer invalid");
+    const res = await apiTest({
+      id: "TC-INT-LOGOUT-002",
+      method: "POST",
+      url: LOGOUT_URL,
+      headers: { Authorization: "Bearer invalid" },
+      expectedStatus: UNAUTHORIZED,
+    });
 
     expect(res.status).toBe(UNAUTHORIZED);
     expect(res.body.message).toMatch(/Invalid token/i);
@@ -95,7 +114,13 @@ describe("Auth Integration - Logout", () => {
       { expiresIn: "-1s" } // expired
     );
 
-    const res = await request(app).post(LOGOUT_URL).set("Authorization", `Bearer ${expiredToken}`);
+    const res = await apiTest({
+      id: "TC-INT-LOGOUT-003",
+      method: "POST",
+      url: LOGOUT_URL,
+      headers: { Authorization: `Bearer ${expiredToken}` },
+      expectedStatus: UNAUTHORIZED,
+    });
 
     expect(res.status).toBe(UNAUTHORIZED);
     expect(res.body.message).toMatch(ERROR_MSG.TOKEN_EXPIRED);
@@ -106,7 +131,13 @@ describe("Auth Integration - Logout", () => {
   // ======================
 
   test("TC-INT-LOGOUT-004 : token header - logout success", async () => {
-    const res = await request(app).post(LOGOUT_URL).set("Authorization", `Bearer ${accessToken}`);
+    const res = await apiTest({
+      id: "TC-INT-LOGOUT-004",
+      method: "POST",
+      url: LOGOUT_URL,
+      headers: { Authorization: `Bearer ${accessToken}` },
+      expectedStatus: OK,
+    });
 
     expect(res.status).toBe(OK);
     expect(res.body.message).toBe("Logout successful");
@@ -116,7 +147,13 @@ describe("Auth Integration - Logout", () => {
   });
 
   test("TC-INT-LOGOUT-005 : token cookie - logout success", async () => {
-    const res = await request(app).post(LOGOUT_URL).set("Cookie", cookies);
+    const res = await apiTest({
+      id: "TC-INT-LOGOUT-005",
+      method: "POST",
+      url: LOGOUT_URL,
+      headers: { Cookie: cookies.join("; ") },
+      expectedStatus: OK,
+    });
 
     expect(res.status).toBe(OK);
     expect(res.body.message).toBe("Logout successful");
@@ -132,14 +169,26 @@ describe("Auth Integration - Logout", () => {
   test("TC-INT-LOGOUT-006 : session tidak ada - Invalid token", async () => {
     await SessionModel.findByIdAndDelete(sessionId);
 
-    const res = await request(app).post(LOGOUT_URL).set("Authorization", `Bearer ${accessToken}`);
+    const res = await apiTest({
+      id: "TC-INT-LOGOUT-006",
+      method: "POST",
+      url: LOGOUT_URL,
+      headers: { Authorization: `Bearer ${accessToken}` },
+      expectedStatus: UNAUTHORIZED,
+    });
 
     expect(res.status).toBe(UNAUTHORIZED);
     expect(res.body.message).toMatch(/Invalid token/i);
   });
 
   test("TC-INT-LOGOUT-007 : logout hapus session - DB check", async () => {
-    await request(app).post(LOGOUT_URL).set("Authorization", `Bearer ${accessToken}`);
+    await apiTest({
+      id: "TC-INT-LOGOUT-007",
+      method: "POST",
+      url: LOGOUT_URL,
+      headers: { Authorization: `Bearer ${accessToken}` },
+      expectedStatus: OK,
+    });
 
     const session = await SessionModel.findById(sessionId);
     expect(session).toBeNull();
@@ -150,7 +199,13 @@ describe("Auth Integration - Logout", () => {
   // ======================
 
   test("TC-INT-LOGOUT-008 : clear cookie", async () => {
-    const res = await request(app).post(LOGOUT_URL).set("Cookie", cookies);
+    const res = await apiTest({
+      id: "TC-INT-LOGOUT-008",
+      method: "POST",
+      url: LOGOUT_URL,
+      headers: { Cookie: cookies.join("; ") },
+      expectedStatus: OK,
+    });
 
     const setCookie = extractCookies(res);
 
@@ -163,9 +218,21 @@ describe("Auth Integration - Logout", () => {
   // ======================
 
   test("TC-INT-LOGOUT-009 : logout dua kali - Invalid token", async () => {
-    await request(app).post(LOGOUT_URL).set("Authorization", `Bearer ${accessToken}`);
+    await apiTest({
+      id: "TC-INT-LOGOUT-009-setup",
+      method: "POST",
+      url: LOGOUT_URL,
+      headers: { Authorization: `Bearer ${accessToken}` },
+      expectedStatus: OK,
+    });
 
-    const res = await request(app).post(LOGOUT_URL).set("Authorization", `Bearer ${accessToken}`);
+    const res = await apiTest({
+      id: "TC-INT-LOGOUT-009",
+      method: "POST",
+      url: LOGOUT_URL,
+      headers: { Authorization: `Bearer ${accessToken}` },
+      expectedStatus: UNAUTHORIZED,
+    });
 
     expect(res.status).toBe(UNAUTHORIZED);
   });
@@ -177,7 +244,13 @@ describe("Auth Integration - Logout", () => {
   test("TC-INT-LOGOUT-010 : token tanpa payload valid", async () => {
     const fakeToken = jwt.sign({}, JWT_SECRET);
 
-    const res = await request(app).post(LOGOUT_URL).set("Authorization", `Bearer ${fakeToken}`);
+    const res = await apiTest({
+      id: "TC-INT-LOGOUT-010",
+      method: "POST",
+      url: LOGOUT_URL,
+      headers: { Authorization: `Bearer ${fakeToken}` },
+      expectedStatus: UNAUTHORIZED,
+    });
 
     expect(res.status).toBe(UNAUTHORIZED);
   });
@@ -185,13 +258,25 @@ describe("Auth Integration - Logout", () => {
   test("TC-INT-LOGOUT-011 : token tanpa sessionId", async () => {
     const fakeToken = jwt.sign({ userId }, JWT_SECRET);
 
-    const res = await request(app).post(LOGOUT_URL).set("Authorization", `Bearer ${fakeToken}`);
+    const res = await apiTest({
+      id: "TC-INT-LOGOUT-011",
+      method: "POST",
+      url: LOGOUT_URL,
+      headers: { Authorization: `Bearer ${fakeToken}` },
+      expectedStatus: UNAUTHORIZED,
+    });
 
     expect(res.status).toBe(UNAUTHORIZED);
   });
 
   test("TC-INT-LOGOUT-012 : header tanpa Bearer prefix", async () => {
-    const res = await request(app).post(LOGOUT_URL).set("Authorization", accessToken);
+    const res = await apiTest({
+      id: "TC-INT-LOGOUT-012",
+      method: "POST",
+      url: LOGOUT_URL,
+      headers: { Authorization: accessToken },
+      expectedStatus: UNAUTHORIZED,
+    });
 
     expect(res.status).toBe(UNAUTHORIZED);
   });
@@ -203,21 +288,36 @@ describe("Auth Integration - Logout", () => {
   test("TC-INT-LOGOUT-013 : user dihapus - tetap success", async () => {
     await UserModel.findByIdAndDelete(userId);
 
-    const res = await request(app).post(LOGOUT_URL).set("Authorization", `Bearer ${accessToken}`);
+    const res = await apiTest({
+      id: "TC-INT-LOGOUT-013",
+      method: "POST",
+      url: LOGOUT_URL,
+      headers: { Authorization: `Bearer ${accessToken}` },
+      expectedStatus: OK,
+    });
 
     expect(res.status).toBe(OK);
   });
 
   test("TC-INT-LOGOUT-014 : multiple session - hanya satu terhapus", async () => {
-    const login2 = await request(app).post(LOGIN_URL).send({
-      email: userPayload.email,
-      password: userPayload.password,
+    const login2 = await apiTest({
+      id: "TC-INT-LOGOUT-014-setup",
+      method: "POST",
+      url: LOGIN_URL,
+      payload: { email: userPayload.email, password: userPayload.password },
+      expectedStatus: OK,
     });
 
     const token2 = login2.body.accessToken;
     const decoded2: any = verifyToken(token2).payload;
 
-    await request(app).post(LOGOUT_URL).set("Authorization", `Bearer ${accessToken}`);
+    await apiTest({
+      id: "TC-INT-LOGOUT-014",
+      method: "POST",
+      url: LOGOUT_URL,
+      headers: { Authorization: `Bearer ${accessToken}` },
+      expectedStatus: OK,
+    });
 
     const s1 = await SessionModel.findById(sessionId);
     const s2 = await SessionModel.findById(decoded2.sessionId);
@@ -227,7 +327,13 @@ describe("Auth Integration - Logout", () => {
   });
 
   test("TC-INT-LOGOUT-015 : cookie + header - tetap success", async () => {
-    const res = await request(app).post(LOGOUT_URL).set("Authorization", `Bearer ${accessToken}`).set("Cookie", cookies);
+    const res = await apiTest({
+      id: "TC-INT-LOGOUT-015",
+      method: "POST",
+      url: LOGOUT_URL,
+      headers: { Authorization: `Bearer ${accessToken}`, Cookie: cookies.join("; ") },
+      expectedStatus: OK,
+    });
 
     expect(res.status).toBe(OK);
   });

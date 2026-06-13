@@ -14,7 +14,7 @@ module.exports = {
   moduleFileExtensions: ["ts", "js", "json"],
   // reporters: ["default"],
   reporters: [
-    "default",
+    "<rootDir>/tests/reporters/verbose-reporter.js",
 
     [
       "jest-html-reporters",

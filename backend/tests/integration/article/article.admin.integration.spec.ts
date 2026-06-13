@@ -1,6 +1,4 @@
-import request from "supertest";
 import mongoose from "mongoose";
-import app from "../../../src/app";
 
 import UserModel from "../../../src/models/userModel";
 import ArticleModel from "../../../src/models/articleModel";
@@ -8,6 +6,7 @@ import ArticleModel from "../../../src/models/articleModel";
 import { signToken } from "../../../src/utils/jwt";
 import { OK, CREATED, BAD_REQUEST, NOT_FOUND, UNAUTHORIZED, FORBIDDEN } from "../../../src/constants/http";
 import { ERROR_MSG } from "../../../src/constants/errorMessage";
+import { apiTest } from "../../setup/apiTest";
 
 let adminToken: string;
 let userToken: string;
@@ -63,42 +62,64 @@ afterAll(async () => {
 
 describe("ADMIN ARTICLE - CREATE", () => {
   test("[TC-INT-ADM-05] : create artikel tanpa token - should return 401", async () => {
-    const res = await request(app).post("/api/admin/articles").send({ title: "A", content: "B" });
+    const res = await apiTest({
+      id: "TC-INT-ADM-05",
+      method: "POST",
+      url: "/api/admin/articles",
+      payload: { title: "A", content: "B" },
+      expectedStatus: UNAUTHORIZED,
+    });
 
     expect(res.status).toBe(UNAUTHORIZED);
   });
 
   test("[TC-INT-ADM-06] : role bukan admin - should return 403", async () => {
-    const res = await request(app)
-      .post("/api/admin/articles")
-      .set("Authorization", `Bearer ${userToken}`)
-      .send({ title: "A", content: "B" });
+    const res = await apiTest({
+      id: "TC-INT-ADM-06",
+      method: "POST",
+      url: "/api/admin/articles",
+      headers: { Authorization: `Bearer ${userToken}` },
+      payload: { title: "A", content: "B" },
+      expectedStatus: FORBIDDEN,
+    });
 
     expect(res.status).toBe(FORBIDDEN);
   });
 
   test("[TC-INT-ADM-09] : tanpa title - should return 400", async () => {
-    const res = await request(app)
-      .post("/api/admin/articles")
-      .set("Authorization", `Bearer ${adminToken}`)
-      .send({ content: "Isi" });
+    const res = await apiTest({
+      id: "TC-INT-ADM-09",
+      method: "POST",
+      url: "/api/admin/articles",
+      headers: { Authorization: `Bearer ${adminToken}` },
+      payload: { content: "Isi" },
+      expectedStatus: BAD_REQUEST,
+    });
 
     expect(res.status).toBe(BAD_REQUEST);
   });
 
   test("[TC-INT-ADM-10] : tanpa content - should return 400", async () => {
-    const res = await request(app)
-      .post("/api/admin/articles")
-      .set("Authorization", `Bearer ${adminToken}`)
-      .send({ title: "Judul" });
+    const res = await apiTest({
+      id: "TC-INT-ADM-10",
+      method: "POST",
+      url: "/api/admin/articles",
+      headers: { Authorization: `Bearer ${adminToken}` },
+      payload: { title: "Judul" },
+      expectedStatus: BAD_REQUEST,
+    });
 
     expect(res.status).toBe(BAD_REQUEST);
   });
 
   test("[TC-INT-ADM-13] : create artikel valid - should return 201", async () => {
-    const res = await request(app).post("/api/admin/articles").set("Authorization", `Bearer ${adminToken}`).send({
-      title: "Judul Artikel",
-      content: "Konten artikel",
+    const res = await apiTest({
+      id: "TC-INT-ADM-13",
+      method: "POST",
+      url: "/api/admin/articles",
+      headers: { Authorization: `Bearer ${adminToken}` },
+      payload: { title: "Judul Artikel", content: "Konten artikel" },
+      expectedStatus: CREATED,
     });
 
     expect(res.status).toBe(CREATED);
@@ -108,7 +129,13 @@ describe("ADMIN ARTICLE - CREATE", () => {
 
 describe("ADMIN ARTICLE - READ", () => {
   test("[TC-INT-ADM-14] : get semua artikel - should return 200 list", async () => {
-    const res = await request(app).get("/api/admin/articles").set("Authorization", `Bearer ${adminToken}`);
+    const res = await apiTest({
+      id: "TC-INT-ADM-14",
+      method: "GET",
+      url: "/api/admin/articles",
+      headers: { Authorization: `Bearer ${adminToken}` },
+      expectedStatus: OK,
+    });
 
     expect(res.status).toBe(OK);
     expect(Array.isArray(res.body.data)).toBe(true);
@@ -122,31 +149,51 @@ describe("ADMIN ARTICLE - READ", () => {
       writer: new mongoose.Types.ObjectId(),
     });
 
-    const res = await request(app).get(`/api/admin/articles/${article._id}`).set("Authorization", `Bearer ${adminToken}`);
+    const res = await apiTest({
+      id: "TC-INT-ADM-15",
+      method: "GET",
+      url: `/api/admin/articles/${article._id}`,
+      headers: { Authorization: `Bearer ${adminToken}` },
+      expectedStatus: OK,
+    });
 
     expect(res.status).toBe(OK);
     expect(res.body.data).toBeDefined();
   });
 
   test("[TC-INT-ADM-01] : update artikel ID tidak ditemukan - should return 404", async () => {
-    const res = await request(app)
-      .put(`/api/admin/articles/${new mongoose.Types.ObjectId()}`)
-      .set("Authorization", `Bearer ${adminToken}`)
-      .send({ title: "Update" });
+    const res = await apiTest({
+      id: "TC-INT-ADM-01",
+      method: "PUT",
+      url: `/api/admin/articles/${new mongoose.Types.ObjectId()}`,
+      headers: { Authorization: `Bearer ${adminToken}` },
+      payload: { title: "Update" },
+      expectedStatus: NOT_FOUND,
+    });
 
     expect(res.status).toBe(NOT_FOUND);
   });
 
   test("[TC-INT-ADM-03] : get artikel ID tidak ditemukan - should return 404", async () => {
-    const res = await request(app)
-      .get(`/api/admin/articles/${new mongoose.Types.ObjectId()}`)
-      .set("Authorization", `Bearer ${adminToken}`);
+    const res = await apiTest({
+      id: "TC-INT-ADM-03",
+      method: "GET",
+      url: `/api/admin/articles/${new mongoose.Types.ObjectId()}`,
+      headers: { Authorization: `Bearer ${adminToken}` },
+      expectedStatus: NOT_FOUND,
+    });
 
     expect(res.status).toBe(NOT_FOUND);
   });
 
   test("[TC-INT-ADM-04] : get artikel ID invalid - should return 400", async () => {
-    const res = await request(app).get("/api/admin/articles/invalid-id").set("Authorization", `Bearer ${adminToken}`);
+    const res = await apiTest({
+      id: "TC-INT-ADM-04",
+      method: "GET",
+      url: "/api/admin/articles/invalid-id",
+      headers: { Authorization: `Bearer ${adminToken}` },
+      expectedStatus: BAD_REQUEST,
+    });
 
     expect(res.status).toBe(BAD_REQUEST);
   });
@@ -161,10 +208,14 @@ describe("ADMIN ARTICLE - UPDATE", () => {
       writer: new mongoose.Types.ObjectId(),
     });
 
-    const res = await request(app)
-      .put(`/api/admin/articles/${article._id}`)
-      .set("Authorization", `Bearer ${adminToken}`)
-      .send({ title: "New Title", content: "New Content" });
+    const res = await apiTest({
+      id: "TC-INT-ADM-16",
+      method: "PUT",
+      url: `/api/admin/articles/${article._id}`,
+      headers: { Authorization: `Bearer ${adminToken}` },
+      payload: { title: "New Title", content: "New Content" },
+      expectedStatus: OK,
+    });
 
     expect(res.status).toBe(OK);
   });
@@ -177,10 +228,14 @@ describe("ADMIN ARTICLE - UPDATE", () => {
       writer: new mongoose.Types.ObjectId(),
     });
 
-    const res = await request(app)
-      .put(`/api/admin/articles/${article._id}`)
-      .set("Authorization", `Bearer ${adminToken}`)
-      .send({ title: "New Title" });
+    const res = await apiTest({
+      id: "TC-INT-ADM-17",
+      method: "PUT",
+      url: `/api/admin/articles/${article._id}`,
+      headers: { Authorization: `Bearer ${adminToken}` },
+      payload: { title: "New Title" },
+      expectedStatus: OK,
+    });
 
     expect(res.status).toBe(OK);
   });
@@ -193,10 +248,14 @@ describe("ADMIN ARTICLE - UPDATE", () => {
       writer: new mongoose.Types.ObjectId(),
     });
 
-    const res = await request(app)
-      .put(`/api/admin/articles/${article._id}`)
-      .set("Authorization", `Bearer ${adminToken}`)
-      .send({ content: "New Content" });
+    const res = await apiTest({
+      id: "TC-INT-ADM-18",
+      method: "PUT",
+      url: `/api/admin/articles/${article._id}`,
+      headers: { Authorization: `Bearer ${adminToken}` },
+      payload: { content: "New Content" },
+      expectedStatus: OK,
+    });
 
     expect(res.status).toBe(OK);
   });
@@ -209,10 +268,14 @@ describe("ADMIN ARTICLE - UPDATE", () => {
       writer: new mongoose.Types.ObjectId(),
     });
 
-    const res = await request(app)
-      .put(`/api/admin/articles/${article._id}`)
-      .set("Authorization", `Bearer ${adminToken}`)
-      .send({});
+    const res = await apiTest({
+      id: "TC-INT-ADM-11",
+      method: "PUT",
+      url: `/api/admin/articles/${article._id}`,
+      headers: { Authorization: `Bearer ${adminToken}` },
+      payload: {},
+      expectedStatus: OK,
+    });
 
     expect(res.status).toBe(OK);
   });
@@ -227,21 +290,36 @@ describe("ADMIN ARTICLE - DELETE", () => {
       writer: new mongoose.Types.ObjectId(),
     });
 
-    const res = await request(app).delete(`/api/admin/articles/${article._id}`).set("Authorization", `Bearer ${adminToken}`);
+    const res = await apiTest({
+      id: "TC-INT-ADM-19",
+      method: "DELETE",
+      url: `/api/admin/articles/${article._id}`,
+      headers: { Authorization: `Bearer ${adminToken}` },
+      expectedStatus: OK,
+    });
 
     expect(res.status).toBe(OK);
   });
 
   test("[TC-INT-ADM-02] : delete artikel ID tidak ditemukan - should return 404", async () => {
-    const res = await request(app)
-      .delete(`/api/admin/articles/${new mongoose.Types.ObjectId()}`)
-      .set("Authorization", `Bearer ${adminToken}`);
+    const res = await apiTest({
+      id: "TC-INT-ADM-02",
+      method: "DELETE",
+      url: `/api/admin/articles/${new mongoose.Types.ObjectId()}`,
+      headers: { Authorization: `Bearer ${adminToken}` },
+      expectedStatus: NOT_FOUND,
+    });
 
     expect(res.status).toBe(NOT_FOUND);
   });
 
   test("[TC-INT-ADM-08] : delete tanpa token - should return 401", async () => {
-    const res = await request(app).delete(`/api/admin/articles/${new mongoose.Types.ObjectId()}`);
+    const res = await apiTest({
+      id: "TC-INT-ADM-08",
+      method: "DELETE",
+      url: `/api/admin/articles/${new mongoose.Types.ObjectId()}`,
+      expectedStatus: UNAUTHORIZED,
+    });
 
     expect(res.status).toBe(UNAUTHORIZED);
   });
@@ -254,9 +332,21 @@ describe("ADMIN ARTICLE - DELETE", () => {
       writer: new mongoose.Types.ObjectId(),
     });
 
-    await request(app).delete(`/api/admin/articles/${article._id}`).set("Authorization", `Bearer ${adminToken}`);
+    await apiTest({
+      id: "TC-INT-ADM-12-setup",
+      method: "DELETE",
+      url: `/api/admin/articles/${article._id}`,
+      headers: { Authorization: `Bearer ${adminToken}` },
+      expectedStatus: OK,
+    });
 
-    const res = await request(app).delete(`/api/admin/articles/${article._id}`).set("Authorization", `Bearer ${adminToken}`);
+    const res = await apiTest({
+      id: "TC-INT-ADM-12",
+      method: "DELETE",
+      url: `/api/admin/articles/${article._id}`,
+      headers: { Authorization: `Bearer ${adminToken}` },
+      expectedStatus: NOT_FOUND,
+    });
 
     expect(res.status).toBe(NOT_FOUND);
   });
@@ -264,9 +354,13 @@ describe("ADMIN ARTICLE - DELETE", () => {
 
 describe("ADMIN ARTICLE - EDGE CASE", () => {
   test("[TC-INT-ADM-20] : slug otomatis terbentuk - should exist", async () => {
-    const res = await request(app).post("/api/admin/articles").set("Authorization", `Bearer ${adminToken}`).send({
-      title: "Hello World",
-      content: "Content",
+    const res = await apiTest({
+      id: "TC-INT-ADM-20",
+      method: "POST",
+      url: "/api/admin/articles",
+      headers: { Authorization: `Bearer ${adminToken}` },
+      payload: { title: "Hello World", content: "Content" },
+      expectedStatus: CREATED,
     });
 
     expect(res.body.data.slug).toBeDefined();
@@ -280,16 +374,26 @@ describe("ADMIN ARTICLE - EDGE CASE", () => {
       writer: new mongoose.Types.ObjectId(),
     });
 
-    const res = await request(app)
-      .put(`/api/admin/articles/${article._id}`)
-      .set("Authorization", `Bearer ${adminToken}`)
-      .send({ title: "New Title" });
+    const res = await apiTest({
+      id: "TC-INT-ADM-21",
+      method: "PUT",
+      url: `/api/admin/articles/${article._id}`,
+      headers: { Authorization: `Bearer ${adminToken}` },
+      payload: { title: "New Title" },
+      expectedStatus: OK,
+    });
 
     expect(res.status).toBe(OK);
   });
 
   test("[TC-INT-ADM-22] : response format artikel sesuai struktur", async () => {
-    const res = await request(app).get("/api/admin/articles").set("Authorization", `Bearer ${adminToken}`);
+    const res = await apiTest({
+      id: "TC-INT-ADM-22",
+      method: "GET",
+      url: "/api/admin/articles",
+      headers: { Authorization: `Bearer ${adminToken}` },
+      expectedStatus: OK,
+    });
 
     if (res.body.data.length > 0) {
       expect(res.body.data[0]).toHaveProperty("title");

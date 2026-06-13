@@ -1,9 +1,8 @@
-import request from "supertest";
 import mongoose from "mongoose";
-import app from "../../../src/app";
 import UserModel from "../../../src/models/userModel";
 import SessionModel from "../../../src/models/sessionModel";
 import { BAD_REQUEST, OK, NOT_FOUND, UNAUTHORIZED } from "../../../src/constants/http";
+import { apiTest } from "../../setup/apiTest";
 
 jest.setTimeout(20000);
 
@@ -65,7 +64,13 @@ describe("Auth Integration - Login", () => {
   // =========================
 
   test("TC-INT-LOGIN-001 : body kosong - should return 400", async () => {
-    const res = await request(app).post(BASE_URL).send({});
+    const res = await apiTest({
+      id: "TC-INT-LOGIN-001",
+      method: "POST",
+      url: BASE_URL,
+      payload: {},
+      expectedStatus: BAD_REQUEST,
+    });
 
     expect(res.status).toBe(BAD_REQUEST);
     expect(res.body).toHaveProperty("errors");
@@ -73,23 +78,38 @@ describe("Auth Integration - Login", () => {
   });
 
   test("TC-INT-LOGIN-002 : email tidak dikirim - should return 400", async () => {
-    const res = await request(app).post(BASE_URL).send({ password: "Valid123!" });
+    const res = await apiTest({
+      id: "TC-INT-LOGIN-002",
+      method: "POST",
+      url: BASE_URL,
+      payload: { password: "Valid123!" },
+      expectedStatus: BAD_REQUEST,
+    });
 
     expect(res.status).toBe(BAD_REQUEST);
     expect(res.body.errors.some((e: any) => e.path === "email")).toBe(true);
   });
 
   test("TC-INT-LOGIN-003 : password tidak dikirim - should return 400", async () => {
-    const res = await request(app).post(BASE_URL).send({ email: "test@mail.com" });
+    const res = await apiTest({
+      id: "TC-INT-LOGIN-003",
+      method: "POST",
+      url: BASE_URL,
+      payload: { email: "test@mail.com" },
+      expectedStatus: BAD_REQUEST,
+    });
 
     expect(res.status).toBe(BAD_REQUEST);
     expect(res.body.errors.some((e: any) => e.path === "password")).toBe(true);
   });
 
   test("TC-INT-LOGIN-004 : format email invalid - should return 400", async () => {
-    const res = await request(app).post(BASE_URL).send({
-      email: "invalid",
-      password: "Valid123!",
+    const res = await apiTest({
+      id: "TC-INT-LOGIN-004",
+      method: "POST",
+      url: BASE_URL,
+      payload: { email: "invalid", password: "Valid123!" },
+      expectedStatus: BAD_REQUEST,
     });
 
     expect(res.status).toBe(BAD_REQUEST);
@@ -97,9 +117,12 @@ describe("Auth Integration - Login", () => {
   });
 
   test("TC-INT-LOGIN-005 : password terlalu pendek - should return 400", async () => {
-    const res = await request(app).post(BASE_URL).send({
-      email: "user@mail.com",
-      password: "123",
+    const res = await apiTest({
+      id: "TC-INT-LOGIN-005",
+      method: "POST",
+      url: BASE_URL,
+      payload: { email: "user@mail.com", password: "123" },
+      expectedStatus: BAD_REQUEST,
     });
 
     expect(res.status).toBe(BAD_REQUEST);
@@ -109,9 +132,12 @@ describe("Auth Integration - Login", () => {
   test("TC-INT-LOGIN-006 : email terlalu panjang - should return 400", async () => {
     const longEmail = `${"a".repeat(260)}@mail.com`;
 
-    const res = await request(app).post(BASE_URL).send({
-      email: longEmail,
-      password: "Valid123!",
+    const res = await apiTest({
+      id: "TC-INT-LOGIN-006",
+      method: "POST",
+      url: BASE_URL,
+      payload: { email: longEmail, password: "Valid123!" },
+      expectedStatus: BAD_REQUEST,
     });
 
     expect(res.status).toBe(BAD_REQUEST);
@@ -122,9 +148,12 @@ describe("Auth Integration - Login", () => {
   // =========================
 
   test("TC-INT-LOGIN-007 : user tidak ditemukan - should return 404", async () => {
-    const res = await request(app).post(BASE_URL).send({
-      email: "notfound@mail.com",
-      password: "Valid123!",
+    const res = await apiTest({
+      id: "TC-INT-LOGIN-007",
+      method: "POST",
+      url: BASE_URL,
+      payload: { email: "notfound@mail.com", password: "Valid123!" },
+      expectedStatus: NOT_FOUND,
     });
 
     expect(res.status).toBe(NOT_FOUND);
@@ -132,9 +161,12 @@ describe("Auth Integration - Login", () => {
   });
 
   test("TC-INT-LOGIN-008 : password salah - should return 401", async () => {
-    const res = await request(app).post(BASE_URL).send({
-      email: mahasiswaUser.email,
-      password: "Wrong123!",
+    const res = await apiTest({
+      id: "TC-INT-LOGIN-008",
+      method: "POST",
+      url: BASE_URL,
+      payload: { email: mahasiswaUser.email, password: "Wrong123!" },
+      expectedStatus: UNAUTHORIZED,
     });
 
     expect(res.status).toBe(UNAUTHORIZED);
@@ -146,21 +178,25 @@ describe("Auth Integration - Login", () => {
   // =========================
 
   test("TC-INT-LOGIN-009 : email dengan spasi - should login success", async () => {
-    const res = await request(app)
-      .post(BASE_URL)
-      .send({
-        email: `  ${mahasiswaUser.email}  `,
-        password: "Valid123!",
-      });
+    const res = await apiTest({
+      id: "TC-INT-LOGIN-009",
+      method: "POST",
+      url: BASE_URL,
+      payload: { email: `  ${mahasiswaUser.email}  `, password: "Valid123!" },
+      expectedStatus: OK,
+    });
 
     expect(res.status).toBe(OK);
     expect(res.body.data.user.email).toBe(mahasiswaUser.email);
   });
 
   test("TC-INT-LOGIN-010 : password dengan spasi - should login success", async () => {
-    const res = await request(app).post(BASE_URL).send({
-      email: mahasiswaUser.email,
-      password: "  Valid123!  ",
+    const res = await apiTest({
+      id: "TC-INT-LOGIN-010",
+      method: "POST",
+      url: BASE_URL,
+      payload: { email: mahasiswaUser.email, password: "  Valid123!  " },
+      expectedStatus: OK,
     });
 
     expect(res.status).toBe(OK);
@@ -171,9 +207,12 @@ describe("Auth Integration - Login", () => {
   // =========================
 
   test("TC-INT-LOGIN-011 : login mahasiswa - should success", async () => {
-    const res = await request(app).post(BASE_URL).send({
-      email: mahasiswaUser.email,
-      password: "Valid123!",
+    const res = await apiTest({
+      id: "TC-INT-LOGIN-011",
+      method: "POST",
+      url: BASE_URL,
+      payload: { email: mahasiswaUser.email, password: "Valid123!" },
+      expectedStatus: OK,
     });
 
     expect(res.status).toBe(OK);
@@ -181,9 +220,12 @@ describe("Auth Integration - Login", () => {
   });
 
   test("TC-INT-LOGIN-012 : login psikolog - should success", async () => {
-    const res = await request(app).post(BASE_URL).send({
-      email: psikologUser.email,
-      password: "Valid123!",
+    const res = await apiTest({
+      id: "TC-INT-LOGIN-012",
+      method: "POST",
+      url: BASE_URL,
+      payload: { email: psikologUser.email, password: "Valid123!" },
+      expectedStatus: OK,
     });
 
     expect(res.status).toBe(OK);
@@ -191,9 +233,12 @@ describe("Auth Integration - Login", () => {
   });
 
   test("TC-INT-LOGIN-013 : login admin - should success", async () => {
-    const res = await request(app).post(BASE_URL).send({
-      email: adminUser.email,
-      password: "Valid123!",
+    const res = await apiTest({
+      id: "TC-INT-LOGIN-013",
+      method: "POST",
+      url: BASE_URL,
+      payload: { email: adminUser.email, password: "Valid123!" },
+      expectedStatus: OK,
     });
 
     expect(res.status).toBe(OK);
@@ -201,9 +246,12 @@ describe("Auth Integration - Login", () => {
   });
 
   test("TC-INT-LOGIN-014 : user belum verified tetap bisa login", async () => {
-    const res = await request(app).post(BASE_URL).send({
-      email: mahasiswaUser.email,
-      password: "Valid123!",
+    const res = await apiTest({
+      id: "TC-INT-LOGIN-014",
+      method: "POST",
+      url: BASE_URL,
+      payload: { email: mahasiswaUser.email, password: "Valid123!" },
+      expectedStatus: OK,
     });
 
     expect(res.status).toBe(OK);
@@ -215,9 +263,12 @@ describe("Auth Integration - Login", () => {
   // =========================
 
   test("TC-INT-LOGIN-015 : accessToken ada - should exist", async () => {
-    const res = await request(app).post(BASE_URL).send({
-      email: adminUser.email,
-      password: "Valid123!",
+    const res = await apiTest({
+      id: "TC-INT-LOGIN-015",
+      method: "POST",
+      url: BASE_URL,
+      payload: { email: adminUser.email, password: "Valid123!" },
+      expectedStatus: OK,
     });
 
     expect(res.body.accessToken).toBeDefined();
@@ -225,18 +276,24 @@ describe("Auth Integration - Login", () => {
   });
 
   test("TC-INT-LOGIN-016 : refreshToken ada - should exist", async () => {
-    const res = await request(app).post(BASE_URL).send({
-      email: adminUser.email,
-      password: "Valid123!",
+    const res = await apiTest({
+      id: "TC-INT-LOGIN-016",
+      method: "POST",
+      url: BASE_URL,
+      payload: { email: adminUser.email, password: "Valid123!" },
+      expectedStatus: OK,
     });
 
     expect(res.body.refreshToken).toBeDefined();
   });
 
   test("TC-INT-LOGIN-017 : cookie accessToken terset", async () => {
-    const res = await request(app).post(BASE_URL).send({
-      email: adminUser.email,
-      password: "Valid123!",
+    const res = await apiTest({
+      id: "TC-INT-LOGIN-017",
+      method: "POST",
+      url: BASE_URL,
+      payload: { email: adminUser.email, password: "Valid123!" },
+      expectedStatus: OK,
     });
 
     const cookies = extractCookies(res);
@@ -246,9 +303,12 @@ describe("Auth Integration - Login", () => {
   });
 
   test("TC-INT-LOGIN-018 : cookie refreshToken terset", async () => {
-    const res = await request(app).post(BASE_URL).send({
-      email: adminUser.email,
-      password: "Valid123!",
+    const res = await apiTest({
+      id: "TC-INT-LOGIN-018",
+      method: "POST",
+      url: BASE_URL,
+      payload: { email: adminUser.email, password: "Valid123!" },
+      expectedStatus: OK,
     });
 
     const cookies = extractCookies(res);
@@ -260,9 +320,12 @@ describe("Auth Integration - Login", () => {
   // =========================
 
   test("TC-INT-LOGIN-019 : session tersimpan di DB", async () => {
-    await request(app).post(BASE_URL).send({
-      email: adminUser.email,
-      password: "Valid123!",
+    await apiTest({
+      id: "TC-INT-LOGIN-019",
+      method: "POST",
+      url: BASE_URL,
+      payload: { email: adminUser.email, password: "Valid123!" },
+      expectedStatus: OK,
     });
 
     const sessions = await SessionModel.find({ userId: adminUser._id });
@@ -272,14 +335,20 @@ describe("Auth Integration - Login", () => {
   });
 
   test("TC-INT-LOGIN-020 : multiple login create multiple session", async () => {
-    await request(app).post(BASE_URL).send({
-      email: adminUser.email,
-      password: "Valid123!",
+    await apiTest({
+      id: "TC-INT-LOGIN-020-setup1",
+      method: "POST",
+      url: BASE_URL,
+      payload: { email: adminUser.email, password: "Valid123!" },
+      expectedStatus: OK,
     });
 
-    await request(app).post(BASE_URL).send({
-      email: adminUser.email,
-      password: "Valid123!",
+    await apiTest({
+      id: "TC-INT-LOGIN-020-setup2",
+      method: "POST",
+      url: BASE_URL,
+      payload: { email: adminUser.email, password: "Valid123!" },
+      expectedStatus: OK,
     });
 
     const sessions = await SessionModel.find({ userId: adminUser._id });
@@ -294,9 +363,12 @@ describe("Auth Integration - Login", () => {
   test("TC-INT-LOGIN-021 : DB error find user - should 500", async () => {
     jest.spyOn(UserModel, "findOne").mockRejectedValueOnce(new Error("DB Error"));
 
-    const res = await request(app).post(BASE_URL).send({
-      email: "test@mail.com",
-      password: "Valid123!",
+    const res = await apiTest({
+      id: "TC-INT-LOGIN-021",
+      method: "POST",
+      url: BASE_URL,
+      payload: { email: "test@mail.com", password: "Valid123!" },
+      expectedStatus: 500,
     });
 
     expect(res.status).toBe(500);
@@ -309,9 +381,12 @@ describe("Auth Integration - Login", () => {
       },
     } as any);
 
-    const res = await request(app).post(BASE_URL).send({
-      email: "user@mail.com",
-      password: "Valid123!",
+    const res = await apiTest({
+      id: "TC-INT-LOGIN-022",
+      method: "POST",
+      url: BASE_URL,
+      payload: { email: "user@mail.com", password: "Valid123!" },
+      expectedStatus: 500,
     });
 
     expect(res.status).toBe(500);
@@ -320,9 +395,12 @@ describe("Auth Integration - Login", () => {
   test("TC-INT-LOGIN-023 : session create error - should 500", async () => {
     jest.spyOn(SessionModel, "create").mockRejectedValueOnce(new Error("fail"));
 
-    const res = await request(app).post(BASE_URL).send({
-      email: adminUser.email,
-      password: "Valid123!",
+    const res = await apiTest({
+      id: "TC-INT-LOGIN-023",
+      method: "POST",
+      url: BASE_URL,
+      payload: { email: adminUser.email, password: "Valid123!" },
+      expectedStatus: 500,
     });
 
     expect(res.status).toBe(500);
@@ -333,9 +411,12 @@ describe("Auth Integration - Login", () => {
       throw new Error("token error");
     });
 
-    const res = await request(app).post(BASE_URL).send({
-      email: adminUser.email,
-      password: "Valid123!",
+    const res = await apiTest({
+      id: "TC-INT-LOGIN-024",
+      method: "POST",
+      url: BASE_URL,
+      payload: { email: adminUser.email, password: "Valid123!" },
+      expectedStatus: 500,
     });
 
     expect(res.status).toBe(500);

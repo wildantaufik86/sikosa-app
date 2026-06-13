@@ -11,6 +11,7 @@ import chatRoom from "../../../src/models/chatRoom";
 import AppError from "../../../src/utils/appError";
 import { BAD_REQUEST, CONFLICT, FORBIDDEN, NOT_FOUND, OK, TO_LARGE, UNAUTHORIZED } from "../../../src/constants/http";
 import { ERROR_MSG } from "../../../src/constants/errorMessage";
+import { logTestContext } from "../../helpers/unit-test-logger";
 
 /**
  * =========================
@@ -80,6 +81,10 @@ describe("CONSULTATION SERVICE - MAHASISWA FLOW", () => {
    */
   describe("applyConsultation", () => {
     test("CONS-MHS-01 tanpa login - should return 401", async () => {
+      logTestContext({
+        input: { userId: undefined, psychologistId: 'some-id', message: "test", role: "mahasiswa" },
+        expected: 'throws AppError with status 401 Unauthorized access',
+      });
       await expectAppError(
         () =>
           applyConsultation({
@@ -94,6 +99,10 @@ describe("CONSULTATION SERVICE - MAHASISWA FLOW", () => {
     });
 
     test("CONS-MHS-02 psychologistId kosong - should return 400", async () => {
+      logTestContext({
+        input: { userId: 'some-id', psychologistId: "", message: "test", role: "mahasiswa" },
+        expected: 'throws AppError with status 400 "psychologistId is required"',
+      });
       await expectAppError(
         () =>
           applyConsultation({
@@ -108,6 +117,10 @@ describe("CONSULTATION SERVICE - MAHASISWA FLOW", () => {
     });
 
     test("CONS-MHS-03 psychologistId invalid - should return 400", async () => {
+      logTestContext({
+        input: { userId: 'some-id', psychologistId: "invalid-id", message: "test", role: "mahasiswa" },
+        expected: 'throws AppError with status 400 "Invalid psychologistId format"',
+      });
       await expectAppError(
         () =>
           applyConsultation({
@@ -122,6 +135,10 @@ describe("CONSULTATION SERVICE - MAHASISWA FLOW", () => {
     });
 
     test("CONS-MHS-04 psychologist tidak ditemukan - should return 404", async () => {
+      logTestContext({
+        input: { userId: 'some-id', psychologistId: 'valid-object-id', message: "test", role: "mahasiswa" },
+        expected: 'throws AppError with status 404 "Psychologist not found"',
+      });
       mockUsersCollection.findOne.mockResolvedValue(null);
 
       await expectAppError(
@@ -138,6 +155,10 @@ describe("CONSULTATION SERVICE - MAHASISWA FLOW", () => {
     });
 
     test("CONS-MHS-05 role bukan mahasiswa - should return 403", async () => {
+      logTestContext({
+        input: { userId: 'some-id', psychologistId: 'valid-object-id', message: "test", role: "psikolog" },
+        expected: 'throws AppError with status 403 "Only mahasiswa allowed"',
+      });
       await expectAppError(
         () =>
           applyConsultation({
@@ -152,6 +173,10 @@ describe("CONSULTATION SERVICE - MAHASISWA FLOW", () => {
     });
 
     test("CONS-MHS-06 duplicate consultation - should return 409", async () => {
+      logTestContext({
+        input: { userId: 'some-id', psychologistId: 'valid-object-id', message: "test", role: "mahasiswa" },
+        expected: 'throws AppError with status 409 "Consultation already exists"',
+      });
       (ConsultationModel.findOne as jest.Mock).mockResolvedValue({ _id: "exist" });
 
       mockUsersCollection.findOne.mockResolvedValue({ _id: createObjectId() });
@@ -170,6 +195,10 @@ describe("CONSULTATION SERVICE - MAHASISWA FLOW", () => {
     });
 
     test("CONS-MHS-15 create consultation sukses - should return 201", async () => {
+      logTestContext({
+        input: { userId: 'some-id', psychologistId: 'valid-object-id', message: "halo", role: "mahasiswa" },
+        expected: 'returns statusCode 201 with message "Consultation created"',
+      });
       (ConsultationModel.findOne as jest.Mock).mockResolvedValue(null);
 
       mockUsersCollection.findOne.mockResolvedValue({ _id: createObjectId() });
@@ -199,6 +228,10 @@ describe("CONSULTATION SERVICE - MAHASISWA FLOW", () => {
    */
   describe("getConsultationDetail & List", () => {
     test("CONS-MHS-07 akses milik orang lain - should return 403", async () => {
+      logTestContext({
+        input: { userId: 'some-id', consultationId: 'some-consultation-id' },
+        expected: 'throws AppError with status 403 "Access denied"',
+      });
       (ConsultationModel.findById as jest.Mock).mockResolvedValue({
         userId: createObjectId(),
         psychologistId: createObjectId(),
@@ -216,6 +249,10 @@ describe("CONSULTATION SERVICE - MAHASISWA FLOW", () => {
     });
 
     test("CONS-MHS-08 consultationId invalid - should return 400", async () => {
+      logTestContext({
+        input: { userId: 'some-id', consultationId: "invalid" },
+        expected: 'throws AppError with status 400 "Invalid consultationId"',
+      });
       await expectAppError(
         () =>
           getConsultationDetail({
@@ -228,6 +265,10 @@ describe("CONSULTATION SERVICE - MAHASISWA FLOW", () => {
     });
 
     test("CONS-MHS-09 consultation tidak ditemukan - should return 404", async () => {
+      logTestContext({
+        input: { userId: 'some-id', consultationId: 'valid-object-id' },
+        expected: 'throws AppError with status 404 "Consultation not found"',
+      });
       (ConsultationModel.findById as jest.Mock).mockResolvedValue(null);
 
       await expectAppError(
@@ -242,6 +283,10 @@ describe("CONSULTATION SERVICE - MAHASISWA FLOW", () => {
     });
 
     test("CONS-MHS-16 get list consultation - should return data", async () => {
+      logTestContext({
+        input: { userId: 'some-id' },
+        expected: 'returns array of length 1',
+      });
       (ConsultationModel.find as jest.Mock).mockResolvedValue([{ _id: "1" }]);
 
       const result = await getConsultationList(createObjectId());
@@ -249,6 +294,10 @@ describe("CONSULTATION SERVICE - MAHASISWA FLOW", () => {
     });
 
     test("CONS-MHS-17 get detail consultation - should return data", async () => {
+      logTestContext({
+        input: { userId: 'some-id', consultationId: 'valid-object-id' },
+        expected: 'returns defined consultation detail object',
+      });
       const uid = createObjectId();
 
       (ConsultationModel.findById as jest.Mock).mockResolvedValue({
@@ -272,6 +321,10 @@ describe("CONSULTATION SERVICE - MAHASISWA FLOW", () => {
    */
   describe("sendMessage", () => {
     test("CONS-MHS-10 tanpa login - should return 401", async () => {
+      logTestContext({
+        input: { userId: undefined, consultationId: 'some-id', message: "halo" },
+        expected: 'throws AppError with status 401 Unauthorized access',
+      });
       await expectAppError(
         () =>
           sendMessage({
@@ -285,6 +338,10 @@ describe("CONSULTATION SERVICE - MAHASISWA FLOW", () => {
     });
 
     test("CONS-MHS-11 status pending - should return 400", async () => {
+      logTestContext({
+        input: { userId: 'some-id', consultationId: 'some-id', message: "hi" },
+        expected: 'throws AppError with status 400 "Consultation not active" (status is pending)',
+      });
       const uid = createObjectId();
 
       (chatRoom.findOne as jest.Mock).mockResolvedValue(mockRoom({ status: "active", participants: [uid] }));
@@ -308,6 +365,10 @@ describe("CONSULTATION SERVICE - MAHASISWA FLOW", () => {
     });
 
     test("CONS-MHS-12 status rejected - should return 400", async () => {
+      logTestContext({
+        input: { userId: 'some-id', consultationId: 'some-id', message: "hi" },
+        expected: 'throws AppError with status 400 "Consultation not active" (status is rejected)',
+      });
       const uid = createObjectId();
 
       (chatRoom.findOne as jest.Mock).mockResolvedValue(mockRoom({ status: "active", participants: [uid] }));
@@ -331,6 +392,10 @@ describe("CONSULTATION SERVICE - MAHASISWA FLOW", () => {
     });
 
     test("CONS-MHS-13 message kosong - should return 400", async () => {
+      logTestContext({
+        input: { userId: 'some-id', consultationId: 'some-id', message: "" },
+        expected: 'throws AppError with status 400 EMPTY_MESSAGE',
+      });
       const uid = createObjectId();
 
       (chatRoom.findOne as jest.Mock).mockResolvedValue(mockRoom({ status: "active", participants: [uid] }));
@@ -354,6 +419,10 @@ describe("CONSULTATION SERVICE - MAHASISWA FLOW", () => {
     });
 
     test("CONS-MHS-14 message terlalu panjang - should return 413", async () => {
+      logTestContext({
+        input: { userId: 'some-id', consultationId: 'some-id', message: "a".repeat(2000) },
+        expected: 'throws AppError with status 413 MESSAGE_TOO_LONG',
+      });
       const uid = createObjectId();
 
       (chatRoom.findOne as jest.Mock).mockResolvedValue(mockRoom({ status: "active", participants: [uid] }));
@@ -377,6 +446,10 @@ describe("CONSULTATION SERVICE - MAHASISWA FLOW", () => {
     });
 
     test("CONS-MHS-18 send message sukses - should return 200", async () => {
+      logTestContext({
+        input: { userId: 'some-id', consultationId: 'some-id', message: "halo" },
+        expected: 'returns statusCode 200 and room.messages.length becomes 1',
+      });
       const uid = createObjectId();
       const pid = createObjectId();
 

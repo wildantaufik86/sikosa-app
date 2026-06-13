@@ -1,9 +1,8 @@
-import request from "supertest";
 import mongoose from "mongoose";
-import app from "../../../src/app";
 import chatRoom from "../../../src/models/chatRoom";
 import { signToken } from "../../../src/utils/jwt";
 import { OK, CREATED, BAD_REQUEST, UNAUTHORIZED, FORBIDDEN, NOT_FOUND, TO_LARGE } from "../../../src/constants/http";
+import { apiTest } from "../../setup/apiTest";
 
 jest.setTimeout(20000); // 20 detik
 
@@ -56,12 +55,24 @@ describe("Chat Integration Test - Psikolog", () => {
   // =========================
   describe("GET /api/chat/rooms", () => {
     test("[TC-INT-CHAT-PSI-001] : tanpa token - should 401 Unauthorized", async () => {
-      const res = await request(app).get("/api/chat/rooms");
+      const res = await apiTest({
+        id: "TC-INT-CHAT-PSI-001",
+        method: "GET",
+        url: "/api/chat/rooms",
+        expectedStatus: UNAUTHORIZED,
+      });
+
       expect(res.status).toBe(UNAUTHORIZED);
     });
 
     test("[TC-INT-CHAT-PSI-002] : get rooms success - should return user rooms", async () => {
-      const res = await request(app).get("/api/chat/rooms").set("Authorization", `Bearer ${psikologToken}`);
+      const res = await apiTest({
+        id: "TC-INT-CHAT-PSI-002",
+        method: "GET",
+        url: "/api/chat/rooms",
+        headers: { Authorization: `Bearer ${psikologToken}` },
+        expectedStatus: OK,
+      });
 
       expect(res.status).toBe(OK);
       expect(Array.isArray(res.body)).toBe(true);
@@ -74,7 +85,13 @@ describe("Chat Integration Test - Psikolog", () => {
         sessionId: new mongoose.Types.ObjectId().toString(),
       });
 
-      const res = await request(app).get("/api/chat/rooms").set("Authorization", `Bearer ${token}`);
+      const res = await apiTest({
+        id: "TC-INT-CHAT-PSI-003",
+        method: "GET",
+        url: "/api/chat/rooms",
+        headers: { Authorization: `Bearer ${token}` },
+        expectedStatus: OK,
+      });
 
       expect(res.status).toBe(OK);
       expect(res.body).toEqual([]);
@@ -87,7 +104,13 @@ describe("Chat Integration Test - Psikolog", () => {
         messages: [],
       });
 
-      const res = await request(app).get("/api/chat/rooms").set("Authorization", `Bearer ${psikologToken}`);
+      const res = await apiTest({
+        id: "TC-INT-CHAT-PSI-004",
+        method: "GET",
+        url: "/api/chat/rooms",
+        headers: { Authorization: `Bearer ${psikologToken}` },
+        expectedStatus: OK,
+      });
 
       const foreignId = foreignRoom._id as mongoose.Types.ObjectId;
 
@@ -102,20 +125,36 @@ describe("Chat Integration Test - Psikolog", () => {
   // =========================
   describe("GET /api/chat/messages/:roomId", () => {
     test("[TC-INT-CHAT-PSI-005] : tanpa token - should 401 Unauthorized", async () => {
-      const res = await request(app).get(`/api/chat/messages/${roomId}`);
+      const res = await apiTest({
+        id: "TC-INT-CHAT-PSI-005",
+        method: "GET",
+        url: `/api/chat/messages/${roomId}`,
+        expectedStatus: UNAUTHORIZED,
+      });
+
       expect(res.status).toBe(UNAUTHORIZED);
     });
 
     test("[TC-INT-CHAT-PSI-006] : room tidak ditemukan - should 404", async () => {
-      const res = await request(app)
-        .get(`/api/chat/messages/${new mongoose.Types.ObjectId()}`)
-        .set("Authorization", `Bearer ${psikologToken}`);
+      const res = await apiTest({
+        id: "TC-INT-CHAT-PSI-006",
+        method: "GET",
+        url: `/api/chat/messages/${new mongoose.Types.ObjectId()}`,
+        headers: { Authorization: `Bearer ${psikologToken}` },
+        expectedStatus: NOT_FOUND,
+      });
 
       expect(res.status).toBe(NOT_FOUND);
     });
 
     test("[TC-INT-CHAT-PSI-007] : get messages success - should return messages", async () => {
-      const res = await request(app).get(`/api/chat/messages/${roomId}`).set("Authorization", `Bearer ${psikologToken}`);
+      const res = await apiTest({
+        id: "TC-INT-CHAT-PSI-007",
+        method: "GET",
+        url: `/api/chat/messages/${roomId}`,
+        headers: { Authorization: `Bearer ${psikologToken}` },
+        expectedStatus: OK,
+      });
 
       expect(res.status).toBe(OK);
       expect(Array.isArray(res.body)).toBe(true);
@@ -128,7 +167,13 @@ describe("Chat Integration Test - Psikolog", () => {
         messages: [],
       });
 
-      const res = await request(app).get(`/api/chat/messages/${foreignRoom._id}`).set("Authorization", `Bearer ${psikologToken}`);
+      const res = await apiTest({
+        id: "TC-INT-CHAT-PSI-008",
+        method: "GET",
+        url: `/api/chat/messages/${foreignRoom._id}`,
+        headers: { Authorization: `Bearer ${psikologToken}` },
+        expectedStatus: FORBIDDEN,
+      });
 
       expect(res.status).toBe(FORBIDDEN);
     });
@@ -139,26 +184,39 @@ describe("Chat Integration Test - Psikolog", () => {
   // =========================
   describe("POST /api/chat/messages", () => {
     test("[TC-INT-CHAT-PSI-010] : tanpa field - should 400", async () => {
-      const res = await request(app).post("/api/chat/messages").set("Authorization", `Bearer ${psikologToken}`).send({});
+      const res = await apiTest({
+        id: "TC-INT-CHAT-PSI-010",
+        method: "POST",
+        url: "/api/chat/messages",
+        headers: { Authorization: `Bearer ${psikologToken}` },
+        payload: {},
+        expectedStatus: BAD_REQUEST,
+      });
 
       expect(res.status).toBe(BAD_REQUEST);
     });
 
     test("[TC-INT-CHAT-PSI-011] : send message success - should 201 Created", async () => {
-      const res = await request(app).post("/api/chat/messages").set("Authorization", `Bearer ${psikologToken}`).send({
-        roomId,
-        senderId: psikologId,
-        message: "Reply from psikolog",
+      const res = await apiTest({
+        id: "TC-INT-CHAT-PSI-011",
+        method: "POST",
+        url: "/api/chat/messages",
+        headers: { Authorization: `Bearer ${psikologToken}` },
+        payload: { roomId, senderId: psikologId, message: "Reply from psikolog" },
+        expectedStatus: CREATED,
       });
 
       expect(res.status).toBe(CREATED);
     });
 
     test("[TC-INT-CHAT-PSI-012] : tidak simpan ke DB - should NOT persist message", async () => {
-      await request(app).post("/api/chat/messages").set("Authorization", `Bearer ${psikologToken}`).send({
-        roomId,
-        senderId: psikologId,
-        message: "Not saved",
+      await apiTest({
+        id: "TC-INT-CHAT-PSI-012",
+        method: "POST",
+        url: "/api/chat/messages",
+        headers: { Authorization: `Bearer ${psikologToken}` },
+        payload: { roomId, senderId: psikologId, message: "Not saved" },
+        expectedStatus: CREATED,
       });
 
       const room = await chatRoom.findById(roomId);
@@ -170,20 +228,26 @@ describe("Chat Integration Test - Psikolog", () => {
     test("[TC-INT-CHAT-PSI-015] : message terlalu panjang - OK", async () => {
       const longMessage = "a".repeat(1001);
 
-      const res = await request(app).post("/api/chat/messages").set("Authorization", `Bearer ${psikologToken}`).send({
-        roomId,
-        senderId: psikologId,
-        message: longMessage,
+      const res = await apiTest({
+        id: "TC-INT-CHAT-PSI-015",
+        method: "POST",
+        url: "/api/chat/messages",
+        headers: { Authorization: `Bearer ${psikologToken}` },
+        payload: { roomId, senderId: psikologId, message: longMessage },
+        expectedStatus: TO_LARGE,
       });
 
       expect(res.status).toBe(TO_LARGE);
     });
 
     test("[TC-INT-CHAT-PSI-016] : message mengandung script - should 400", async () => {
-      const res = await request(app).post("/api/chat/messages").set("Authorization", `Bearer ${psikologToken}`).send({
-        roomId,
-        senderId: psikologId,
-        message: "<script>alert(1)</script>",
+      const res = await apiTest({
+        id: "TC-INT-CHAT-PSI-016",
+        method: "POST",
+        url: "/api/chat/messages",
+        headers: { Authorization: `Bearer ${psikologToken}` },
+        payload: { roomId, senderId: psikologId, message: "<script>alert(1)</script>" },
+        expectedStatus: BAD_REQUEST,
       });
 
       expect(res.status).toBe(BAD_REQUEST);
@@ -195,20 +259,36 @@ describe("Chat Integration Test - Psikolog", () => {
   // =========================
   describe("PATCH /api/chat/finish/:roomId", () => {
     test("[TC-INT-CHAT-PSI-017] : tanpa token - should 401 Unauthorized", async () => {
-      const res = await request(app).patch(`/api/chat/finish/${roomId}`);
+      const res = await apiTest({
+        id: "TC-INT-CHAT-PSI-017",
+        method: "PATCH",
+        url: `/api/chat/finish/${roomId}`,
+        expectedStatus: UNAUTHORIZED,
+      });
+
       expect(res.status).toBe(UNAUTHORIZED);
     });
 
     test("[TC-INT-CHAT-PSI-018] : room tidak ditemukan - should 404", async () => {
-      const res = await request(app)
-        .patch(`/api/chat/finish/${new mongoose.Types.ObjectId()}`)
-        .set("Authorization", `Bearer ${psikologToken}`);
+      const res = await apiTest({
+        id: "TC-INT-CHAT-PSI-018",
+        method: "PATCH",
+        url: `/api/chat/finish/${new mongoose.Types.ObjectId()}`,
+        headers: { Authorization: `Bearer ${psikologToken}` },
+        expectedStatus: NOT_FOUND,
+      });
 
       expect(res.status).toBe(NOT_FOUND);
     });
 
     test("[TC-INT-CHAT-PSI-019] : finish chat success - should update status inactive", async () => {
-      const res = await request(app).patch(`/api/chat/finish/${roomId}`).set("Authorization", `Bearer ${psikologToken}`);
+      const res = await apiTest({
+        id: "TC-INT-CHAT-PSI-019",
+        method: "PATCH",
+        url: `/api/chat/finish/${roomId}`,
+        headers: { Authorization: `Bearer ${psikologToken}` },
+        expectedStatus: OK,
+      });
 
       expect(res.status).toBe(OK);
 
@@ -217,9 +297,21 @@ describe("Chat Integration Test - Psikolog", () => {
     });
 
     test("[TC-INT-CHAT-PSI-020] : idempotent - should remain inactive", async () => {
-      await request(app).patch(`/api/chat/finish/${roomId}`).set("Authorization", `Bearer ${psikologToken}`);
+      await apiTest({
+        id: "TC-INT-CHAT-PSI-020-setup",
+        method: "PATCH",
+        url: `/api/chat/finish/${roomId}`,
+        headers: { Authorization: `Bearer ${psikologToken}` },
+        expectedStatus: OK,
+      });
 
-      const res = await request(app).patch(`/api/chat/finish/${roomId}`).set("Authorization", `Bearer ${psikologToken}`);
+      const res = await apiTest({
+        id: "TC-INT-CHAT-PSI-020",
+        method: "PATCH",
+        url: `/api/chat/finish/${roomId}`,
+        headers: { Authorization: `Bearer ${psikologToken}` },
+        expectedStatus: OK,
+      });
 
       expect(res.status).toBe(OK);
 
@@ -228,20 +320,41 @@ describe("Chat Integration Test - Psikolog", () => {
     });
 
     test("[TC-INT-CHAT-PSI-021] : get messages setelah finish - should still accessible", async () => {
-      await request(app).patch(`/api/chat/finish/${roomId}`).set("Authorization", `Bearer ${psikologToken}`);
+      await apiTest({
+        id: "TC-INT-CHAT-PSI-021-setup",
+        method: "PATCH",
+        url: `/api/chat/finish/${roomId}`,
+        headers: { Authorization: `Bearer ${psikologToken}` },
+        expectedStatus: OK,
+      });
 
-      const res = await request(app).get(`/api/chat/messages/${roomId}`).set("Authorization", `Bearer ${psikologToken}`);
+      const res = await apiTest({
+        id: "TC-INT-CHAT-PSI-021",
+        method: "GET",
+        url: `/api/chat/messages/${roomId}`,
+        headers: { Authorization: `Bearer ${psikologToken}` },
+        expectedStatus: OK,
+      });
 
       expect(res.status).toBe(OK);
     });
 
     test("[TC-INT-CHAT-PSI-022] : kirim message ke room inactive - behavior tergantung controller", async () => {
-      await request(app).patch(`/api/chat/finish/${roomId}`).set("Authorization", `Bearer ${psikologToken}`);
+      await apiTest({
+        id: "TC-INT-CHAT-PSI-022-setup",
+        method: "PATCH",
+        url: `/api/chat/finish/${roomId}`,
+        headers: { Authorization: `Bearer ${psikologToken}` },
+        expectedStatus: OK,
+      });
 
-      const res = await request(app).post("/api/chat/messages").set("Authorization", `Bearer ${psikologToken}`).send({
-        roomId,
-        senderId: psikologId,
-        message: "After finish",
+      const res = await apiTest({
+        id: "TC-INT-CHAT-PSI-022",
+        method: "POST",
+        url: "/api/chat/messages",
+        headers: { Authorization: `Bearer ${psikologToken}` },
+        payload: { roomId, senderId: psikologId, message: "After finish" },
+        expectedStatus: CREATED,
       });
 
       expect([CREATED, BAD_REQUEST]).toContain(res.status);

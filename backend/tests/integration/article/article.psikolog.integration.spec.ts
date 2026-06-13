@@ -1,12 +1,11 @@
-import request from "supertest";
 import mongoose from "mongoose";
-import app from "../../../src/app";
 
 import UserModel from "../../../src/models/userModel";
 import ArticleModel from "../../../src/models/articleModel";
 
 import { signToken } from "../../../src/utils/jwt";
 import { OK, CREATED, BAD_REQUEST, NOT_FOUND, UNAUTHORIZED } from "../../../src/constants/http";
+import { apiTest } from "../../setup/apiTest";
 
 let psikologToken: string;
 let otherToken: string;
@@ -80,10 +79,14 @@ describe("PSIKOLOG ARTICLE - NEGATIVE", () => {
       writer: otherId,
     });
 
-    const res = await request(app)
-      .put(`/api/psikolog/articles/${article._id}`)
-      .set("Authorization", `Bearer ${psikologToken}`)
-      .send({ title: "Update" });
+    const res = await apiTest({
+      id: "TC-INT-PSI-01",
+      method: "PUT",
+      url: `/api/psikolog/articles/${article._id}`,
+      headers: { Authorization: `Bearer ${psikologToken}` },
+      payload: { title: "Update" },
+      expectedStatus: UNAUTHORIZED,
+    });
 
     expect(res.status).toBe(UNAUTHORIZED);
   });
@@ -96,82 +99,124 @@ describe("PSIKOLOG ARTICLE - NEGATIVE", () => {
       writer: otherId,
     });
 
-    const res = await request(app)
-      .delete(`/api/psikolog/articles/${article._id}`)
-      .set("Authorization", `Bearer ${psikologToken}`);
+    const res = await apiTest({
+      id: "TC-INT-PSI-02",
+      method: "DELETE",
+      url: `/api/psikolog/articles/${article._id}`,
+      headers: { Authorization: `Bearer ${psikologToken}` },
+      expectedStatus: UNAUTHORIZED,
+    });
 
     expect(res.status).toBe(UNAUTHORIZED);
   });
 
   test("[TC-INT-PSI-03] Update tidak ditemukan", async () => {
-    const res = await request(app)
-      .put(`/api/psikolog/articles/${new mongoose.Types.ObjectId()}`)
-      .set("Authorization", `Bearer ${psikologToken}`)
-      .send({ title: "X" });
+    const res = await apiTest({
+      id: "TC-INT-PSI-03",
+      method: "PUT",
+      url: `/api/psikolog/articles/${new mongoose.Types.ObjectId()}`,
+      headers: { Authorization: `Bearer ${psikologToken}` },
+      payload: { title: "X" },
+      expectedStatus: UNAUTHORIZED,
+    });
 
     expect([UNAUTHORIZED, NOT_FOUND]).toContain(res.status);
   });
 
   test("[TC-INT-PSI-04] Delete tidak ditemukan", async () => {
-    const res = await request(app)
-      .delete(`/api/psikolog/articles/${new mongoose.Types.ObjectId()}`)
-      .set("Authorization", `Bearer ${psikologToken}`);
+    const res = await apiTest({
+      id: "TC-INT-PSI-04",
+      method: "DELETE",
+      url: `/api/psikolog/articles/${new mongoose.Types.ObjectId()}`,
+      headers: { Authorization: `Bearer ${psikologToken}` },
+      expectedStatus: UNAUTHORIZED,
+    });
 
     expect([UNAUTHORIZED, NOT_FOUND]).toContain(res.status);
   });
 
   test("[TC-INT-PSI-05] Create tanpa token", async () => {
-    const res = await request(app).post("/api/psikolog/articles").send({
-      title: "A",
-      content: "B",
+    const res = await apiTest({
+      id: "TC-INT-PSI-05",
+      method: "POST",
+      url: "/api/psikolog/articles",
+      payload: { title: "A", content: "B" },
+      expectedStatus: UNAUTHORIZED,
     });
 
     expect(res.status).toBe(UNAUTHORIZED);
   });
 
   test("[TC-INT-PSI-06] Update tanpa token", async () => {
-    const res = await request(app).put(`/api/psikolog/articles/${new mongoose.Types.ObjectId()}`).send({ title: "X" });
+    const res = await apiTest({
+      id: "TC-INT-PSI-06",
+      method: "PUT",
+      url: `/api/psikolog/articles/${new mongoose.Types.ObjectId()}`,
+      payload: { title: "X" },
+      expectedStatus: UNAUTHORIZED,
+    });
 
     expect(res.status).toBe(UNAUTHORIZED);
   });
 
   test("[TC-INT-PSI-07] Delete tanpa token", async () => {
-    const res = await request(app).delete(`/api/psikolog/articles/${new mongoose.Types.ObjectId()}`);
+    const res = await apiTest({
+      id: "TC-INT-PSI-07",
+      method: "DELETE",
+      url: `/api/psikolog/articles/${new mongoose.Types.ObjectId()}`,
+      expectedStatus: UNAUTHORIZED,
+    });
 
     expect(res.status).toBe(UNAUTHORIZED);
   });
 
   test("[TC-INT-PSI-08] Create tanpa title", async () => {
-    const res = await request(app)
-      .post("/api/psikolog/articles")
-      .set("Authorization", `Bearer ${psikologToken}`)
-      .send({ content: "B" });
+    const res = await apiTest({
+      id: "TC-INT-PSI-08",
+      method: "POST",
+      url: "/api/psikolog/articles",
+      headers: { Authorization: `Bearer ${psikologToken}` },
+      payload: { content: "B" },
+      expectedStatus: BAD_REQUEST,
+    });
 
     expect(res.status).toBe(BAD_REQUEST);
   });
 
   test("[TC-INT-PSI-09] Create tanpa content", async () => {
-    const res = await request(app)
-      .post("/api/psikolog/articles")
-      .set("Authorization", `Bearer ${psikologToken}`)
-      .send({ title: "A" });
+    const res = await apiTest({
+      id: "TC-INT-PSI-09",
+      method: "POST",
+      url: "/api/psikolog/articles",
+      headers: { Authorization: `Bearer ${psikologToken}` },
+      payload: { title: "A" },
+      expectedStatus: BAD_REQUEST,
+    });
 
     expect(res.status).toBe(BAD_REQUEST);
   });
 
   test("[TC-INT-PSI-10] Update ID invalid", async () => {
-    const res = await request(app)
-      .put("/api/psikolog/articles/invalid-id")
-      .set("Authorization", `Bearer ${psikologToken}`)
-      .send({ title: "X" });
+    const res = await apiTest({
+      id: "TC-INT-PSI-10",
+      method: "PUT",
+      url: "/api/psikolog/articles/invalid-id",
+      headers: { Authorization: `Bearer ${psikologToken}` },
+      payload: { title: "X" },
+      expectedStatus: BAD_REQUEST,
+    });
 
     expect(res.status).toBe(BAD_REQUEST);
   });
 
   test("[TC-INT-PSI-12] Get artikel tidak ditemukan", async () => {
-    const res = await request(app)
-      .get(`/api/admin/articles/${new mongoose.Types.ObjectId()}`)
-      .set("Authorization", `Bearer ${adminToken}`);
+    const res = await apiTest({
+      id: "TC-INT-PSI-12",
+      method: "GET",
+      url: `/api/admin/articles/${new mongoose.Types.ObjectId()}`,
+      headers: { Authorization: `Bearer ${adminToken}` },
+      expectedStatus: NOT_FOUND,
+    });
 
     expect(res.status).toBe(NOT_FOUND);
   });
@@ -189,11 +234,21 @@ describe("PSIKOLOG ARTICLE - EDGE", () => {
       writer: psikologId,
     });
 
-    await request(app).delete(`/api/psikolog/articles/${article._id}`).set("Authorization", `Bearer ${psikologToken}`);
+    await apiTest({
+      id: "TC-INT-PSI-11-setup",
+      method: "DELETE",
+      url: `/api/psikolog/articles/${article._id}`,
+      headers: { Authorization: `Bearer ${psikologToken}` },
+      expectedStatus: OK,
+    });
 
-    const res = await request(app)
-      .delete(`/api/psikolog/articles/${article._id}`)
-      .set("Authorization", `Bearer ${psikologToken}`);
+    const res = await apiTest({
+      id: "TC-INT-PSI-11",
+      method: "DELETE",
+      url: `/api/psikolog/articles/${article._id}`,
+      headers: { Authorization: `Bearer ${psikologToken}` },
+      expectedStatus: NOT_FOUND,
+    });
 
     expect([NOT_FOUND, UNAUTHORIZED]).toContain(res.status);
   });
@@ -204,10 +259,14 @@ describe("PSIKOLOG ARTICLE - EDGE", () => {
 //
 describe("PSIKOLOG ARTICLE - POSITIVE", () => {
   test("[TC-INT-PSI-13] Create artikel valid", async () => {
-    const res = await request(app)
-      .post("/api/psikolog/articles")
-      .set("Authorization", `Bearer ${psikologToken}`)
-      .send({ title: "Hello", content: "World" });
+    const res = await apiTest({
+      id: "TC-INT-PSI-13",
+      method: "POST",
+      url: "/api/psikolog/articles",
+      headers: { Authorization: `Bearer ${psikologToken}` },
+      payload: { title: "Hello", content: "World" },
+      expectedStatus: CREATED,
+    });
 
     expect(res.status).toBe(CREATED);
   });
@@ -220,10 +279,14 @@ describe("PSIKOLOG ARTICLE - POSITIVE", () => {
       writer: psikologId,
     });
 
-    const res = await request(app)
-      .put(`/api/psikolog/articles/${article._id}`)
-      .set("Authorization", `Bearer ${psikologToken}`)
-      .send({ title: "New" });
+    const res = await apiTest({
+      id: "TC-INT-PSI-14",
+      method: "PUT",
+      url: `/api/psikolog/articles/${article._id}`,
+      headers: { Authorization: `Bearer ${psikologToken}` },
+      payload: { title: "New" },
+      expectedStatus: OK,
+    });
 
     expect(res.status).toBe(OK);
   });
@@ -236,10 +299,14 @@ describe("PSIKOLOG ARTICLE - POSITIVE", () => {
       writer: psikologId,
     });
 
-    const res = await request(app)
-      .put(`/api/psikolog/articles/${article._id}`)
-      .set("Authorization", `Bearer ${psikologToken}`)
-      .send({ title: "New Title" });
+    const res = await apiTest({
+      id: "TC-INT-PSI-15",
+      method: "PUT",
+      url: `/api/psikolog/articles/${article._id}`,
+      headers: { Authorization: `Bearer ${psikologToken}` },
+      payload: { title: "New Title" },
+      expectedStatus: OK,
+    });
 
     expect(res.status).toBe(OK);
     expect(res.body.data.slug).toBe("new-title");
@@ -253,10 +320,14 @@ describe("PSIKOLOG ARTICLE - POSITIVE", () => {
       writer: psikologId,
     });
 
-    const res = await request(app)
-      .put(`/api/psikolog/articles/${article._id}`)
-      .set("Authorization", `Bearer ${psikologToken}`)
-      .send({ content: "New Content" });
+    const res = await apiTest({
+      id: "TC-INT-PSI-16",
+      method: "PUT",
+      url: `/api/psikolog/articles/${article._id}`,
+      headers: { Authorization: `Bearer ${psikologToken}` },
+      payload: { content: "New Content" },
+      expectedStatus: OK,
+    });
 
     expect(res.status).toBe(OK);
   });
@@ -269,9 +340,13 @@ describe("PSIKOLOG ARTICLE - POSITIVE", () => {
       writer: psikologId,
     });
 
-    const res = await request(app)
-      .delete(`/api/psikolog/articles/${article._id}`)
-      .set("Authorization", `Bearer ${psikologToken}`);
+    const res = await apiTest({
+      id: "TC-INT-PSI-17",
+      method: "DELETE",
+      url: `/api/psikolog/articles/${article._id}`,
+      headers: { Authorization: `Bearer ${psikologToken}` },
+      expectedStatus: OK,
+    });
 
     expect(res.status).toBe(OK);
   });
@@ -284,7 +359,13 @@ describe("PSIKOLOG ARTICLE - POSITIVE", () => {
       writer: psikologId,
     });
 
-    const res = await request(app).get(`/api/admin/articles/${article._id}`).set("Authorization", `Bearer ${adminToken}`);
+    const res = await apiTest({
+      id: "TC-INT-PSI-18",
+      method: "GET",
+      url: `/api/admin/articles/${article._id}`,
+      headers: { Authorization: `Bearer ${adminToken}` },
+      expectedStatus: OK,
+    });
 
     expect(res.status).toBe(OK);
   });
@@ -297,17 +378,27 @@ describe("PSIKOLOG ARTICLE - POSITIVE", () => {
       writer: psikologId,
     });
 
-    const res = await request(app).get("/api/admin/articles").set("Authorization", `Bearer ${adminToken}`);
+    const res = await apiTest({
+      id: "TC-INT-PSI-19",
+      method: "GET",
+      url: "/api/admin/articles",
+      headers: { Authorization: `Bearer ${adminToken}` },
+      expectedStatus: OK,
+    });
 
     expect(res.status).toBe(OK);
     expect(Array.isArray(res.body.data)).toBe(true);
   });
 
   test("[TC-INT-PSI-20] Slug terbentuk", async () => {
-    const res = await request(app)
-      .post("/api/psikolog/articles")
-      .set("Authorization", `Bearer ${psikologToken}`)
-      .send({ title: "Hello World", content: "X" });
+    const res = await apiTest({
+      id: "TC-INT-PSI-20",
+      method: "POST",
+      url: "/api/psikolog/articles",
+      headers: { Authorization: `Bearer ${psikologToken}` },
+      payload: { title: "Hello World", content: "X" },
+      expectedStatus: CREATED,
+    });
 
     expect(res.body.data.slug).toBe("hello-world");
   });
@@ -320,19 +411,27 @@ describe("PSIKOLOG ARTICLE - POSITIVE", () => {
       writer: psikologId,
     });
 
-    const res = await request(app)
-      .put(`/api/psikolog/articles/${article._id}`)
-      .set("Authorization", `Bearer ${psikologToken}`)
-      .send({ title: "Updated Title" });
+    const res = await apiTest({
+      id: "TC-INT-PSI-21",
+      method: "PUT",
+      url: `/api/psikolog/articles/${article._id}`,
+      headers: { Authorization: `Bearer ${psikologToken}` },
+      payload: { title: "Updated Title" },
+      expectedStatus: OK,
+    });
 
     expect(res.body.data.slug).toBe("updated-title");
   });
 
   test("[TC-INT-PSI-22] Response format valid", async () => {
-    const res = await request(app)
-      .post("/api/psikolog/articles")
-      .set("Authorization", `Bearer ${psikologToken}`)
-      .send({ title: "Format Test", content: "X" });
+    const res = await apiTest({
+      id: "TC-INT-PSI-22",
+      method: "POST",
+      url: "/api/psikolog/articles",
+      headers: { Authorization: `Bearer ${psikologToken}` },
+      payload: { title: "Format Test", content: "X" },
+      expectedStatus: CREATED,
+    });
 
     expect(res.body.data).toHaveProperty("id");
     expect(res.body.data).toHaveProperty("title");

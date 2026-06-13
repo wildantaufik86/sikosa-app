@@ -5,6 +5,7 @@ import UserModel from "../../../src/models/userModel";
 import { ConsultationModel } from "../../../src/models/consultationModel";
 import { signToken } from "../../../src/utils/jwt";
 import { BAD_REQUEST, FORBIDDEN, NOT_FOUND, OK, UNAUTHORIZED } from "../../../src/constants/http";
+import { apiTest } from "../../setup/apiTest";
 
 jest.setTimeout(20000); // 20 detik
 
@@ -80,10 +81,14 @@ describe("User Profile Integration Test", () => {
     });
 
     test("[TC-INT-UP-001] : update fullname - fullname updated", async () => {
-      const res = await request(app)
-        .put("/api/user/profile")
-        .set("Authorization", `Bearer ${token}`)
-        .send({ fullname: "New Name" });
+      const res = await apiTest({
+        id: "TC-INT-UP-001",
+        method: "PUT",
+        url: "/api/user/profile",
+        headers: { Authorization: `Bearer ${token}` },
+        payload: { fullname: "New Name" },
+        expectedStatus: OK,
+      });
 
       expect(res.status).toBe(OK);
 
@@ -92,7 +97,14 @@ describe("User Profile Integration Test", () => {
     });
 
     test("[TC-INT-UP-002] : update nim - nim updated", async () => {
-      const res = await request(app).put("/api/user/profile").set("Authorization", `Bearer ${token}`).send({ nim: "12345678" });
+      const res = await apiTest({
+        id: "TC-INT-UP-002",
+        method: "PUT",
+        url: "/api/user/profile",
+        headers: { Authorization: `Bearer ${token}` },
+        payload: { nim: "12345678" },
+        expectedStatus: OK,
+      });
 
       expect(res.status).toBe(OK);
 
@@ -113,10 +125,14 @@ describe("User Profile Integration Test", () => {
     });
 
     test("[TC-INT-UP-004] : update fullname + nim - all updated", async () => {
-      const res = await request(app)
-        .put("/api/user/profile")
-        .set("Authorization", `Bearer ${token}`)
-        .send({ fullname: "Updated", nim: "999" });
+      const res = await apiTest({
+        id: "TC-INT-UP-004",
+        method: "PUT",
+        url: "/api/user/profile",
+        headers: { Authorization: `Bearer ${token}` },
+        payload: { fullname: "Updated", nim: "999" },
+        expectedStatus: OK,
+      });
 
       expect(res.status).toBe(OK);
 
@@ -126,19 +142,39 @@ describe("User Profile Integration Test", () => {
     });
 
     test("[TC-INT-UP-005] : empty payload - BAD_REQUEST", async () => {
-      const res = await request(app).put("/api/user/profile").set("Authorization", `Bearer ${token}`).send({});
+      const res = await apiTest({
+        id: "TC-INT-UP-005",
+        method: "PUT",
+        url: "/api/user/profile",
+        headers: { Authorization: `Bearer ${token}` },
+        payload: {},
+        expectedStatus: BAD_REQUEST,
+      });
 
       expect(res.status).toBe(BAD_REQUEST);
     });
 
     test("[TC-INT-UP-006] : no token - UNAUTHORIZED", async () => {
-      const res = await request(app).put("/api/user/profile").send({ fullname: "Test" });
+      const res = await apiTest({
+        id: "TC-INT-UP-006",
+        method: "PUT",
+        url: "/api/user/profile",
+        payload: { fullname: "Test" },
+        expectedStatus: UNAUTHORIZED,
+      });
 
       expect(res.status).toBe(UNAUTHORIZED);
     });
 
     test("[TC-INT-UP-007] : invalid token - UNAUTHORIZED", async () => {
-      const res = await request(app).put("/api/user/profile").set("Authorization", "Bearer invalid").send({ fullname: "Test" });
+      const res = await apiTest({
+        id: "TC-INT-UP-007",
+        method: "PUT",
+        url: "/api/user/profile",
+        headers: { Authorization: "Bearer invalid" },
+        payload: { fullname: "Test" },
+        expectedStatus: UNAUTHORIZED,
+      });
 
       expect(res.status).toBe(UNAUTHORIZED);
     });
@@ -146,26 +182,54 @@ describe("User Profile Integration Test", () => {
     test("[TC-INT-UP-008] : deleted user - UNAUTHORIZED", async () => {
       await UserModel.findByIdAndDelete(userId);
 
-      const res = await request(app).put("/api/user/profile").set("Authorization", `Bearer ${token}`).send({ fullname: "Test" });
+      const res = await apiTest({
+        id: "TC-INT-UP-008",
+        method: "PUT",
+        url: "/api/user/profile",
+        headers: { Authorization: `Bearer ${token}` },
+        payload: { fullname: "Test" },
+        expectedStatus: UNAUTHORIZED,
+      });
 
       expect(res.status).toBe(UNAUTHORIZED);
     });
 
     test("[TC-INT-UP-009] : empty fullname - BAD_REQUEST", async () => {
-      const res = await request(app).put("/api/user/profile").set("Authorization", `Bearer ${token}`).send({ fullname: "" });
+      const res = await apiTest({
+        id: "TC-INT-UP-009",
+        method: "PUT",
+        url: "/api/user/profile",
+        headers: { Authorization: `Bearer ${token}` },
+        payload: { fullname: "" },
+        expectedStatus: BAD_REQUEST,
+      });
 
       expect(res.status).toBe(BAD_REQUEST);
     });
 
     test("[TC-INT-UP-011] : unknown field - BAD_REQUEST", async () => {
-      const res = await request(app).put("/api/user/profile").set("Authorization", `Bearer ${token}`).send({ unknown: "field" });
+      const res = await apiTest({
+        id: "TC-INT-UP-011",
+        method: "PUT",
+        url: "/api/user/profile",
+        headers: { Authorization: `Bearer ${token}` },
+        payload: { unknown: "field" },
+        expectedStatus: BAD_REQUEST,
+      });
 
       expect(res.status).toBe(BAD_REQUEST);
     });
 
     // ================= EDGE =================
     test("[TC-INT-UP-010] : empty nim string - no update", async () => {
-      const res = await request(app).put("/api/user/profile").set("Authorization", `Bearer ${token}`).send({ nim: "" });
+      const res = await apiTest({
+        id: "TC-INT-UP-010",
+        method: "PUT",
+        url: "/api/user/profile",
+        headers: { Authorization: `Bearer ${token}` },
+        payload: { nim: "" },
+        expectedStatus: OK,
+      });
 
       expect(res.status).toBe(OK);
     });
@@ -173,33 +237,62 @@ describe("User Profile Integration Test", () => {
     test("[TC-INT-UP-012] : long fullname - success", async () => {
       const longName = "A".repeat(OK);
 
-      const res = await request(app)
-        .put("/api/user/profile")
-        .set("Authorization", `Bearer ${token}`)
-        .send({ fullname: longName });
+      const res = await apiTest({
+        id: "TC-INT-UP-012",
+        method: "PUT",
+        url: "/api/user/profile",
+        headers: { Authorization: `Bearer ${token}` },
+        payload: { fullname: longName },
+        expectedStatus: OK,
+      });
 
       expect(res.status).toBe(OK);
     });
 
     test("[TC-INT-UP-013] : partial update fullname", async () => {
-      const res = await request(app)
-        .put("/api/user/profile")
-        .set("Authorization", `Bearer ${token}`)
-        .send({ fullname: "Partial" });
+      const res = await apiTest({
+        id: "TC-INT-UP-013",
+        method: "PUT",
+        url: "/api/user/profile",
+        headers: { Authorization: `Bearer ${token}` },
+        payload: { fullname: "Partial" },
+        expectedStatus: OK,
+      });
 
       expect(res.status).toBe(OK);
     });
 
     test("[TC-INT-UP-014] : partial update nim", async () => {
-      const res = await request(app).put("/api/user/profile").set("Authorization", `Bearer ${token}`).send({ nim: "555" });
+      const res = await apiTest({
+        id: "TC-INT-UP-014",
+        method: "PUT",
+        url: "/api/user/profile",
+        headers: { Authorization: `Bearer ${token}` },
+        payload: { nim: "555" },
+        expectedStatus: OK,
+      });
 
       expect(res.status).toBe(OK);
     });
 
     test("[TC-INT-UP-015] : multiple request consistency", async () => {
-      await request(app).put("/api/user/profile").set("Authorization", `Bearer ${token}`).send({ fullname: "First" });
+      await apiTest({
+        id: "TC-INT-UP-015-setup",
+        method: "PUT",
+        url: "/api/user/profile",
+        headers: { Authorization: `Bearer ${token}` },
+        payload: { fullname: "First" },
+        expectedStatus: OK,
+      });
 
-      const res = await request(app).put("/api/user/profile").set("Authorization", `Bearer ${token}`).send({ fullname: "First" });
+      const res = await apiTest({
+        id: "TC-INT-UP-015",
+        method: "PUT",
+        url: "/api/user/profile",
+        headers: { Authorization: `Bearer ${token}` },
+        payload: { fullname: "First" },
+        expectedStatus: OK,
+      });
 
       expect(res.status).toBe(OK);
 
@@ -210,7 +303,14 @@ describe("User Profile Integration Test", () => {
     test("[TC-INT-UP-016] : role psikolog - FORBIDDEN", async () => {
       const { token } = await createUserWithRole("psikolog");
 
-      const res = await request(app).put("/api/user/profile").set("Authorization", `Bearer ${token}`).send({ fullname: "Test" });
+      const res = await apiTest({
+        id: "TC-INT-UP-016",
+        method: "PUT",
+        url: "/api/user/profile",
+        headers: { Authorization: `Bearer ${token}` },
+        payload: { fullname: "Test" },
+        expectedStatus: FORBIDDEN,
+      });
 
       expect(res.status).toBe(FORBIDDEN);
     });
@@ -218,7 +318,14 @@ describe("User Profile Integration Test", () => {
     test("[TC-INT-UP-017] : role admin - FORBIDDEN", async () => {
       const { token } = await createUserWithRole("admin");
 
-      const res = await request(app).put("/api/user/profile").set("Authorization", `Bearer ${token}`).send({ fullname: "Test" });
+      const res = await apiTest({
+        id: "TC-INT-UP-017",
+        method: "PUT",
+        url: "/api/user/profile",
+        headers: { Authorization: `Bearer ${token}` },
+        payload: { fullname: "Test" },
+        expectedStatus: FORBIDDEN,
+      });
 
       expect(res.status).toBe(FORBIDDEN);
     });
@@ -228,7 +335,14 @@ describe("User Profile Integration Test", () => {
 
       await UserModel.findByIdAndDelete(user._id);
 
-      const res = await request(app).put("/api/user/profile").set("Authorization", `Bearer ${token}`).send({ fullname: "Test" });
+      const res = await apiTest({
+        id: "TC-INT-UP-018",
+        method: "PUT",
+        url: "/api/user/profile",
+        headers: { Authorization: `Bearer ${token}` },
+        payload: { fullname: "Test" },
+        expectedStatus: UNAUTHORIZED,
+      });
 
       expect(res.status).toBe(UNAUTHORIZED);
     });

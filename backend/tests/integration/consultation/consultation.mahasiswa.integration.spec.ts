@@ -1,12 +1,11 @@
-import request from "supertest";
 import mongoose from "mongoose";
-import app from "../../../src/app";
 import { signToken } from "../../../src/utils/jwt";
 import UserModel from "../../../src/models/userModel";
 import { ConsultationModel } from "../../../src/models/consultationModel";
 import SessionModel from "../../../src/models/sessionModel";
 import { BAD_REQUEST, CREATED, FORBIDDEN, NOT_FOUND, OK, UNAUTHORIZED, CONFLICT, TO_LARGE } from "../../../src/constants/http";
 import chatRoom from "../../../src/models/chatRoom";
+import { apiTest } from "../../setup/apiTest";
 
 jest.setTimeout(20000);
 
@@ -70,7 +69,13 @@ describe("Consultation Integration - Mahasiswa", () => {
   // ================= APPLY =================
   describe("Apply Consultation", () => {
     test("TC-INT-CONS-MHS-001 : tanpa token - should 401", async () => {
-      const res = await request(app).post("/api/consultation/apply").send({});
+      const res = await apiTest({
+        id: "TC-INT-CONS-MHS-001",
+        method: "POST",
+        url: "/api/consultation/apply",
+        payload: {},
+        expectedStatus: UNAUTHORIZED,
+      });
 
       expect(res.status).toBe(UNAUTHORIZED);
 
@@ -82,9 +87,13 @@ describe("Consultation Integration - Mahasiswa", () => {
     });
 
     test("TC-INT-CONS-MHS-002 : role bukan mahasiswa - should 403", async () => {
-      const res = await request(app).post("/api/consultation/apply").set("Authorization", `Bearer ${psikologToken}`).send({
-        psychologistId: psikologId,
-        message: "Halo",
+      const res = await apiTest({
+        id: "TC-INT-CONS-MHS-002",
+        method: "POST",
+        url: "/api/consultation/apply",
+        headers: { Authorization: `Bearer ${psikologToken}` },
+        payload: { psychologistId: psikologId, message: "Halo" },
+        expectedStatus: FORBIDDEN,
       });
 
       expect(res.status).toBe(FORBIDDEN);
@@ -93,10 +102,14 @@ describe("Consultation Integration - Mahasiswa", () => {
     });
 
     test("TC-INT-CONS-MHS-003 : psychologistId kosong - should 400", async () => {
-      const res = await request(app)
-        .post("/api/consultation/apply")
-        .set("Authorization", `Bearer ${mahasiswaToken}`)
-        .send({ message: "Halo" });
+      const res = await apiTest({
+        id: "TC-INT-CONS-MHS-003",
+        method: "POST",
+        url: "/api/consultation/apply",
+        headers: { Authorization: `Bearer ${mahasiswaToken}` },
+        payload: { message: "Halo" },
+        expectedStatus: BAD_REQUEST,
+      });
 
       expect(res.status).toBe(BAD_REQUEST);
 
@@ -104,9 +117,13 @@ describe("Consultation Integration - Mahasiswa", () => {
     });
 
     test("TC-INT-CONS-MHS-004 : psychologistId invalid - should 400", async () => {
-      const res = await request(app).post("/api/consultation/apply").set("Authorization", `Bearer ${mahasiswaToken}`).send({
-        psychologistId: "123",
-        message: "Halo",
+      const res = await apiTest({
+        id: "TC-INT-CONS-MHS-004",
+        method: "POST",
+        url: "/api/consultation/apply",
+        headers: { Authorization: `Bearer ${mahasiswaToken}` },
+        payload: { psychologistId: "123", message: "Halo" },
+        expectedStatus: BAD_REQUEST,
       });
 
       expect(res.status).toBe(BAD_REQUEST);
@@ -115,31 +132,40 @@ describe("Consultation Integration - Mahasiswa", () => {
     test("TC-INT-CONS-MHS-005 : psychologist tidak ditemukan - should 404", async () => {
       const fakeId = new mongoose.Types.ObjectId();
 
-      const res = await request(app).post("/api/consultation/apply").set("Authorization", `Bearer ${mahasiswaToken}`).send({
-        psychologistId: fakeId,
-        message: "Halo",
+      const res = await apiTest({
+        id: "TC-INT-CONS-MHS-005",
+        method: "POST",
+        url: "/api/consultation/apply",
+        headers: { Authorization: `Bearer ${mahasiswaToken}` },
+        payload: { psychologistId: fakeId, message: "Halo" },
+        expectedStatus: NOT_FOUND,
       });
 
       expect(res.status).toBe(NOT_FOUND);
     });
 
     test("TC-INT-CONS-MHS-006 : message kosong - should 400", async () => {
-      const res = await request(app).post("/api/consultation/apply").set("Authorization", `Bearer ${mahasiswaToken}`).send({
-        psychologistId: psikologId,
-        message: "",
+      const res = await apiTest({
+        id: "TC-INT-CONS-MHS-006",
+        method: "POST",
+        url: "/api/consultation/apply",
+        headers: { Authorization: `Bearer ${mahasiswaToken}` },
+        payload: { psychologistId: psikologId, message: "" },
+        expectedStatus: BAD_REQUEST,
       });
 
       expect(res.status).toBe(BAD_REQUEST);
     });
 
     test("TC-INT-CONS-MHS-007 : message terlalu panjang - should 413", async () => {
-      const res = await request(app)
-        .post("/api/consultation/apply")
-        .set("Authorization", `Bearer ${mahasiswaToken}`)
-        .send({
-          psychologistId: psikologId,
-          message: "a".repeat(1001),
-        });
+      const res = await apiTest({
+        id: "TC-INT-CONS-MHS-007",
+        method: "POST",
+        url: "/api/consultation/apply",
+        headers: { Authorization: `Bearer ${mahasiswaToken}` },
+        payload: { psychologistId: psikologId, message: "a".repeat(1001) },
+        expectedStatus: TO_LARGE,
+      });
 
       expect(res.status).toBe(TO_LARGE);
     });
@@ -151,18 +177,26 @@ describe("Consultation Integration - Mahasiswa", () => {
         status: "pending",
       });
 
-      const res = await request(app).post("/api/consultation/apply").set("Authorization", `Bearer ${mahasiswaToken}`).send({
-        psychologistId: psikologId,
-        message: "Halo",
+      const res = await apiTest({
+        id: "TC-INT-CONS-MHS-008",
+        method: "POST",
+        url: "/api/consultation/apply",
+        headers: { Authorization: `Bearer ${mahasiswaToken}` },
+        payload: { psychologistId: psikologId, message: "Halo" },
+        expectedStatus: CONFLICT,
       });
 
       expect(res.status).toBe(CONFLICT);
     });
 
     test("TC-INT-CONS-MHS-009 : apply success - should 201 & create DB", async () => {
-      const res = await request(app).post("/api/consultation/apply").set("Authorization", `Bearer ${mahasiswaToken}`).send({
-        psychologistId: psikologId,
-        message: "Halo",
+      const res = await apiTest({
+        id: "TC-INT-CONS-MHS-009",
+        method: "POST",
+        url: "/api/consultation/apply",
+        headers: { Authorization: `Bearer ${mahasiswaToken}` },
+        payload: { psychologistId: psikologId, message: "Halo" },
+        expectedStatus: CREATED,
       });
 
       expect(res.status).toBe(CREATED);
@@ -182,7 +216,12 @@ describe("Consultation Integration - Mahasiswa", () => {
   // ================= HISTORY =================
   describe("Consultation History", () => {
     test("TC-INT-CONS-MHS-010 : tanpa token - should 401", async () => {
-      const res = await request(app).get("/api/user/consultation/history");
+      const res = await apiTest({
+        id: "TC-INT-CONS-MHS-010",
+        method: "GET",
+        url: "/api/user/consultation/history",
+        expectedStatus: UNAUTHORIZED,
+      });
 
       expect(res.status).toBe(UNAUTHORIZED);
     });
@@ -200,14 +239,26 @@ describe("Consultation Integration - Mahasiswa", () => {
         status: "pending",
       });
 
-      const res = await request(app).get("/api/user/consultation/history").set("Authorization", `Bearer ${mahasiswaToken}`);
+      const res = await apiTest({
+        id: "TC-INT-CONS-MHS-011",
+        method: "GET",
+        url: "/api/user/consultation/history",
+        headers: { Authorization: `Bearer ${mahasiswaToken}` },
+        expectedStatus: OK,
+      });
 
       expect(res.status).toBe(OK);
       expect(res.body.data.length).toBe(1);
     });
 
     test("TC-INT-CONS-MHS-012 : history kosong - return []", async () => {
-      const res = await request(app).get("/api/user/consultation/history").set("Authorization", `Bearer ${mahasiswaToken}`);
+      const res = await apiTest({
+        id: "TC-INT-CONS-MHS-012",
+        method: "GET",
+        url: "/api/user/consultation/history",
+        headers: { Authorization: `Bearer ${mahasiswaToken}` },
+        expectedStatus: OK,
+      });
 
       expect(res.status).toBe(OK);
       expect(res.body.data.length).toBe(0);
@@ -217,21 +268,36 @@ describe("Consultation Integration - Mahasiswa", () => {
   // ================= DETAIL =================
   describe("Consultation Detail", () => {
     test("TC-INT-CONS-MHS-013 : tanpa token - should 401", async () => {
-      const res = await request(app).get(`/api/user/consultation/history/${new mongoose.Types.ObjectId()}`);
+      const res = await apiTest({
+        id: "TC-INT-CONS-MHS-013",
+        method: "GET",
+        url: `/api/user/consultation/history/${new mongoose.Types.ObjectId()}`,
+        expectedStatus: UNAUTHORIZED,
+      });
 
       expect(res.status).toBe(UNAUTHORIZED);
     });
 
     test("TC-INT-CONS-MHS-014 : invalid id - should 400", async () => {
-      const res = await request(app).get("/api/user/consultation/history/abc").set("Authorization", `Bearer ${mahasiswaToken}`);
+      const res = await apiTest({
+        id: "TC-INT-CONS-MHS-014",
+        method: "GET",
+        url: "/api/user/consultation/history/abc",
+        headers: { Authorization: `Bearer ${mahasiswaToken}` },
+        expectedStatus: BAD_REQUEST,
+      });
 
       expect(res.status).toBe(BAD_REQUEST);
     });
 
     test("TC-INT-CONS-MHS-015 : consultation not found - should 404", async () => {
-      const res = await request(app)
-        .get(`/api/user/consultation/history/${new mongoose.Types.ObjectId()}`)
-        .set("Authorization", `Bearer ${mahasiswaToken}`);
+      const res = await apiTest({
+        id: "TC-INT-CONS-MHS-015",
+        method: "GET",
+        url: `/api/user/consultation/history/${new mongoose.Types.ObjectId()}`,
+        headers: { Authorization: `Bearer ${mahasiswaToken}` },
+        expectedStatus: NOT_FOUND,
+      });
 
       expect(res.status).toBe(NOT_FOUND);
     });
@@ -245,9 +311,13 @@ describe("Consultation Integration - Mahasiswa", () => {
         status: "pending",
       });
 
-      const res = await request(app)
-        .get(`/api/user/consultation/history/${cons._id}`)
-        .set("Authorization", `Bearer ${mahasiswaToken}`);
+      const res = await apiTest({
+        id: "TC-INT-CONS-MHS-016",
+        method: "GET",
+        url: `/api/user/consultation/history/${cons._id}`,
+        headers: { Authorization: `Bearer ${mahasiswaToken}` },
+        expectedStatus: FORBIDDEN,
+      });
 
       expect(res.status).toBe(FORBIDDEN);
     });
@@ -261,9 +331,13 @@ describe("Consultation Integration - Mahasiswa", () => {
 
       const id = cons._id as mongoose.Types.ObjectId;
 
-      const res = await request(app)
-        .get(`/api/user/consultation/history/${cons._id}`)
-        .set("Authorization", `Bearer ${mahasiswaToken}`);
+      const res = await apiTest({
+        id: "TC-INT-CONS-MHS-017",
+        method: "GET",
+        url: `/api/user/consultation/history/${cons._id}`,
+        headers: { Authorization: `Bearer ${mahasiswaToken}` },
+        expectedStatus: OK,
+      });
 
       expect(res.status).toBe(OK);
       expect(res.body.data._id.toString()).toBe(id.toString());

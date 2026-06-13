@@ -1,6 +1,15 @@
+import * as fs from 'fs';
+import * as os from 'os';
+import * as path from 'path';
 import request from "supertest";
 import { reportApiTest } from "./report";
 import app from "../../src/app";
+
+const CONTEXT_FILE = path.join(os.tmpdir(), 'sikosa-test-context.json');
+
+function readStore(): Record<string, any> {
+  try { return JSON.parse(fs.readFileSync(CONTEXT_FILE, 'utf-8')); } catch { return {}; }
+}
 
 type Method = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 
@@ -52,6 +61,14 @@ export const apiTest = async ({
   const res = await req;
 
   await reportApiTest(id, method, url, payload, res, expectedStatus);
+
+  const rawName = (expect as any).getState().currentTestName;
+  if (rawName) {
+    const testName = rawName.replace(/ > /g, ' ');
+    const store = readStore();
+    store[testName] = { method, url, payload, expectedStatus, actualStatus: res.status, responseBody: res.body };
+    fs.writeFileSync(CONTEXT_FILE, JSON.stringify(store), 'utf-8');
+  }
 
   return res;
 };

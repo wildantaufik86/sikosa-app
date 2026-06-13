@@ -2,3 +2,7 @@
 
 # JEST REPORT
 /reports/*
+
+# DOCS
+/docs
+/docs/*

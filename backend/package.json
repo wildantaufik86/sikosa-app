@@ -9,7 +9,11 @@
     "build": "rimraf dist && tsc",
     "test": "jest --runInBand",
     "test:watch": "jest --watch --runInBand",
-    "test:coverage": "jest --coverage --runInBand"
+    "test:coverage": "jest --coverage --runInBand",
+    "seed": "ts-node -r dotenv/config src/seeds/index.ts",
+    "seed:fresh": "ts-node -r dotenv/config src/seeds/index.ts --fresh",
+    "seed:users": "ts-node -r dotenv/config src/seeds/userSeeder.ts",
+    "seed:users:fresh": "ts-node -r dotenv/config src/seeds/userSeeder.ts --fresh"
   },
   "keywords": [],
   "author": "",
